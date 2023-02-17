@@ -5,16 +5,16 @@ using System.Diagnostics;
 public record OrderInfo(int StoreId, ServiceMethod ServiceMethod, OrderTiming Timing);
 
 public abstract record ServiceMethod {
-    public T Match<T>(Func<Delivery, T> f1, Func<Carryout, T> f2) => this switch {
-        Delivery d => f1(d),
-        Carryout c => f2(c),
+    public T Match<T>(Func<Address, T> f1, Func<PickupLocation, T> f2) => this switch {
+        Delivery d => f1(d.Address),
+        Carryout c => f2(c.Location),
         _ => throw new UnreachableException("Invalid ServiceMethod")
     };
 
-    public void Match(Action<Delivery> f1, Action<Carryout> f2) {
+    public void Match(Action<Address> f1, Action<PickupLocation> f2) {
         switch (this) {
-            case Delivery d: f1(d); break;
-            case Carryout c: f2(c); break;
+            case Delivery d: f1(d.Address); break;
+            case Carryout c: f2(c.Location); break;
             default: throw new UnreachableException("Invalid ServiceMethod");
         }
     }
@@ -56,6 +56,12 @@ public record PaymentInfo(
     string Email, string Phone, Payment Payment);
 
 public abstract record Payment {
+    public T Match<T>(Func<T> f1, Func<long, string, string, string, T> f2) => this switch {
+        PayAtStore => f1(),
+        PayWithCard c => f2(c.CardNumber, c.Expiration, c.SecurityCode, c.BillingZip),
+        _ => throw new UnreachableException("Invalid Payment")
+    };
+
     public sealed record PayAtStore : Payment;
     public sealed record PayWithCard(
         long CardNumber, string Expiration,

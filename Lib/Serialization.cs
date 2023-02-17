@@ -99,8 +99,8 @@ public class ServiceMethodJsonConverter : JsonConverter<ServiceMethod> {
 
     public override void Write(Utf8JsonWriter writer, ServiceMethod value, JsonSerializerOptions options) {
         value.Match(
-            delivery => JsonSerializer.Serialize(writer, delivery.Address, options),
-            carryout => writer.WriteStringValue($"Carryout - {carryout.Location}"));
+            address => JsonSerializer.Serialize(writer, address, options),
+            location => writer.WriteStringValue($"Carryout - {location}"));
     }
 }
 

@@ -1,6 +1,31 @@
 using System.Diagnostics;
 
 public static class SummaryUtils {
+    public static string Summarize(this OrderInfo o) =>
+        string.Join('\n', new[] {
+            $"Order for {o.Timing.Match(() => "now", dt => $"later at {dt}")}",
+            $"{o.ServiceMethod.Match(
+                    address => $"Delivery from Store #{o.StoreId} to\n{address.Summarize()}",
+                    loc => $"Carryout at {loc} at Store #{o.StoreId}")}",
+        });
+
+    public static string Summarize(this Address a) =>
+        string.Join('\n', new[] {
+            a.Name ?? "",
+            a.StreetAddress,
+            a.Apt.HasValue ? $"Apt. {a.Apt}" : "",
+            $"{a.City}, {a.State} {a.ZipCode}",
+        }.Where(s => s != "")
+        .Select(s => $"  {s}"));
+
+    public static string Summarize(this PaymentInfo p) =>
+        $@"Name: {p.FirstName} {p.LastName}
+Email: {p.Email}
+Phone: {p.Phone}
+{p.Payment.Match(
+    () => "Pay at Store",
+    (card, exp, code, zip) => $"Pay with card ending in {card % 10000}")}";
+
     public static string Summarize(this Pizza p) =>
         string.Join('\n', new[] {
             $"{p.Size} {p.Crust} Pizza x{p.Quantity}",

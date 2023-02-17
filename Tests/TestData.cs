@@ -15,13 +15,13 @@ public static class TestOrder {
             new(1, new ServiceMethod.Delivery(new(AddressType.House, "My House", "1234 Main St", null, "12345", "ACity", "NY")), new OrderTiming.Now()),
             "DeliveryNow.json", "DeliveryNowSummary.txt");
         yield return new(
-            new(2, new ServiceMethod.Delivery(new(AddressType.Business, "The Business", "1234 Main St", null, "12345", "ACity", "NY")), new OrderTiming.Later(new(2021, 10, 30, 22, 30, 0))),
+            new(2, new ServiceMethod.Delivery(new(AddressType.Business, "The Business", "1234 Main St", 123, "12345", "ACity", "NY")), new OrderTiming.Later(new(2021, 10, 30, 21, 30, 0))),
             "DeliveryLater.json", "DeliveryLaterSummary.txt");
         yield return new(
             new(3, new ServiceMethod.Carryout(PickupLocation.InStore), new OrderTiming.Now()),
             "CarryoutNow.json", "CarryoutNowSummary.txt");
         yield return new(
-            new(4, new ServiceMethod.Carryout(PickupLocation.Window), new OrderTiming.Later(new(2021, 10, 31, 22, 30, 0))),
+            new(4, new ServiceMethod.Carryout(PickupLocation.Window), new OrderTiming.Later(new(2021, 10, 31, 21, 30, 0))),
             "CarryoutLater.json", "CarryoutLaterSummary.txt");
     }
 }
@@ -39,8 +39,8 @@ public static class TestPayment {
             new Payment.PayAtStore());
         Payment.PayWithCard cardPayment = new(1000_2000_3000_4000, "01/23", "123", "12345");
 
-        yield return new(payAtStore, "PayAtStoreInfo.json", "");
-        yield return new(payAtStore with { Payment = cardPayment }, "PayWithCardInfo.json", "");
+        yield return new(payAtStore, "PayAtStoreInfo.json", "PayAtStoreSummary.txt");
+        yield return new(payAtStore with { Payment = cardPayment }, "PayWithCardInfo.json", "PayWithCardSummary.txt");
     }
 }
 

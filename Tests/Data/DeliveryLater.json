@@ -4,10 +4,10 @@
     "AddressType": "Business",
     "Name": "The Business",
     "StreetAddress": "1234 Main St",
-    "Apt": null,
+    "Apt": 123,
     "ZipCode": "12345",
     "City": "ACity",
     "State": "NY"
   },
-  "Timing": "2021-10-30T22:30:00"
+  "Timing": "2021-10-30T21:30:00"
 }
