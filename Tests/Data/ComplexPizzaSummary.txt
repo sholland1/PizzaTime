@@ -1,0 +1,13 @@
+Medium HandmadePan Pizza x2
+  with (None|Extra) cheese
+  with Extra Marinara sauce
+  well done
+  square cut
+Toppings:
+ Pepperoni
+ Extra Bacon on the Left
+ Light Mushrooms on the Right
+ Spinach
+Garlic sauce x1
+Ranch sauce x2
+Marinara sauce x3

@@ -1,0 +1,20 @@
+Small Thin Pizza x1
+  with no cheese
+  square cut
+  with oregano
+Toppings:
+ Pepperoni
+ Light Ham on the Left
+ Light Beef on the Left
+ Light Salami on the Left
+ Light ItalianSausage on the Left
+ Light PremiumChicken on the Left
+ Light Bacon on the Left
+ Light PhillySteak on the Left
+ Light HotBuffaloSauce on the Left
+ Light JalapenoPeppers on the Left
+ Extra Onions on the Right
+ Extra BananaPeppers on the Right
+ Extra DicedTomatoes on the Right
+ Extra BlackOlives on the Right
+ Mushrooms on the Right

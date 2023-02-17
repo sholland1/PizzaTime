@@ -1,0 +1,125 @@
+Delivery
+  Address
+Carryout
+  Store (lookup by city/state or zip)
+    Store Pickup
+    Pickup window
+Order Timing (Now, Later [DateTime])
+
+CouponCode (0000)
+
+FirstName
+LastName
+Email
+Phone
+Payment (Pay at Store, Pay Now)
+  CardNumber (0000 0000 0000 0000)
+  Expiration (MM/YY)
+  SecurityCode (000)
+  BillingZip (00000)
+
+Sequences:
+Fast (pizza):
+1.
+  - Read in default pizza from defaultPizza.json
+  - Read in default order info
+  - Put pizza in cart
+  - Display pizza, price, and estimated ready time
+  - Request confirmation (Y/n)
+2.
+  - Enter confirmation
+  - Read in default payment info
+  - Order pizza
+
+Choose (pizza --choose-from-file):
+  - Display existing pizzas in fzf
+  - Display existing order infos in fzf
+  - Display existing payment infos in fzf
+
+FromScratch (pizza --scratch)
+  Maybe TUI application (Terminal.Gui?)
+  
+ \|/
+--+--
+ /|\
+_|_|_
+_|_|_
+ | | 
+
+Display:
+Medium HandmadePan Pizza x2
+  with (None|Extra) cheese
+  with Extra Marinara sauce
+  well done
+  square cut
+Toppings:
+ Pepperoni
+ Extra Bacon on the Left
+ Light Mushrooms on the Right
+ Spinach
+Garlic sauce x1
+Ranch sauce x2
+Marinara sauce x3
+
+Large HandTossed Pizza x1
+  pie cut
+ Toppings:
+  Pepperoni
+
+Constraints:
+  Small Crust(HandTossed, Thin, GlutenFree)
+  Medium Crust(HandTossed, Thin, Pan)
+  Large Crust(HandTossed, Thin, Brooklyn)
+  XL Crust(Brooklyn)
+
+  HandTossed Instructions(Cut, Bake, GarlicCrust)
+  Thin Instructions(Cut, Oregano)
+  Pan Instructions(Cut, Bake)
+  Brooklyn Instructions(Cut, Bake)
+  GlutenFree Instructions(Cut, Bake)
+
+  10 Toppings per side (Light,Normal=1, Extra=2)
+  No duplicate toppings
+  DippingSauce range [0..25]
+  Quantity range [1..25]
+
+Pizza
+  Size (Small, Medium, Large, XL)
+  Crust (Brooklyn, Hand Tossed, Thin, Pan, Gluten Free)
+  Cheese (Left, Right, All) (Light, Normal, Extra)
+  Sauce (Robust Inspired Tomato Sauce
+         Hearty Marinara Sauce
+         Honey BBQ Sauce
+         Garlic Parmesan Sauce
+         Alfredo Sauce
+         Ranch) (Light, Normal, Extra)
+  Toppings
+    Meat (Ham
+          Beef
+          Salami
+          Pepperoni
+          Italian Sausage
+          Premium Chicken
+          Bacon
+          Philly Steak)
+    Non-meats (Hot Buffalo Sauce
+               Jalapeno Peppers
+               Onions
+               Banana Peppers
+               Diced Tomatoes
+               Black Olives
+               Mushrooms
+               Pineapple
+               Shredded Provolone Cheese
+               Cheddar Cheese
+               Green Peppers
+               Spinach
+               Roasted Red Peppers
+               Feta Cheese
+               Shredded Parmesan Asiago)
+  Dipping Sauce (Garlic [int], Ranch [int], Marinara [int])
+  Bake (Normal, Well Done)
+  Cut (Pie, Square, Uncut)
+  Oregano (bool)
+  Garlic Crust (bool)
+  Quantity (int)

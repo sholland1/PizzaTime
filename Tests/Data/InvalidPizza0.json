@@ -1,0 +1,35 @@
+{
+  "Size": "Large",
+  "Crust": "GlutenFree",
+  "Cheese": "=",
+  "Sauce": "=Tomato",
+  "Toppings": [
+    "A=Pepperoni",
+    "L-Ham",
+    "L-Beef",
+    "L-Salami",
+    "L-ItalianSausage",
+
+    "L-PremiumChicken",
+    "L-Bacon",
+    "L-PhillySteak",
+    "L-HotBuffaloSauce",
+    "L-JalapenoPeppers",
+
+    "R^Onions",
+    "R^BananaPeppers",
+    "R^DicedTomatoes",
+    "R^BlackOlives",
+    "R^Mushrooms"
+  ],
+  "DippingSauce": {
+    "GarlicAmount": -1,
+    "RanchAmount": 26,
+    "MarinaraAmount": 25
+  },
+  "Bake": "WellDone",
+  "Cut": "Pie",
+  "Oregano": true,
+  "GarlicCrust": true,
+  "Quantity": 0
+}

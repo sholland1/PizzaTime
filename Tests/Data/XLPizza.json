@@ -1,0 +1,17 @@
+{
+  "Size": "XL",
+  "Crust": "Brooklyn",
+  "Cheese": "-",
+  "Sauce": "=Tomato",
+  "Toppings": [],
+  "DippingSauce": {
+    "GarlicAmount": 25,
+    "RanchAmount": 25,
+    "MarinaraAmount": 25
+  },
+  "Bake": "Normal",
+  "Cut": "Uncut",
+  "Oregano": false,
+  "GarlicCrust": false,
+  "Quantity": 25
+}

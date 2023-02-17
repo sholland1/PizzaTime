@@ -1,0 +1,20 @@
+{
+  "Size": "XL",
+  "Crust": "Thin",
+  "Cheese": "=",
+  "Sauce": "=Tomato",
+  "Toppings": [
+    "A=Pepperoni",
+    "L-Pepperoni"
+  ],
+  "DippingSauce": {
+    "GarlicAmount": 0,
+    "RanchAmount": 0,
+    "MarinaraAmount": 0
+  },
+  "Bake": "WellDone",
+  "Cut": "Uncut",
+  "Oregano": true,
+  "GarlicCrust": true,
+  "Quantity": 26
+}

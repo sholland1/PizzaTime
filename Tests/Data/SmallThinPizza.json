@@ -1,0 +1,33 @@
+{
+  "Size": "Small",
+  "Crust": "Thin",
+  "Cheese": "_",
+  "Sauce": "=Tomato",
+  "Toppings": [
+    "A=Pepperoni",
+    "L-Ham",
+    "L-Beef",
+    "L-Salami",
+    "L-ItalianSausage",
+    "L-PremiumChicken",
+    "L-Bacon",
+    "L-PhillySteak",
+    "L-HotBuffaloSauce",
+    "L-JalapenoPeppers",
+    "R^Onions",
+    "R^BananaPeppers",
+    "R^DicedTomatoes",
+    "R^BlackOlives",
+    "R=Mushrooms"
+  ],
+  "DippingSauce": {
+    "GarlicAmount": 0,
+    "RanchAmount": 0,
+    "MarinaraAmount": 0
+  },
+  "Bake": "Normal",
+  "Cut": "Square",
+  "Oregano": true,
+  "GarlicCrust": false,
+  "Quantity": 1
+}

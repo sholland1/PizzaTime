@@ -1,0 +1,13 @@
+{
+  "StoreId": 1,
+  "ServiceMethod": {
+    "AddressType": "House",
+    "Name": "My House",
+    "StreetAddress": "1234 Main St",
+    "Apt": null,
+    "ZipCode": "12345",
+    "City": "ACity",
+    "State": "NY"
+  },
+  "Timing": "Now"
+}
