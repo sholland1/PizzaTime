@@ -81,8 +81,8 @@ public static class TestPizza {
 
     public static Pizza BadEnumPizza =
         new((Size)10, (Crust)10, new Cheese.Full((Amount)10), new((SauceType)10, (Amount)10),
-        new(new Topping[] { new((ToppingType)99, (Location)10, (Amount)10) }),
-        new(0, 0, 0), (Bake)10, (Cut)10, false, false, 1);
+            new(new Topping[] { new((ToppingType)99, (Location)10, (Amount)10) }),
+            new(0, 0, 0), (Bake)10, (Cut)10, false, false, 1);
 
     public static IPizzaBuilder Complex =
         Build.Medium.Pan()

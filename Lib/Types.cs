@@ -5,17 +5,17 @@ using System.Diagnostics;
 public record OrderInfo(int StoreId, ServiceMethod ServiceMethod, OrderTiming Timing);
 
 public abstract record ServiceMethod {
-    public T Match<T>(Func<Address, T> f1, Func<PickupLocation, T> f2) => this switch {
-        Delivery d => f1(d.Address),
-        Carryout c => f2(c.Location),
-        _ => throw new UnreachableException("Invalid ServiceMethod")
+    public T Match<T>(Func<Address, T> delivery, Func<PickupLocation, T> carryout) => this switch {
+        Delivery d => delivery(d.Address),
+        Carryout c => carryout(c.Location),
+        _ => throw new UnreachableException($"Invalid ServiceMethod! {this}")
     };
 
-    public void Match(Action<Address> f1, Action<PickupLocation> f2) {
+    public void Match(Action<Address> delivery, Action<PickupLocation> carryout) {
         switch (this) {
-            case Delivery d: f1(d.Address); break;
-            case Carryout c: f2(c.Location); break;
-            default: throw new UnreachableException("Invalid ServiceMethod");
+            case Delivery d: delivery(d.Address); break;
+            case Carryout c: carryout(c.Location); break;
+            default: throw new UnreachableException($"Invalid ServiceMethod! {this}");
         }
     }
 
@@ -33,17 +33,17 @@ public enum AddressType { House, Apartment, Business, Hotel, Other }
 public enum PickupLocation { InStore, Window, Carside }
 
 public abstract record OrderTiming {
-    public T Match<T>(Func<T> f1, Func<DateTime, T> f2) => this switch {
-        Now => f1(),
-        Later l => f2(l.DateTime),
-        _ => throw new UnreachableException("Invalid ServiceMethod")
+    public T Match<T>(Func<T> now, Func<DateTime, T> later) => this switch {
+        Now => now(),
+        Later l => later(l.DateTime),
+        _ => throw new UnreachableException($"Invalid OrderTiming! {this}")
     };
 
-    public void Match(Action f1, Action<DateTime> f2) {
+    public void Match(Action now, Action<DateTime> later) {
         switch (this) {
-            case Now: f1(); break;
-            case Later l: f2(l.DateTime); break;
-            default: throw new UnreachableException("Invalid OrderTiming");
+            case Now: now(); break;
+            case Later l: later(l.DateTime); break;
+            default: throw new UnreachableException($"Invalid OrderTiming! {this}");
         }
     }
 
@@ -56,11 +56,19 @@ public record PaymentInfo(
     string Email, string Phone, Payment Payment);
 
 public abstract record Payment {
-    public T Match<T>(Func<T> f1, Func<long, string, string, string, T> f2) => this switch {
-        PayAtStore => f1(),
-        PayWithCard c => f2(c.CardNumber, c.Expiration, c.SecurityCode, c.BillingZip),
-        _ => throw new UnreachableException("Invalid Payment")
+    public T Match<T>(Func<T> store, Func<long, string, string, string, T> card) => this switch {
+        PayAtStore => store(),
+        PayWithCard c => card(c.CardNumber, c.Expiration, c.SecurityCode, c.BillingZip),
+        _ => throw new UnreachableException($"Invalid Payment! {this}")
     };
+
+    public void Match(Action store, Action<long, string, string, string> card) {
+        switch (this) {
+            case PayAtStore: store(); break;
+            case PayWithCard c: card(c.CardNumber, c.Expiration, c.SecurityCode, c.BillingZip); break;
+            default: throw new UnreachableException($"Invalid Payment! {this}");
+        }
+    }
 
     public sealed record PayAtStore : Payment;
     public sealed record PayWithCard(

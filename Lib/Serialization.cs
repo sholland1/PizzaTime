@@ -25,11 +25,10 @@ public class OrderTimingJsonCoverter : JsonConverter<OrderTiming> {
         throw new NotSupportedException($"Invalid OrderTiming! Value: {value}");
     }
 
-    public override void Write(Utf8JsonWriter writer, OrderTiming value, JsonSerializerOptions options) {
+    public override void Write(Utf8JsonWriter writer, OrderTiming value, JsonSerializerOptions options) =>
         value.Match(
             () => writer.WriteStringValue("Now"),
             later => writer.WriteStringValue(later));
-    }
 }
 
 public class ServiceMethodJsonConverter : JsonConverter<ServiceMethod> {
@@ -97,11 +96,10 @@ public class ServiceMethodJsonConverter : JsonConverter<ServiceMethod> {
         throw new NotSupportedException($"Invalid ServiceMethod! Token: {reader.TokenType}");
     }
 
-    public override void Write(Utf8JsonWriter writer, ServiceMethod value, JsonSerializerOptions options) {
+    public override void Write(Utf8JsonWriter writer, ServiceMethod value, JsonSerializerOptions options) =>
         value.Match(
             address => JsonSerializer.Serialize(writer, address, options),
             location => writer.WriteStringValue($"Carryout - {location}"));
-    }
 }
 
 public class PaymentJsonConverter : JsonConverter<Payment> {
@@ -237,11 +235,10 @@ public class CheeseJsonConverter : JsonConverter<Cheese> {
     }
 
     public override void Write(Utf8JsonWriter writer, Cheese value, JsonSerializerOptions options) {
-        var x = value switch {
-            Cheese.Full f => f.Amount.Serialize().ToString(),
-            Cheese.Sides s => $"{s.Left.Serialize()}{s.Right.Serialize()}",
-            _ => "_"
-        };
+        var x = value.Match(
+            amt => amt.Serialize().ToString(),
+            (left, right) => $"{left.Serialize()}{right.Serialize()}",
+            () => "_");
         writer.WriteStringValue(x);
     }
 }

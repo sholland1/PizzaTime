@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 public class Pizza {
     public Size Size { get; init; }
     public Crust Crust { get; init; }
@@ -30,19 +32,10 @@ public class Pizza {
         Quantity = quantity;
     }
 
-    public Pizza(Pizza p) {
-        Size = p.Size;
-        Crust = p.Crust;
-        Cheese = p.Cheese;
-        Sauce = p.Sauce;
-        Toppings = p.Toppings;
-        DippingSauce = p.DippingSauce;
-        Bake = p.Bake;
-        Cut = p.Cut;
-        Oregano = p.Oregano;
-        GarlicCrust = p.GarlicCrust;
-        Quantity = p.Quantity;
-    }
+    public Pizza(Pizza p) :
+        this(p.Size, p.Crust, p.Cheese, p.Sauce,
+            p.Toppings, p.DippingSauce, p.Bake, p.Cut,
+            p.Oregano, p.GarlicCrust, p.Quantity) {}
 
     public override bool Equals(object? obj) =>
         obj is Pizza p
@@ -80,6 +73,23 @@ public enum Size { Small, Medium, Large, XL }
 public enum Crust { Brooklyn, HandTossed, Thin, HandmadePan, GlutenFree }
 
 public abstract record Cheese {
+    public T Match<T>(Func<Amount, T> full, Func<Amount?, Amount?, T> sides, Func<T> none) =>
+        this switch {
+            Full f => full(f.Amount),
+            Sides s => sides(s.Left, s.Right),
+            None n => none(),
+            _ => throw new UnreachableException($"Invalid Cheese! {this}")
+        };
+
+    public void Match(Action<Amount> full, Action<Amount?, Amount?> sides, Action none) {
+        switch (this) {
+            case Full f: full(f.Amount); break;
+            case Sides s: sides(s.Left, s.Right); break;
+            case None n: none(); break;
+            default: throw new UnreachableException($"Invalid Cheese! {this}");
+        }
+    }
+
     public sealed record Full(Amount Amount) : Cheese {
         public override bool IsStandard => Amount == Amount.Normal;
     }

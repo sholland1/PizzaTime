@@ -18,13 +18,14 @@ public static class SummaryUtils {
         }.Where(s => s != "")
         .Select(s => $"  {s}"));
 
-    public static string Summarize(this PaymentInfo p) =>
-        $@"Name: {p.FirstName} {p.LastName}
-Email: {p.Email}
-Phone: {p.Phone}
-{p.Payment.Match(
-    () => "Pay at Store",
-    (card, exp, code, zip) => $"Pay with card ending in {card % 10000}")}";
+    public static string Summarize(this PaymentInfo p) => $"""
+        Name: {p.FirstName} {p.LastName}
+        Email: {p.Email}
+        Phone: {p.Phone}
+        {p.Payment.Match(
+            () => "Pay at Store",
+            (card, exp, code, zip) => $"Pay with card ending in {card % 10000}")}
+        """;
 
     public static string Summarize(this Pizza p) =>
         string.Join('\n', new[] {
@@ -81,13 +82,11 @@ Phone: {p.Phone}
     } + "cut";
 
     private static string Display(this Cheese c) {
-        var disp = c switch {
-            Cheese.None => "no",
-            Cheese.Full f => $"{f.Amount}",
-            Cheese.Sides s => "(" + (s.Left?.ToString() ?? "None")
-                + "|" + (s.Right?.ToString() ?? "None") + ")",
-            _ => throw new UnreachableException($"Invalid cheese! Value: {c}")
-        };
+        var disp = c.Match(
+            amt => $"{amt}",
+            (left, right) => "(" + (left?.ToString() ?? "None")
+                + "|" + (right?.ToString() ?? "None") + ")",
+            () => "no");
         return disp + " cheese";
     }
 }
