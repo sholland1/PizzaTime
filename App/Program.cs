@@ -28,7 +28,7 @@ Console.WriteLine(pp.Summarize());
 
 var json = JsonSerializer.Serialize(p, PizzaSerializer.Options);
 // File.WriteAllText("pizza3.json", json);
-var p2 = JsonSerializer.Deserialize<Pizza>(json, PizzaSerializer.Options);
+var p2 = JsonSerializer.Deserialize<Pizza>(json, PizzaSerializer.Options)!;
 var json2 = JsonSerializer.Serialize(p2, PizzaSerializer.Options);
 
 Console.WriteLine(p);
