@@ -4,11 +4,26 @@ using static BuilderHelpers;
 public static class TestOrder {
     public const string DataDirectory = "../../../Data";
 
+    public static IEnumerable<InvalidData2> BadEnumOrders() {
+        yield return new(new(1, new ServiceMethod.Delivery(
+            new((AddressType)10, "My House", "1234 Main St", null, "12345", "ACity", "NY")),
+            new OrderTiming.Now()), new[] { "ServiceMethod.Address.AddressType" });
+        yield return new(new(1, new ServiceMethod.Carryout((PickupLocation)10), new OrderTiming.Now()),
+            new[] { "ServiceMethod.Location" });
+    }
+
     public record ValidData(OrderInfo OrderInfo, string JsonFile, string SummaryFile);
-    // public record InvalidData(string JsonFile, string[] InvalidProperties);
+    public record InvalidData(string JsonFile, string[] InvalidProperties);
+    public record InvalidData2(OrderInfo BadEnumOrder, string[] InvalidProperties);
 
     public static IEnumerable<object[]> GenerateValidOrders() => ValidOrders().Select(o => new[] { o });
-    // public static IEnumerable<object[]> GenerateInvalidOrders() => InvalidOrders().Select(o => new[] { o });
+    public static IEnumerable<object[]> GenerateInvalidOrders() => InvalidOrders().Select(o => new[] { o });
+
+    private static IEnumerable<InvalidData> InvalidOrders() {
+        yield return new("InvalidOrderInfo0.json", new[] { "ServiceMethod.Address.Apt", "ServiceMethod.Address.State", "ServiceMethod.Address.ZipCode", "StoreId" });
+    }
+
+    public static IEnumerable<object[]> GenerateBadEnumOrders() => BadEnumOrders().Select(o => new[] { o });
 
     public static IEnumerable<ValidData> ValidOrders() {
         yield return new(
@@ -30,17 +45,25 @@ public static class TestPayment {
     public const string DataDirectory = "../../../Data";
 
     public record ValidData(PaymentInfo PaymentInfo, string JsonFile, string SummaryFile);
+    public record InvalidData(string JsonFile, string[] InvalidProperties);
 
     public static IEnumerable<object[]> GenerateValidPayments() => ValidPayments().Select(p => new[] { p });
+    public static IEnumerable<object[]> GenerateInvalidPayments() => InvalidPayments().Select(p => new[] { p });
+
+    private static IEnumerable<InvalidData> InvalidPayments() {
+        yield return new("InvalidPaymentInfo0.json", new[] { "Email", "Payment.BillingZip", "Payment.CardNumber", "Payment.Expiration", "Payment.SecurityCode" , "Phone"});
+    }
 
     public static IEnumerable<ValidData> ValidPayments() {
         PaymentInfo payAtStore = new(
             "FName", "LName", "user@yahoo.com", "123-123-1234",
             new Payment.PayAtStore());
         Payment.PayWithCard cardPayment = new(1000_2000_3000_4000, "01/23", "123", "12345");
+        PaymentInfo payWithCard = new(
+            "FName", "LName", "user@yahoo.com", "123-123-1234", cardPayment);
 
         yield return new(payAtStore, "PayAtStoreInfo.json", "PayAtStoreSummary.txt");
-        yield return new(payAtStore with { Payment = cardPayment }, "PayWithCardInfo.json", "PayWithCardSummary.txt");
+        yield return new(payWithCard, "PayWithCardInfo.json", "PayWithCardSummary.txt");
     }
 }
 

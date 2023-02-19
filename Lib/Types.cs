@@ -1,8 +1,39 @@
-//TODO: test order and payment validation
 //TODO: stub out api calls
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
-public record OrderInfo(int StoreId, ServiceMethod ServiceMethod, OrderTiming Timing);
+public class OrderInfo {
+    public required int StoreId { get; init; }
+    public required ServiceMethod ServiceMethod { get; init; }
+    public required OrderTiming Timing { get; init; }
+
+    public OrderInfo() {}
+
+    [SetsRequiredMembers]
+    public OrderInfo(int storeId, ServiceMethod serviceMethod, OrderTiming timing) {
+        StoreId = storeId;
+        ServiceMethod = serviceMethod;
+        Timing = timing;
+    }
+
+    [SetsRequiredMembers]
+    public OrderInfo(OrderInfo o) :
+        this(o.StoreId, o.ServiceMethod, o.Timing) {}
+
+    public override bool Equals(object? obj) =>
+        obj is OrderInfo o
+        && StoreId == o.StoreId
+        && ServiceMethod == o.ServiceMethod
+        && Timing == o.Timing;
+
+    public override int GetHashCode() {
+        HashCode hash = new();
+        hash.Add(StoreId);
+        hash.Add(ServiceMethod);
+        hash.Add(Timing);
+        return hash.ToHashCode();
+    }
+}
 
 public abstract record ServiceMethod {
     public T Match<T>(Func<Address, T> delivery, Func<PickupLocation, T> carryout) => this switch {
@@ -51,9 +82,46 @@ public abstract record OrderTiming {
     public sealed record Later(DateTime DateTime) : OrderTiming;
 }
 
-public record PaymentInfo(
-    string FirstName, string LastName,
-    string Email, string Phone, Payment Payment);
+public class PaymentInfo {
+    public required string FirstName { get; init; }
+    public required string LastName { get; init; }
+    public required string Email { get; init; }
+    public required string Phone { get; init; }
+    public required Payment Payment { get; init; }
+
+    public PaymentInfo() {}
+
+    [SetsRequiredMembers]
+    public PaymentInfo(string firstName, string lastName, string email, string phone, Payment payment) {
+        FirstName = firstName;
+        LastName = lastName;
+        Email = email;
+        Phone = phone;
+        Payment = payment;
+    }
+
+    [SetsRequiredMembers]
+    public PaymentInfo(PaymentInfo p) :
+        this(p.FirstName, p.LastName, p.Email, p.Phone, p.Payment) {}
+
+    public override bool Equals(object? obj) =>
+        obj is PaymentInfo p
+        && FirstName == p.FirstName
+        && LastName == p.LastName
+        && Email == p.Email
+        && Phone == p.Phone
+        && Payment == p.Payment;
+
+    public override int GetHashCode() {
+        HashCode hash = new();
+        hash.Add(FirstName);
+        hash.Add(LastName);
+        hash.Add(Email);
+        hash.Add(Phone);
+        hash.Add(Payment);
+        return hash.ToHashCode();
+    }
+}
 
 public abstract record Payment {
     public T Match<T>(Func<T> store, Func<long, string, string, string, T> card) => this switch {

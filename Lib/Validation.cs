@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using FluentValidation.Results;
 using static BuilderHelpers;
@@ -83,6 +84,33 @@ public static class ValidationHelpers {
             ? new Result<List<ValidationFailure>, ValidPizza>.Success(new(pizza))
             : new Result<List<ValidationFailure>, ValidPizza>.Failure(result.Errors);
     }
+
+    public static Result<List<ValidationFailure>, ValidOrderInfo> Parse(this OrderInfo orderInfo) {
+        OrderInfoValidator validator = new();
+        var result = validator.Validate(orderInfo);
+        return result.IsValid
+            ? new Result<List<ValidationFailure>, ValidOrderInfo>.Success(new(orderInfo))
+            : new Result<List<ValidationFailure>, ValidOrderInfo>.Failure(result.Errors);
+    }
+
+    public static Result<List<ValidationFailure>, ValidPaymentInfo> Parse(this PaymentInfo paymentInfo) {
+        PaymentInfoValidator validator = new();
+        var result = validator.Validate(paymentInfo);
+        return result.IsValid
+            ? new Result<List<ValidationFailure>, ValidPaymentInfo>.Success(new(paymentInfo))
+            : new Result<List<ValidationFailure>, ValidPaymentInfo>.Failure(result.Errors);
+    }
+}
+
+public class ValidPaymentInfo : PaymentInfo {
+    [SetsRequiredMembers]
+    internal ValidPaymentInfo(PaymentInfo paymentInfo) : base(paymentInfo) { }
+}
+
+
+public class ValidOrderInfo : OrderInfo {
+    [SetsRequiredMembers]
+    internal ValidOrderInfo(OrderInfo orderInfo) : base(orderInfo) { }
 }
 
 public class ValidPizza : Pizza {
@@ -91,27 +119,40 @@ public class ValidPizza : Pizza {
 
 public class OrderInfoValidator : AbstractValidator<OrderInfo> {
     public OrderInfoValidator() {
+        RuleFor(o => o.StoreId).GreaterThanOrEqualTo(0);
+        When(o => o.ServiceMethod is ServiceMethod.Carryout,
+            () => RuleFor(o => ((ServiceMethod.Carryout)o.ServiceMethod).Location).IsInEnum());
         When(o => o.ServiceMethod is ServiceMethod.Delivery,
-            () => {
-                RuleFor(o => ((ServiceMethod.Delivery)o.ServiceMethod).Address.State)
-                    .Matches("[A-Z][A-Z]");
-                RuleFor(o => ((ServiceMethod.Delivery)o.ServiceMethod).Address.ZipCode)
-                    .Matches("\\d{5}");
-            });
+            () => RuleFor(o => ((ServiceMethod.Delivery)o.ServiceMethod).Address).SetValidator(new AddressValidator()));
+    }
+}
+
+public class AddressValidator : AbstractValidator<Address> {
+    public AddressValidator() {
+        RuleFor(d => d.AddressType).IsInEnum();
+        RuleFor(d => d.Apt).GreaterThanOrEqualTo(0);
+        RuleFor(d => d.State).Matches("^[A-Z][A-Z]$");
+        RuleFor(d => d.ZipCode).Matches("^\\d{5}$");
     }
 }
 
 public class PaymentInfoValidator : AbstractValidator<PaymentInfo> {
     public PaymentInfoValidator() {
         RuleFor(p => p.Email).EmailAddress();
-        RuleFor(p => p.Phone).Matches("\\d{9}");
+        RuleFor(p => p.Phone).Matches(@"\d{3}-\d{3}-\d{4}");
 
         When(p => p.Payment is Payment.PayWithCard,
-            () => {
-                RuleFor(p => ((Payment.PayWithCard)p.Payment).CardNumber.ToString()).CreditCard();
-                RuleFor(p => ((Payment.PayWithCard)p.Payment).Expiration).Matches(@"[01]\d/\d\d");
-                RuleFor(p => ((Payment.PayWithCard)p.Payment).SecurityCode).Matches("\\d{3}");
-                RuleFor(p => ((Payment.PayWithCard)p.Payment).BillingZip).Matches("\\d{5}");
-            });
+            () => RuleFor(p => ((Payment.PayWithCard)p.Payment)).SetValidator(new PayWithCardValidator()));
+    }
+}
+
+public class PayWithCardValidator : AbstractValidator<Payment.PayWithCard> {
+    public PayWithCardValidator() {
+        RuleFor(p => p.CardNumber.ToString())
+            .CreditCard()
+            .WithName("CardNumber");
+        RuleFor(p => p.Expiration).Must(Utils.MatchesMMyy);
+        RuleFor(p => p.SecurityCode).Matches("^\\d{3}$");
+        RuleFor(p => p.BillingZip).Matches("^\\d{5}$");
     }
 }

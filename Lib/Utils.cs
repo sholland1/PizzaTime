@@ -10,6 +10,13 @@ static class Utils {
         HashSet<T> knownKeys = new();
         return source.Any(k => !knownKeys.Add(k));
     }
+
+    public static bool MatchesMMyy(string s) =>
+        s.Length == 5
+        && int.TryParse(s[..2], out var month)
+        && s[2] == '/'
+        && int.TryParse(s[3..], out var _year)
+        && month.Between(1, 12);
 }
 
 public abstract record Result<TFailure, TSuccess> {

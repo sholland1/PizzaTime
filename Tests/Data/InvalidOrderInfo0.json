@@ -1,0 +1,13 @@
+{
+  "StoreId": -1,
+  "ServiceMethod": {
+    "AddressType": "Business",
+    "Name": "The Business",
+    "StreetAddress": "1234 Main St",
+    "Apt": -1,
+    "ZipCode": "x12345",
+    "City": "ACity",
+    "State": "NYZ"
+  },
+  "Timing": "2021-10-31T21:30:00"
+}
