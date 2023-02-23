@@ -20,6 +20,9 @@ public class OrderInfo {
     public OrderInfo(OrderInfo o) :
         this(o.StoreId, o.ServiceMethod, o.Timing) {}
 
+    public static bool operator ==(OrderInfo? a, OrderInfo? b) => Equals(a, b);
+    public static bool operator !=(OrderInfo? a, OrderInfo? b) => !Equals(a, b);
+
     public override bool Equals(object? obj) =>
         obj is OrderInfo o
         && StoreId == o.StoreId
@@ -103,6 +106,9 @@ public class PaymentInfo {
     [SetsRequiredMembers]
     public PaymentInfo(PaymentInfo p) :
         this(p.FirstName, p.LastName, p.Email, p.Phone, p.Payment) {}
+
+    public static bool operator ==(PaymentInfo? a, PaymentInfo? b) => Equals(a, b);
+    public static bool operator !=(PaymentInfo? a, PaymentInfo? b) => !Equals(a, b);
 
     public override bool Equals(object? obj) =>
         obj is PaymentInfo p

@@ -37,6 +37,9 @@ public class Pizza {
             p.Toppings, p.DippingSauce, p.Bake, p.Cut,
             p.Oregano, p.GarlicCrust, p.Quantity) {}
 
+    public static bool operator ==(Pizza? a, Pizza? b) => Equals(a, b);
+    public static bool operator !=(Pizza? a, Pizza? b) => !Equals(a, b);
+
     public override bool Equals(object? obj) =>
         obj is Pizza p
         && Size == p.Size

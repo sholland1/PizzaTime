@@ -23,12 +23,12 @@ Fast (pizza):
 1.
   - Read in default pizza from defaultPizza.json
   - Read in default order info
+  - Read in default payment info
   - Put pizza in cart
   - Display pizza, price, and estimated ready time
   - Request confirmation (Y/n)
 2.
   - Enter confirmation
-  - Read in default payment info
   - Order pizza
 
 Choose (pizza --choose-from-file):

@@ -7,7 +7,7 @@ public class ValidationTests {
     [Theory]
     [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
     public void ValidationWorks(TestPizza.ValidData p) =>
-        p.Pizza.Parse().Match(vp => { }, FailWithErrors);
+        p.Pizza.Parse().MapFailure(FailWithErrors);
 
     [Theory]
     [MemberData(nameof(TestPizza.GenerateInvalidPizzas), MemberType = typeof(TestPizza))]
@@ -34,7 +34,7 @@ public class ValidationTests {
     [Theory]
     [MemberData(nameof(TestOrder.GenerateValidOrders), MemberType = typeof(TestOrder))]
     public void OrderInfoValidationWorks(TestOrder.ValidData o) =>
-        o.OrderInfo.Parse().Match(vo => { }, FailWithErrors);
+        o.OrderInfo.Parse().MapFailure(FailWithErrors);
 
     [Theory]
     [MemberData(nameof(TestOrder.GenerateInvalidOrders), MemberType = typeof(TestOrder))]
@@ -57,7 +57,7 @@ public class ValidationTests {
     [Theory]
     [MemberData(nameof(TestPayment.GenerateValidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoValidationWorks(TestPayment.ValidData p) =>
-        p.PaymentInfo.Parse().Match(vp => { }, FailWithErrors);
+        p.PaymentInfo.Parse().MapFailure(FailWithErrors);
 
     [Theory]
     [MemberData(nameof(TestPayment.GenerateInvalidPayments), MemberType = typeof(TestPayment))]
