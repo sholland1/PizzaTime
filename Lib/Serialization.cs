@@ -3,11 +3,14 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using static BuilderHelpers;
 
-public static class OrderSerializer {
+public static class PizzaSerializer {
     public static JsonSerializerOptions Options => new() {
         WriteIndented = true,
         Converters = {
             new JsonStringEnumConverter(),
+            new CheeseJsonConverter(),
+            new SauceJsonConverter(),
+            new ToppingJsonConverter(),
             new PaymentJsonConverter(),
             new ServiceMethodJsonConverter(),
             new OrderTimingJsonCoverter()
@@ -176,18 +179,6 @@ public class PaymentJsonConverter : JsonConverter<Payment> {
 
         throw new NotSupportedException($"Invalid Payment! Value: {value}");
     }
-}
-
-public static class PizzaSerializer {
-    public static JsonSerializerOptions Options => new() {
-        WriteIndented = true,
-        Converters = {
-            new JsonStringEnumConverter(),
-            new CheeseJsonConverter(),
-            new SauceJsonConverter(),
-            new ToppingJsonConverter()
-        }
-    };
 }
 
 static class AmountUtils {
