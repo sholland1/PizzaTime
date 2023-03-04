@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-public class Pizza {
+public class UnvalidatedPizza {
     public Size Size { get; init; }
     public Crust Crust { get; init; }
     public Cheese Cheese { get; init; } = new Cheese.Full(Amount.Normal);
@@ -13,9 +13,9 @@ public class Pizza {
     public bool GarlicCrust { get; init; }
     public int Quantity { get; init; }
 
-    public Pizza() {}
+    public UnvalidatedPizza() {}
 
-    public Pizza(
+    public UnvalidatedPizza(
         Size size, Crust crust, Cheese cheese, Sauce? sauce,
         Toppings toppings, DippingSauce dippingSauce,
         Bake bake, Cut cut, bool oregano, bool garlicCrust, int quantity) {
@@ -32,16 +32,16 @@ public class Pizza {
         Quantity = quantity;
     }
 
-    public Pizza(Pizza p) :
+    public UnvalidatedPizza(UnvalidatedPizza p) :
         this(p.Size, p.Crust, p.Cheese, p.Sauce,
             p.Toppings, p.DippingSauce, p.Bake, p.Cut,
             p.Oregano, p.GarlicCrust, p.Quantity) {}
 
-    public static bool operator ==(Pizza? a, Pizza? b) => Equals(a, b);
-    public static bool operator !=(Pizza? a, Pizza? b) => !Equals(a, b);
+    public static bool operator ==(UnvalidatedPizza? a, UnvalidatedPizza? b) => Equals(a, b);
+    public static bool operator !=(UnvalidatedPizza? a, UnvalidatedPizza? b) => !Equals(a, b);
 
     public override bool Equals(object? obj) =>
-        obj is Pizza p
+        obj is UnvalidatedPizza p
         && Size == p.Size
         && Crust == p.Crust
         && Cheese == p.Cheese

@@ -13,7 +13,7 @@ public class ValidationTests {
     [MemberData(nameof(TestPizza.GenerateInvalidPizzas), MemberType = typeof(TestPizza))]
     public void InvalidationWorks(TestPizza.InvalidData p) {
         var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, p.JsonFile));
-        var invalidPizza = JsonSerializer.Deserialize<Pizza>(json, PizzaSerializer.Options)!;
+        var invalidPizza = JsonSerializer.Deserialize<UnvalidatedPizza>(json, PizzaSerializer.Options)!;
         invalidPizza.Parse().Match(
             vp => Assert.Fail("Shouldn't be valid."),
             es => AssertSameInvalidProps(p.InvalidProperties, es));
@@ -40,7 +40,7 @@ public class ValidationTests {
     [MemberData(nameof(TestOrder.GenerateInvalidOrders), MemberType = typeof(TestOrder))]
     public void OrderInfoInvalidationWorks(TestOrder.InvalidData o) {
         var json = File.ReadAllText(Path.Combine(TestOrder.DataDirectory, o.JsonFile));
-        var invalidOrder = JsonSerializer.Deserialize<OrderInfo>(json, OrderSerializer.Options)!;
+        var invalidOrder = JsonSerializer.Deserialize<UnvalidatedOrderInfo>(json, PizzaSerializer.Options)!;
         invalidOrder.Parse().Match(
             vo => Assert.Fail("Shouldn't be valid."),
             es => AssertSameInvalidProps(o.InvalidProperties, es));
@@ -63,7 +63,7 @@ public class ValidationTests {
     [MemberData(nameof(TestPayment.GenerateInvalidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoInvalidationWorks(TestPayment.InvalidData p) {
         var json = File.ReadAllText(Path.Combine(TestPayment.DataDirectory, p.JsonFile));
-        var invalidPayment = JsonSerializer.Deserialize<PaymentInfo>(json, OrderSerializer.Options)!;
+        var invalidPayment = JsonSerializer.Deserialize<UnvalidatedPaymentInfo>(json, PizzaSerializer.Options)!;
         invalidPayment.Parse().Match(
             vp => Assert.Fail("Shouldn't be valid."),
             es => AssertSameInvalidProps(p.InvalidProperties, es));

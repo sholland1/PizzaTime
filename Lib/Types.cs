@@ -2,29 +2,29 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-public class OrderInfo {
+public class UnvalidatedOrderInfo {
     public required int StoreId { get; init; }
     public required ServiceMethod ServiceMethod { get; init; }
     public required OrderTiming Timing { get; init; }
 
-    public OrderInfo() {}
+    public UnvalidatedOrderInfo() {}
 
     [SetsRequiredMembers]
-    public OrderInfo(int storeId, ServiceMethod serviceMethod, OrderTiming timing) {
+    public UnvalidatedOrderInfo(int storeId, ServiceMethod serviceMethod, OrderTiming timing) {
         StoreId = storeId;
         ServiceMethod = serviceMethod;
         Timing = timing;
     }
 
     [SetsRequiredMembers]
-    public OrderInfo(OrderInfo o) :
+    public UnvalidatedOrderInfo(UnvalidatedOrderInfo o) :
         this(o.StoreId, o.ServiceMethod, o.Timing) {}
 
-    public static bool operator ==(OrderInfo? a, OrderInfo? b) => Equals(a, b);
-    public static bool operator !=(OrderInfo? a, OrderInfo? b) => !Equals(a, b);
+    public static bool operator ==(UnvalidatedOrderInfo? a, UnvalidatedOrderInfo? b) => Equals(a, b);
+    public static bool operator !=(UnvalidatedOrderInfo? a, UnvalidatedOrderInfo? b) => !Equals(a, b);
 
     public override bool Equals(object? obj) =>
-        obj is OrderInfo o
+        obj is UnvalidatedOrderInfo o
         && StoreId == o.StoreId
         && ServiceMethod == o.ServiceMethod
         && Timing == o.Timing;
@@ -85,17 +85,17 @@ public abstract record OrderTiming {
     public sealed record Later(DateTime DateTime) : OrderTiming;
 }
 
-public class PaymentInfo {
+public class UnvalidatedPaymentInfo {
     public required string FirstName { get; init; }
     public required string LastName { get; init; }
     public required string Email { get; init; }
     public required string Phone { get; init; }
     public required Payment Payment { get; init; }
 
-    public PaymentInfo() {}
+    public UnvalidatedPaymentInfo() {}
 
     [SetsRequiredMembers]
-    public PaymentInfo(string firstName, string lastName, string email, string phone, Payment payment) {
+    public UnvalidatedPaymentInfo(string firstName, string lastName, string email, string phone, Payment payment) {
         FirstName = firstName;
         LastName = lastName;
         Email = email;
@@ -104,14 +104,14 @@ public class PaymentInfo {
     }
 
     [SetsRequiredMembers]
-    public PaymentInfo(PaymentInfo p) :
+    public UnvalidatedPaymentInfo(UnvalidatedPaymentInfo p) :
         this(p.FirstName, p.LastName, p.Email, p.Phone, p.Payment) {}
 
-    public static bool operator ==(PaymentInfo? a, PaymentInfo? b) => Equals(a, b);
-    public static bool operator !=(PaymentInfo? a, PaymentInfo? b) => !Equals(a, b);
+    public static bool operator ==(UnvalidatedPaymentInfo? a, UnvalidatedPaymentInfo? b) => Equals(a, b);
+    public static bool operator !=(UnvalidatedPaymentInfo? a, UnvalidatedPaymentInfo? b) => !Equals(a, b);
 
     public override bool Equals(object? obj) =>
-        obj is PaymentInfo p
+        obj is UnvalidatedPaymentInfo p
         && FirstName == p.FirstName
         && LastName == p.LastName
         && Email == p.Email

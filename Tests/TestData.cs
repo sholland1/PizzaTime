@@ -12,9 +12,9 @@ public static class TestOrder {
             new[] { "ServiceMethod.Location" });
     }
 
-    public record ValidData(OrderInfo OrderInfo, string JsonFile, string SummaryFile);
+    public record ValidData(UnvalidatedOrderInfo OrderInfo, string JsonFile, string SummaryFile);
     public record InvalidData(string JsonFile, string[] InvalidProperties);
-    public record InvalidData2(OrderInfo BadEnumOrder, string[] InvalidProperties);
+    public record InvalidData2(UnvalidatedOrderInfo BadEnumOrder, string[] InvalidProperties);
 
     public static IEnumerable<object[]> GenerateValidOrders() => ValidOrders().Select(o => new[] { o });
     public static IEnumerable<object[]> GenerateInvalidOrders() => InvalidOrders().Select(o => new[] { o });
@@ -44,7 +44,7 @@ public static class TestOrder {
 public static class TestPayment {
     public const string DataDirectory = "../../../Data";
 
-    public record ValidData(PaymentInfo PaymentInfo, string JsonFile, string SummaryFile);
+    public record ValidData(UnvalidatedPaymentInfo PaymentInfo, string JsonFile, string SummaryFile);
     public record InvalidData(string JsonFile, string[] InvalidProperties);
 
     public static IEnumerable<object[]> GenerateValidPayments() => ValidPayments().Select(p => new[] { p });
@@ -55,11 +55,11 @@ public static class TestPayment {
     }
 
     public static IEnumerable<ValidData> ValidPayments() {
-        PaymentInfo payAtStore = new(
+        UnvalidatedPaymentInfo payAtStore = new(
             "FName", "LName", "user@yahoo.com", "123-123-1234",
             new Payment.PayAtStore());
         Payment.PayWithCard cardPayment = new(1000_2000_3000_4000, "01/23", "123", "12345");
-        PaymentInfo payWithCard = new(
+        UnvalidatedPaymentInfo payWithCard = new(
             "FName", "LName", "user@yahoo.com", "123-123-1234", cardPayment);
 
         yield return new(payAtStore, "PayAtStoreInfo.json", "PayAtStoreSummary.txt");
@@ -70,7 +70,7 @@ public static class TestPayment {
 public static class TestPizza {
     public const string DataDirectory = "../../../Data";
 
-    public record ValidData(Pizza Pizza, string JsonFile, string SummaryFile);
+    public record ValidData(UnvalidatedPizza Pizza, string JsonFile, string SummaryFile);
     public record InvalidData(string JsonFile, string[] InvalidProperties);
 
     public static IEnumerable<object[]> GenerateValidPizzas() => ValidPizzas().Select(p => new[] { p });
@@ -102,7 +102,7 @@ public static class TestPizza {
         }
     }
 
-    public static Pizza BadEnumPizza =
+    public static UnvalidatedPizza BadEnumPizza =
         new((Size)10, (Crust)10, new Cheese.Full((Amount)10), new((SauceType)10, (Amount)10),
             new(new Topping[] { new((ToppingType)99, (Location)10, (Amount)10) }),
             new(0, 0, 0), (Bake)10, (Cut)10, false, false, 1);

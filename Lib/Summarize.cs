@@ -1,7 +1,7 @@
 using System.Diagnostics;
 
 public static class SummaryUtils {
-    public static string Summarize(this OrderInfo o) =>
+    public static string Summarize(this UnvalidatedOrderInfo o) =>
         string.Join('\n', new[] {
             $"Order for {o.Timing.Match(() => "now", dt => $"later at {dt}")}",
             $"{o.ServiceMethod.Match(
@@ -18,7 +18,7 @@ public static class SummaryUtils {
         }.Where(s => s != "")
         .Select(s => $"  {s}"));
 
-    public static string Summarize(this PaymentInfo p) => $"""
+    public static string Summarize(this UnvalidatedPaymentInfo p) => $"""
         Name: {p.FirstName} {p.LastName}
         Email: {p.Email}
         Phone: {p.Phone}
@@ -27,7 +27,7 @@ public static class SummaryUtils {
             (card, exp, code, zip) => $"Pay with card ending in {card % 10000}")}
         """;
 
-    public static string Summarize(this Pizza p) =>
+    public static string Summarize(this UnvalidatedPizza p) =>
         string.Join('\n', new[] {
             $"{p.Size} {p.Crust} Pizza x{p.Quantity}",
             p.Cheese.IsStandard ? "" : $"  with {p.Cheese.Display()}",

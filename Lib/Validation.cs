@@ -3,7 +3,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using static BuilderHelpers;
 
-public class PizzaValidator : AbstractValidator<Pizza> {
+public class PizzaValidator : AbstractValidator<UnvalidatedPizza> {
     public PizzaValidator() {
         //Enums
         RuleFor(p => p.Size).IsInEnum();
@@ -77,47 +77,64 @@ public class PizzaValidator : AbstractValidator<Pizza> {
 }
 
 public static class ValidationHelpers {
-    public static Result<List<ValidationFailure>, ValidPizza> Parse(this Pizza pizza) {
+    public static Pizza Validate(this UnvalidatedPizza pizza) {
+        PizzaValidator validator = new();
+        validator.ValidateAndThrow(pizza);
+        return new(pizza);
+    }
+
+    public static OrderInfo Validate(this UnvalidatedOrderInfo orderInfo) {
+        OrderInfoValidator validator = new();
+        validator.ValidateAndThrow(orderInfo);
+        return new(orderInfo);
+    }
+
+    public static PaymentInfo Validate(this UnvalidatedPaymentInfo paymentInfo) {
+        PaymentInfoValidator validator = new();
+        validator.ValidateAndThrow(paymentInfo);
+        return new(paymentInfo);
+    }
+
+    public static Validation<Pizza> Parse(this UnvalidatedPizza pizza) {
         PizzaValidator validator = new();
         var result = validator.Validate(pizza);
         return result.IsValid
-            ? new Result<List<ValidationFailure>, ValidPizza>.Success(new(pizza))
-            : new Result<List<ValidationFailure>, ValidPizza>.Failure(result.Errors);
+            ? new Validation<Pizza>.Success(new(pizza))
+            : new Validation<Pizza>.Failure(result.Errors);
     }
 
-    public static Result<List<ValidationFailure>, ValidOrderInfo> Parse(this OrderInfo orderInfo) {
+    public static Validation<OrderInfo> Parse(this UnvalidatedOrderInfo orderInfo) {
         OrderInfoValidator validator = new();
         var result = validator.Validate(orderInfo);
         return result.IsValid
-            ? new Result<List<ValidationFailure>, ValidOrderInfo>.Success(new(orderInfo))
-            : new Result<List<ValidationFailure>, ValidOrderInfo>.Failure(result.Errors);
+            ? new Validation<OrderInfo>.Success(new(orderInfo))
+            : new Validation<OrderInfo>.Failure(result.Errors);
     }
 
-    public static Result<List<ValidationFailure>, ValidPaymentInfo> Parse(this PaymentInfo paymentInfo) {
+    public static Validation<PaymentInfo> Parse(this UnvalidatedPaymentInfo paymentInfo) {
         PaymentInfoValidator validator = new();
         var result = validator.Validate(paymentInfo);
         return result.IsValid
-            ? new Result<List<ValidationFailure>, ValidPaymentInfo>.Success(new(paymentInfo))
-            : new Result<List<ValidationFailure>, ValidPaymentInfo>.Failure(result.Errors);
+            ? new Validation<PaymentInfo>.Success(new(paymentInfo))
+            : new Validation<PaymentInfo>.Failure(result.Errors);
     }
 }
 
-public class ValidPaymentInfo : PaymentInfo {
+public class PaymentInfo : UnvalidatedPaymentInfo {
     [SetsRequiredMembers]
-    internal ValidPaymentInfo(PaymentInfo paymentInfo) : base(paymentInfo) { }
+    internal PaymentInfo(UnvalidatedPaymentInfo paymentInfo) : base(paymentInfo) { }
 }
 
-
-public class ValidOrderInfo : OrderInfo {
+public class OrderInfo : UnvalidatedOrderInfo {
     [SetsRequiredMembers]
-    internal ValidOrderInfo(OrderInfo orderInfo) : base(orderInfo) { }
+    internal OrderInfo(UnvalidatedOrderInfo orderInfo) : base(orderInfo) { }
 }
 
-public class ValidPizza : Pizza {
-    internal ValidPizza(Pizza pizza) : base(pizza) {}
+public class Pizza : UnvalidatedPizza {
+    internal Pizza(UnvalidatedPizza pizza) : base(pizza) {}
 }
 
-public class OrderInfoValidator : AbstractValidator<OrderInfo> {
+public class OrderInfoValidator : AbstractValidator<UnvalidatedOrderInfo> {
     public OrderInfoValidator() {
         RuleFor(o => o.StoreId).GreaterThanOrEqualTo(0);
         When(o => o.ServiceMethod is ServiceMethod.Carryout,
@@ -136,7 +153,7 @@ public class AddressValidator : AbstractValidator<Address> {
     }
 }
 
-public class PaymentInfoValidator : AbstractValidator<PaymentInfo> {
+public class PaymentInfoValidator : AbstractValidator<UnvalidatedPaymentInfo> {
     public PaymentInfoValidator() {
         RuleFor(p => p.Email).EmailAddress();
         RuleFor(p => p.Phone).Matches(@"\d{3}-\d{3}-\d{4}");

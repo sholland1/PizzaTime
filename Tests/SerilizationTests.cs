@@ -7,7 +7,7 @@ public class SerializationTests {
     [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
     public void RoundTripA(TestPizza.ValidData p) {
         var serialized = JsonSerializer.Serialize(p.Pizza, PizzaSerializer.Options);
-        var roundTrip = JsonSerializer.Deserialize<Pizza>(serialized, PizzaSerializer.Options);
+        var roundTrip = JsonSerializer.Deserialize<UnvalidatedPizza>(serialized, PizzaSerializer.Options);
         Assert.Equal(p.Pizza, roundTrip);
     }
 
@@ -15,7 +15,7 @@ public class SerializationTests {
     [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
     public void RoundTripB(TestPizza.ValidData p) {
         var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, p.JsonFile));
-        var deserialized = JsonSerializer.Deserialize<Pizza>(json, PizzaSerializer.Options);
+        var deserialized = JsonSerializer.Deserialize<UnvalidatedPizza>(json, PizzaSerializer.Options);
         var roundTrip = JsonSerializer.Serialize(deserialized, PizzaSerializer.Options);
         Assert.Equal(json, roundTrip);
     }
@@ -24,7 +24,7 @@ public class SerializationTests {
     [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
     public void DeserializeWorks(TestPizza.ValidData p) {
         var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, p.JsonFile));
-        var deserialized = JsonSerializer.Deserialize<Pizza>(json, PizzaSerializer.Options);
+        var deserialized = JsonSerializer.Deserialize<UnvalidatedPizza>(json, PizzaSerializer.Options);
         Assert.Equal(p.Pizza, deserialized);
     }
 
@@ -41,7 +41,7 @@ public class SerializationTests {
     public void DeserializeDoesntWorkForValidPizza(TestPizza.ValidData p) {
         var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, p.JsonFile));
         Assert.Throws<NotSupportedException>(() => {
-            var deserialized = JsonSerializer.Deserialize<ValidPizza>(json, PizzaSerializer.Options);
+            var deserialized = JsonSerializer.Deserialize<Pizza>(json, PizzaSerializer.Options);
             Assert.Fail($"Should throw before here. {deserialized}");
         });
     }
@@ -61,8 +61,8 @@ public class SerializationTests {
     [Theory]
     [MemberData(nameof(TestPayment.GenerateValidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoRoundTripA(TestPayment.ValidData p) {
-        var serialized = JsonSerializer.Serialize(p.PaymentInfo, OrderSerializer.Options);
-        var roundTrip = JsonSerializer.Deserialize<PaymentInfo>(serialized, OrderSerializer.Options);
+        var serialized = JsonSerializer.Serialize(p.PaymentInfo, PizzaSerializer.Options);
+        var roundTrip = JsonSerializer.Deserialize<UnvalidatedPaymentInfo>(serialized, PizzaSerializer.Options);
         Assert.Equal(p.PaymentInfo, roundTrip);
     }
 
@@ -70,8 +70,8 @@ public class SerializationTests {
     [MemberData(nameof(TestPayment.GenerateValidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoRoundTripB(TestPayment.ValidData p) {
         var json = File.ReadAllText(Path.Combine(TestPayment.DataDirectory, p.JsonFile));
-        var deserialized = JsonSerializer.Deserialize<PaymentInfo>(json, OrderSerializer.Options);
-        var roundTrip = JsonSerializer.Serialize(deserialized, OrderSerializer.Options);
+        var deserialized = JsonSerializer.Deserialize<UnvalidatedPaymentInfo>(json, PizzaSerializer.Options);
+        var roundTrip = JsonSerializer.Serialize(deserialized, PizzaSerializer.Options);
         Assert.Equal(json, roundTrip);
     }
 
@@ -79,7 +79,7 @@ public class SerializationTests {
     [MemberData(nameof(TestPayment.GenerateValidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoDeserializeWorks(TestPayment.ValidData p) {
         var json = File.ReadAllText(Path.Combine(TestPayment.DataDirectory, p.JsonFile));
-        var deserialized = JsonSerializer.Deserialize<PaymentInfo>(json, OrderSerializer.Options);
+        var deserialized = JsonSerializer.Deserialize<UnvalidatedPaymentInfo>(json, PizzaSerializer.Options);
         Assert.Equal(p.PaymentInfo, deserialized);
     }
 
@@ -87,7 +87,7 @@ public class SerializationTests {
     [MemberData(nameof(TestPayment.GenerateValidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoSerializationWorks(TestPayment.ValidData p) {
         var json = File.ReadAllText(Path.Combine(TestPayment.DataDirectory, p.JsonFile));
-        var serialized = JsonSerializer.Serialize(p.PaymentInfo, OrderSerializer.Options);
+        var serialized = JsonSerializer.Serialize(p.PaymentInfo, PizzaSerializer.Options);
         Assert.Equal(json, serialized);
     }
 
@@ -95,8 +95,8 @@ public class SerializationTests {
     [Theory]
     [MemberData(nameof(TestOrder.GenerateValidOrders), MemberType = typeof(TestOrder))]
     public void OrderInfoRoundTripA(TestOrder.ValidData p) {
-        var serialized = JsonSerializer.Serialize(p.OrderInfo, OrderSerializer.Options);
-        var roundTrip = JsonSerializer.Deserialize<OrderInfo>(serialized, OrderSerializer.Options);
+        var serialized = JsonSerializer.Serialize(p.OrderInfo, PizzaSerializer.Options);
+        var roundTrip = JsonSerializer.Deserialize<UnvalidatedOrderInfo>(serialized, PizzaSerializer.Options);
         Assert.Equal(p.OrderInfo, roundTrip);
     }
 
@@ -104,8 +104,8 @@ public class SerializationTests {
     [MemberData(nameof(TestOrder.GenerateValidOrders), MemberType = typeof(TestOrder))]
     public void OrderInfoRoundTripB(TestOrder.ValidData p) {
         var json = File.ReadAllText(Path.Combine(TestOrder.DataDirectory, p.JsonFile));
-        var deserialized = JsonSerializer.Deserialize<OrderInfo>(json, OrderSerializer.Options);
-        var roundTrip = JsonSerializer.Serialize(deserialized, OrderSerializer.Options);
+        var deserialized = JsonSerializer.Deserialize<UnvalidatedOrderInfo>(json, PizzaSerializer.Options);
+        var roundTrip = JsonSerializer.Serialize(deserialized, PizzaSerializer.Options);
         Assert.Equal(json, roundTrip);
     }
 
@@ -113,7 +113,7 @@ public class SerializationTests {
     [MemberData(nameof(TestOrder.GenerateValidOrders), MemberType = typeof(TestOrder))]
     public void OrderInfoDeserializeWorks(TestOrder.ValidData p) {
         var json = File.ReadAllText(Path.Combine(TestOrder.DataDirectory, p.JsonFile));
-        var deserialized = JsonSerializer.Deserialize<OrderInfo>(json, OrderSerializer.Options);
+        var deserialized = JsonSerializer.Deserialize<UnvalidatedOrderInfo>(json, PizzaSerializer.Options);
         Assert.Equal(p.OrderInfo, deserialized);
     }
 
@@ -121,7 +121,7 @@ public class SerializationTests {
     [MemberData(nameof(TestOrder.GenerateValidOrders), MemberType = typeof(TestOrder))]
     public void OrderInfoSerializationWorks(TestOrder.ValidData p) {
         var json = File.ReadAllText(Path.Combine(TestOrder.DataDirectory, p.JsonFile));
-        var serialized = JsonSerializer.Serialize(p.OrderInfo, OrderSerializer.Options);
+        var serialized = JsonSerializer.Serialize(p.OrderInfo, PizzaSerializer.Options);
         Assert.Equal(json, serialized);
     }
 }

@@ -16,7 +16,7 @@ public class PizzaBuilder<TBuilder> : IPizzaBuilder
         _crust = crust;
     }
 
-    public Pizza Build(int quantity = 1) => new(
+    public UnvalidatedPizza Build(int quantity = 1) => new(
         _size, _crust, _cheese, _sauce, new(_toppings),
         _dippingSauce, _bake, _cut, _oregano,
         _garlicCrust, quantity);
@@ -63,7 +63,7 @@ public class PizzaBuilder<TBuilder> : IPizzaBuilder
 }
 
 public interface IPizzaBuilder {
-    public Pizza Build(int quantity = 1);
+    public UnvalidatedPizza Build(int quantity = 1);
 }
 
 public static class Build {
