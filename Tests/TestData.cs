@@ -1,6 +1,5 @@
 using static BuilderHelpers;
 
-//create test data for OrderInfo
 public static class TestOrder {
     public const string DataDirectory = "../../../Data";
 
@@ -27,14 +26,14 @@ public static class TestOrder {
 
     public static IEnumerable<ValidData> ValidOrders() {
         yield return new(
-            new(1, new ServiceMethod.Delivery(new(AddressType.House, "My House", "1234 Main St", null, "12345", "ACity", "NY")), new OrderTiming.Now()),
+            new(1, new ServiceMethod.Carryout(PickupLocation.InStore), new OrderTiming.Now()),
+            "defaultOrderInfo.json", "CarryoutNowSummary.txt");
+        yield return new(
+            new(2, new ServiceMethod.Delivery(new(AddressType.House, "My House", "1234 Main St", null, "12345", "ACity", "NY")), new OrderTiming.Now()),
             "DeliveryNow.json", "DeliveryNowSummary.txt");
         yield return new(
-            new(2, new ServiceMethod.Delivery(new(AddressType.Business, "The Business", "1234 Main St", 123, "12345", "ACity", "NY")), new OrderTiming.Later(new(2021, 10, 30, 21, 30, 0))),
+            new(3, new ServiceMethod.Delivery(new(AddressType.Business, "The Business", "1234 Main St", 123, "12345", "ACity", "NY")), new OrderTiming.Later(new(2021, 10, 30, 21, 30, 0))),
             "DeliveryLater.json", "DeliveryLaterSummary.txt");
-        yield return new(
-            new(3, new ServiceMethod.Carryout(PickupLocation.InStore), new OrderTiming.Now()),
-            "CarryoutNow.json", "CarryoutNowSummary.txt");
         yield return new(
             new(4, new ServiceMethod.Carryout(PickupLocation.Window), new OrderTiming.Later(new(2021, 10, 31, 21, 30, 0))),
             "CarryoutLater.json", "CarryoutLaterSummary.txt");
@@ -62,8 +61,8 @@ public static class TestPayment {
         UnvalidatedPaymentInfo payWithCard = new(
             "FName", "LName", "user@yahoo.com", "123-123-1234", cardPayment);
 
+        yield return new(payWithCard, "defaultPaymentInfo.json", "PayWithCardSummary.txt");
         yield return new(payAtStore, "PayAtStoreInfo.json", "PayAtStoreSummary.txt");
-        yield return new(payWithCard, "PayWithCardInfo.json", "PayWithCardSummary.txt");
     }
 }
 
@@ -77,8 +76,8 @@ public static class TestPizza {
     public static IEnumerable<object[]> GenerateInvalidPizzas() => InvalidPizzas().Select(p => new[] { p });
 
     public static IEnumerable<ValidData> ValidPizzas() {
+        yield return new(LargePep.Build(), "defaultPizza.json", "LargePepPizzaSummary.txt");
         yield return new(Complex.Build(2), "ComplexPizza.json", "ComplexPizzaSummary.txt");
-        yield return new(LargePep.Build(), "LargePepPizza.json", "LargePepPizzaSummary.txt");
         yield return new(SmallThin.Build(), "SmallThinPizza.json", "SmallThinPizzaSummary.txt");
         yield return new(SmallHandTossed.Build(), "SmallHandTossed.json", "SmallHandTossedSummary.txt");
         yield return new(XLPizza.Build(25), "XLPizza.json", "XLPizzaSummary.txt");
@@ -154,4 +153,25 @@ public static class TestPizza {
             .SetCheese(Light)
             .SetDippingSauces(25, 25, 25)
             .SetCut(Uncut);
+}
+
+public class DummyPizzaRepository : IPizzaRepo {
+    private readonly Dictionary<string, Pizza> _pizzas = TestPizza.ValidPizzas()
+        .ToDictionary(
+            p => Path.GetFileNameWithoutExtension(p.JsonFile),
+            p => p.Pizza.Validate());
+
+    private readonly Dictionary<string, OrderInfo> _orderInfos = TestOrder.ValidOrders()
+        .ToDictionary(
+            p => Path.GetFileNameWithoutExtension(p.JsonFile),
+            p => p.OrderInfo.Validate());
+
+    private readonly Dictionary<string, PaymentInfo> _paymentInfos = TestPayment.ValidPayments()
+        .ToDictionary(
+            p => Path.GetFileNameWithoutExtension(p.JsonFile),
+            p => p.PaymentInfo.Validate());
+
+    public Pizza GetPizza(string name) => _pizzas[name];
+    public OrderInfo GetOrderInfo(string name) => _orderInfos[name];
+    public PaymentInfo GetPaymentInfo(string name) => _paymentInfos[name];
 }
