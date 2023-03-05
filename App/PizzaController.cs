@@ -17,15 +17,15 @@ public class PizzaController {
             return;
         }
 
-        var summary = $"""
-            Pizza was added to cart:
-            {userPizza.Summarize()}
+        _consoleUI.PrintLine($"Pizza was added to cart:\n{cartResult.Summarize()}\n");
 
-            Cart summary:
-            {cartResult.Summarize()}
+        var priceResult = _api.CheckCartTotal();
+        if (!priceResult.Success) {
+            _consoleUI.PrintLine($"Failed to check cart price:\n{priceResult.Message}");
+            return;
+        }
 
-            """;
-        _consoleUI.PrintLine(summary);
+        _consoleUI.PrintLine($"Cart summary:\n{priceResult.Summarize()}\n");
 
         var answer = _consoleUI.Prompt("Confirm order? [Y/n]: ") ?? "y";
         _consoleUI.PrintLine();
@@ -36,8 +36,9 @@ public class PizzaController {
         }
 
         _consoleUI.PrintLine("Ordering pizza...");
+
         var orderResult = _api.OrderPizza(userOrder, userPayment);
-        if (!cartResult.Success) {
+        if (!orderResult.Success) {
             _consoleUI.PrintLine($"Failed to place order: {orderResult.Message}");
             return;
         }

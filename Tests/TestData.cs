@@ -175,3 +175,57 @@ public class DummyPizzaRepository : IPizzaRepo {
     public OrderInfo GetOrderInfo(string name) => _orderInfos[name];
     public PaymentInfo GetPaymentInfo(string name) => _paymentInfos[name];
 }
+
+public class DummyConsoleUI : IConsoleUI {
+    public List<string> PrintedMessages = new List<string>();
+    private readonly Queue<string> _readLines = new Queue<string>();
+
+    public DummyConsoleUI(params string[] readLines) => Array.ForEach(readLines, _readLines.Enqueue);
+
+    public void Print(string message) => PrintedMessages.Add(message);
+    public void PrintLine(string message) => PrintedMessages.Add(message + "\n");
+    public void PrintLine() => PrintedMessages.Add("\n");
+    public string? ReadLine() => _readLines.Dequeue();
+
+    public override string ToString() => string.Join("", PrintedMessages);
+}
+
+public class DummyPizzaApi : IPizzaApi {
+    private readonly bool _cartFail;
+    private readonly bool _priceFail;
+    private readonly bool _orderFail;
+
+    public List<ApiCall> Calls = new();
+
+    public DummyPizzaApi(bool cartFail = false, bool priceFail = false, bool orderFail = false) =>
+        (_cartFail, _priceFail, _orderFail) = (cartFail, priceFail, orderFail);
+
+    public ApiResult AddPizzaToCart(Pizza userPizza) {
+        ApiResult result = new(!_cartFail,
+            _cartFail
+            ? "Pizza was not added to cart."
+            : "Pizza added to cart.");
+        Calls.Add(new(nameof(AddPizzaToCart), userPizza, result));
+        return result;
+    }
+
+    public ApiResult CheckCartTotal() {
+        ApiResult result = new(!_priceFail,
+            _priceFail
+            ? "Failed to check cart price."
+            : $"Cart price is ${Calls.Count(c => c.Method == nameof(AddPizzaToCart))*8.25:F2}.");
+        Calls.Add(new(nameof(CheckCartTotal), "", result));
+        return result;
+    }
+
+    public ApiResult OrderPizza(OrderInfo userOrder, PaymentInfo userPayment) {
+        ApiResult result = new(!_orderFail,
+            _orderFail
+            ? "Failed to place order."
+            : "Order was placed.");
+        Calls.Add(new(nameof(OrderPizza), (userOrder, userPayment), result));
+        return result;
+    }
+}
+
+public record ApiCall(string Method, object Body, ApiResult Result);

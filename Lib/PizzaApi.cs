@@ -1,11 +1,7 @@
 public interface IPizzaApi {
     ApiResult AddPizzaToCart(Pizza userPizza);
+    ApiResult CheckCartTotal();
     ApiResult OrderPizza(OrderInfo userOrder, PaymentInfo userPayment);
-}
-
-public class DummyPizzaApi : IPizzaApi {
-    public ApiResult AddPizzaToCart(Pizza userPizza) => new ApiResult(true, "Pizza added to cart.");
-    public ApiResult OrderPizza(OrderInfo userOrder, PaymentInfo userPayment) => new ApiResult(true, "Order was placed.");
 }
 
 public class DominosApi : IPizzaApi {
@@ -18,6 +14,11 @@ public class DominosApi : IPizzaApi {
         _pizza = userPizza;
         return new ApiResult(true, "Pizza added to cart.");
     }
+
+    public ApiResult CheckCartTotal() =>
+        _pizza is null
+        ? new ApiResult(true, "Cart is empty.")
+        : new ApiResult(true, "Cart price is $9.99.");
 
     public ApiResult OrderPizza(OrderInfo userOrder, PaymentInfo userPayment) =>
         _pizza is null
