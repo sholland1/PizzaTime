@@ -5,7 +5,6 @@ public class PizzaBuilder<TBuilder> : IPizzaBuilder
     protected Cheese _cheese = new Cheese.Full(Amount.Normal);
     protected Sauce? _sauce = new(SauceType.Tomato, Amount.Normal);
     protected List<Topping> _toppings = new();
-    protected DippingSauce _dippingSauce;
     protected Bake _bake;
     protected Cut _cut;
     protected bool _oregano;
@@ -15,11 +14,9 @@ public class PizzaBuilder<TBuilder> : IPizzaBuilder
         _size = size;
         _crust = crust;
     }
-
     public UnvalidatedPizza Build(int quantity = 1) => new(
         _size, _crust, _cheese, _sauce, new(_toppings),
-        _dippingSauce, _bake, _cut, _oregano,
-        _garlicCrust, quantity);
+        _bake, _cut, _oregano, _garlicCrust, quantity);
 
     public TBuilder AddTopping(ToppingType toppingType, Location location = Location.All, Amount amount = Amount.Normal) {
         _toppings.Add(new(toppingType, location, amount));
@@ -53,11 +50,6 @@ public class PizzaBuilder<TBuilder> : IPizzaBuilder
 
     public TBuilder SetCut(Cut cut) {
         _cut = cut;
-        return (TBuilder)this;
-    }
-
-    public TBuilder SetDippingSauces(int garlicQty, int ranchQty, int marinaraQty) {
-        _dippingSauce = new(garlicQty, ranchQty, marinaraQty);
         return (TBuilder)this;
     }
 }

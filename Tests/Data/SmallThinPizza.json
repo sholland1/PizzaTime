@@ -20,11 +20,6 @@
     "R^BlackOlives",
     "R=Mushrooms"
   ],
-  "DippingSauce": {
-    "GarlicAmount": 0,
-    "RanchAmount": 0,
-    "MarinaraAmount": 0
-  },
   "Bake": "Normal",
   "Cut": "Square",
   "Oregano": true,

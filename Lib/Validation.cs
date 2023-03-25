@@ -69,9 +69,6 @@ public class PizzaValidator : AbstractValidator<UnvalidatedPizza> {
                 .Sum(t => t.Amount == Extra ? 2 : 1)
                 .Between(0, 10))
             .Must(ts => !ts.Select(t => t.ToppingType).ContainsDuplicates());
-        RuleFor(p => p.DippingSauce.GarlicAmount).InclusiveBetween(0, 25);
-        RuleFor(p => p.DippingSauce.RanchAmount).InclusiveBetween(0, 25);
-        RuleFor(p => p.DippingSauce.MarinaraAmount).InclusiveBetween(0, 25);
         RuleFor(p => p.Quantity).InclusiveBetween(1, 25);
     }
 }

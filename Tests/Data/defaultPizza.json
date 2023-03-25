@@ -6,11 +6,6 @@
   "Toppings": [
     "A=Pepperoni"
   ],
-  "DippingSauce": {
-    "GarlicAmount": 0,
-    "RanchAmount": 0,
-    "MarinaraAmount": 0
-  },
   "Bake": "Normal",
   "Cut": "Pie",
   "Oregano": false,

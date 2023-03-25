@@ -6,7 +6,6 @@ public class UnvalidatedPizza {
     public Cheese Cheese { get; init; } = new Cheese.Full(Amount.Normal);
     public Sauce? Sauce { get; init; }
     public Toppings Toppings { get; init; } = new Toppings();
-    public DippingSauce DippingSauce { get; init; }
     public Bake Bake { get; init; }
     public Cut Cut { get; init; }
     public bool Oregano { get; init; }
@@ -17,14 +16,13 @@ public class UnvalidatedPizza {
 
     public UnvalidatedPizza(
         Size size, Crust crust, Cheese cheese, Sauce? sauce,
-        Toppings toppings, DippingSauce dippingSauce,
+        Toppings toppings,
         Bake bake, Cut cut, bool oregano, bool garlicCrust, int quantity) {
         Size = size;
         Crust = crust;
         Cheese = cheese;
         Sauce = sauce;
         Toppings = toppings;
-        DippingSauce = dippingSauce;
         Bake = bake;
         Cut = cut;
         Oregano = oregano;
@@ -34,7 +32,7 @@ public class UnvalidatedPizza {
 
     public UnvalidatedPizza(UnvalidatedPizza p) :
         this(p.Size, p.Crust, p.Cheese, p.Sauce,
-            p.Toppings, p.DippingSauce, p.Bake, p.Cut,
+            p.Toppings, p.Bake, p.Cut,
             p.Oregano, p.GarlicCrust, p.Quantity) {}
 
     public static bool operator ==(UnvalidatedPizza? a, UnvalidatedPizza? b) => Equals(a, b);
@@ -47,7 +45,6 @@ public class UnvalidatedPizza {
         && Cheese == p.Cheese
         && Sauce == p.Sauce
         && Toppings == p.Toppings
-        && DippingSauce == p.DippingSauce
         && Bake == p.Bake
         && Cut == p.Cut
         && Oregano == p.Oregano
@@ -61,7 +58,6 @@ public class UnvalidatedPizza {
         hash.Add(Cheese);
         hash.Add(Sauce);
         hash.Add(Toppings);
-        hash.Add(DippingSauce);
         hash.Add(Bake);
         hash.Add(Cut);
         hash.Add(Oregano);
@@ -134,8 +130,6 @@ public enum ToppingType {
     GreenPeppers, Spinach, RoastedRedPeppers,
     FetaCheese, ShreddedParmesanAsiago
 }
-
-public record struct DippingSauce(int GarlicAmount, int RanchAmount, int MarinaraAmount);
 
 public enum Bake { Normal, WellDone }
 public enum Cut { Pie, Square, Uncut }

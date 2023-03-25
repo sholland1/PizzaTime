@@ -4,11 +4,6 @@
   "Cheese": "=",
   "Sauce": "=Tomato",
   "Toppings": [],
-  "DippingSauce": {
-    "GarlicAmount": 0,
-    "RanchAmount": 0,
-    "MarinaraAmount": 0
-  },
   "Bake": "WellDone",
   "Cut": "Pie",
   "Oregano": false,

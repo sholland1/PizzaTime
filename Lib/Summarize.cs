@@ -38,7 +38,6 @@ public static class SummaryUtils {
             p.GarlicCrust ? "  with garlic crust" : "",
         }
         .Concat(p.Toppings.Display())
-        .Concat(p.DippingSauce.Display())
         .Where(s => s != ""));
 
     private static IEnumerable<string> Display(this Topping t) {
@@ -60,12 +59,6 @@ public static class SummaryUtils {
         foreach (var t in ts) {
             yield return $" {string.Join(' ', t.Display())}";
         }
-    }
-
-    private static IEnumerable<string> Display(this DippingSauce ds) {
-        if (ds.GarlicAmount > 0) yield return $"Garlic sauce x{ds.GarlicAmount}";
-        if (ds.RanchAmount > 0) yield return $"Ranch sauce x{ds.RanchAmount}";
-        if (ds.MarinaraAmount > 0) yield return $"Marinara sauce x{ds.MarinaraAmount}";
     }
 
     private static string Display(this Sauce? s) {

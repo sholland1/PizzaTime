@@ -57,9 +57,6 @@ Toppings:
  Extra Bacon on the Left
  Light Mushrooms on the Right
  Spinach
-Garlic sauce x1
-Ranch sauce x2
-Marinara sauce x3
 
 Large HandTossed Pizza x1
   pie cut
@@ -80,7 +77,6 @@ Constraints:
 
   10 Toppings per side (Light,Normal=1, Extra=2)
   No duplicate toppings
-  DippingSauce range [0..25]
   Quantity range [1..25]
 
 Pizza
@@ -117,7 +113,6 @@ Pizza
                Roasted Red Peppers
                Feta Cheese
                Shredded Parmesan Asiago)
-  Dipping Sauce (Garlic [int], Ranch [int], Marinara [int])
   Bake (Normal, Well Done)
   Cut (Pie, Square, Uncut)
   Oregano (bool)

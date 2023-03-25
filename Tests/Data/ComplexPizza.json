@@ -9,11 +9,6 @@
     "R-Mushrooms",
     "A=Spinach"
   ],
-  "DippingSauce": {
-    "GarlicAmount": 1,
-    "RanchAmount": 2,
-    "MarinaraAmount": 3
-  },
   "Bake": "WellDone",
   "Cut": "Square",
   "Oregano": false,

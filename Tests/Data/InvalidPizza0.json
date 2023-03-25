@@ -22,11 +22,6 @@
     "R^BlackOlives",
     "R^Mushrooms"
   ],
-  "DippingSauce": {
-    "GarlicAmount": -1,
-    "RanchAmount": 26,
-    "MarinaraAmount": 25
-  },
   "Bake": "WellDone",
   "Cut": "Pie",
   "Oregano": true,

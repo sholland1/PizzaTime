@@ -84,7 +84,7 @@ public static class TestPizza {
     }
 
     public static IEnumerable<InvalidData> InvalidPizzas() {
-        yield return new("InvalidPizza0.json", new[] { "Crust", "DippingSauce.GarlicAmount", "DippingSauce.RanchAmount", "GarlicCrust", "Oregano", "Quantity", "Toppings" });
+        yield return new("InvalidPizza0.json", new[] { "Crust", "GarlicCrust", "Oregano", "Quantity", "Toppings" });
         yield return new("InvalidPizza1.json", new[] { "Crust", "Oregano", "Quantity", "Toppings" });
         yield return new("InvalidPizza2.json", new[] { "Bake", "Crust", "GarlicCrust", "Quantity", "Toppings" });
     }
@@ -104,7 +104,7 @@ public static class TestPizza {
     public static UnvalidatedPizza BadEnumPizza =
         new((Size)10, (Crust)10, new Cheese.Full((Amount)10), new((SauceType)10, (Amount)10),
             new(new Topping[] { new((ToppingType)99, (Location)10, (Amount)10) }),
-            new(0, 0, 0), (Bake)10, (Cut)10, false, false, 1);
+            (Bake)10, (Cut)10, false, false, 1);
 
     public static IPizzaBuilder Complex =
         Build.Medium.Pan()
@@ -114,7 +114,6 @@ public static class TestPizza {
             .AddTopping(Bacon, Left, Extra)
             .AddTopping(Mushrooms, Right, Light)
             .AddTopping(Spinach)
-            .SetDippingSauces(1, 2, 3)
             .SetBake(WellDone)
             .SetCut(Square);
 
@@ -151,7 +150,6 @@ public static class TestPizza {
     public static IPizzaBuilder XLPizza =
         Build.XL.Brooklyn()
             .SetCheese(Light)
-            .SetDippingSauces(25, 25, 25)
             .SetCut(Uncut);
 }
 
