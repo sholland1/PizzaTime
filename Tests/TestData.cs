@@ -1,4 +1,5 @@
 using static BuilderHelpers;
+using static TestPizza;
 
 public static class TestOrder {
     public const string DataDirectory = "../../../Data";
@@ -75,12 +76,12 @@ public static class TestPizza {
     public static IEnumerable<object[]> GenerateValidPizzas() => ValidPizzas().Select(p => new[] { p });
     public static IEnumerable<object[]> GenerateInvalidPizzas() => InvalidPizzas().Select(p => new[] { p });
 
-    public static IEnumerable<ValidData> ValidPizzas() {
-        yield return new(LargePep.Build(), "defaultPizza.json", "LargePepPizzaSummary.txt");
-        yield return new(Complex.Build(2), "ComplexPizza.json", "ComplexPizzaSummary.txt");
-        yield return new(SmallThin.Build(), "SmallThinPizza.json", "SmallThinPizzaSummary.txt");
-        yield return new(SmallHandTossed.Build(), "SmallHandTossed.json", "SmallHandTossedSummary.txt");
-        yield return new(XLPizza.Build(25), "XLPizza.json", "XLPizzaSummary.txt");
+    public static IEnumerable<UnvalidatedPizza> ValidPizzas() {
+        yield return LargePep.Build();
+        yield return Complex.Build(2);
+        yield return SmallThin.Build();
+        yield return SmallHandTossed.Build();
+        yield return XLPizza.Build(25);
     }
 
     public static IEnumerable<InvalidData> InvalidPizzas() {
@@ -89,17 +90,17 @@ public static class TestPizza {
         yield return new("InvalidPizza2.json", new[] { "Bake", "Crust", "GarlicCrust", "Quantity", "Toppings" });
     }
 
-    public static void WritePizzaFile(int pizza, bool json = true, bool summary = true) {
-        var p = ValidPizzas().ElementAt(pizza);
-        if (json) {
-            var text = System.Text.Json.JsonSerializer.Serialize(p.Pizza, PizzaSerializer.Options);
-            File.WriteAllText(Path.Combine(DataDirectory, p.JsonFile), text);
-        }
+    // public static void WritePizzaFile(int pizza, bool json = true, bool summary = true) {
+    //     var p = ValidPizzas().ElementAt(pizza);
+    //     if (json) {
+    //         var text = System.Text.Json.JsonSerializer.Serialize(p.Pizza, PizzaSerializer.Options);
+    //         File.WriteAllText(Path.Combine(DataDirectory, p.JsonFile), text);
+    //     }
 
-        if (summary) {
-            File.WriteAllText(Path.Combine(DataDirectory, p.SummaryFile), p.Pizza.Summarize());
-        }
-    }
+    //     if (summary) {
+    //         File.WriteAllText(Path.Combine(DataDirectory, p.SummaryFile), p.Pizza.Summarize());
+    //     }
+    // }
 
     public static UnvalidatedPizza BadEnumPizza =
         new((Size)10, (Crust)10, new Cheese.Full((Amount)10), new((SauceType)10, (Amount)10),
@@ -154,10 +155,15 @@ public static class TestPizza {
 }
 
 public class DummyPizzaRepository : IPizzaRepo {
-    private readonly Dictionary<string, Pizza> _pizzas = TestPizza.ValidPizzas()
-        .ToDictionary(
-            p => Path.GetFileNameWithoutExtension(p.JsonFile),
-            p => p.Pizza.Validate());
+    private readonly Dictionary<string, UnvalidatedPizza> _pizzas = TestPizza.ValidPizzas().Zip(
+        new[] {
+            "defaultPizza",
+            nameof(Complex),
+            nameof(SmallThin),
+            nameof(SmallHandTossed),
+            nameof(XLPizza)
+        })
+        .ToDictionary(p => p.Second, p => p.First);
 
     private readonly Dictionary<string, OrderInfo> _orderInfos = TestOrder.ValidOrders()
         .ToDictionary(
@@ -169,7 +175,7 @@ public class DummyPizzaRepository : IPizzaRepo {
             p => Path.GetFileNameWithoutExtension(p.JsonFile),
             p => p.PaymentInfo.Validate());
 
-    public Pizza GetPizza(string name) => _pizzas[name];
+    public Pizza GetPizza(string name) => _pizzas[name].Validate();
     public OrderInfo GetOrderInfo(string name) => _orderInfos[name];
     public PaymentInfo GetPaymentInfo(string name) => _paymentInfos[name];
 }

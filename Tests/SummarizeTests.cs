@@ -1,11 +1,11 @@
 namespace Tests;
 
 public class SummarizeTests {
-    [Theory]
-    [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
-    public void SummarizeWorks(TestPizza.ValidData data) {
-        var actual = data.Pizza.Summarize();
-        var expected = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, data.SummaryFile));
+    [Fact]
+    public void SummarizeAllPizzas() {
+        var expected = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, "PizzaSummaries.txt"))
+            .Split("\n*\n");
+        var actual = TestPizza.ValidPizzas().Select(p => p.Summarize());
         Assert.Equal(expected, actual);
     }
 

@@ -1,0 +1,85 @@
+[
+  {
+    "Size": "Large",
+    "Crust": "HandTossed",
+    "Cheese": "=",
+    "Sauce": "=Tomato",
+    "Toppings": [
+      "A=Pepperoni"
+    ],
+    "Bake": "Normal",
+    "Cut": "Pie",
+    "Oregano": false,
+    "GarlicCrust": false,
+    "Quantity": 1
+  },
+  {
+    "Size": "Medium",
+    "Crust": "HandmadePan",
+    "Cheese": "-^",
+    "Sauce": "^HoneyBBQ",
+    "Toppings": [
+      "A=Pepperoni",
+      "L^Bacon",
+      "R-Mushrooms",
+      "A=Spinach"
+    ],
+    "Bake": "WellDone",
+    "Cut": "Square",
+    "Oregano": false,
+    "GarlicCrust": false,
+    "Quantity": 2
+  },
+  {
+    "Size": "Small",
+    "Crust": "Thin",
+    "Cheese": "_",
+    "Sauce": "=Tomato",
+    "Toppings": [
+      "A=Pepperoni",
+      "L-Ham",
+      "L-Beef",
+      "L-Salami",
+      "L-ItalianSausage",
+      "L-PremiumChicken",
+      "L-Bacon",
+      "L-PhillySteak",
+      "L-HotBuffaloSauce",
+      "L-JalapenoPeppers",
+      "R^Onions",
+      "R^BananaPeppers",
+      "R^DicedTomatoes",
+      "R^BlackOlives",
+      "R=Mushrooms"
+    ],
+    "Bake": "Normal",
+    "Cut": "Square",
+    "Oregano": true,
+    "GarlicCrust": false,
+    "Quantity": 1
+  },
+  {
+    "Size": "Small",
+    "Crust": "HandTossed",
+    "Cheese": "=",
+    "Sauce": "=Tomato",
+    "Toppings": [],
+    "Bake": "WellDone",
+    "Cut": "Pie",
+    "Oregano": false,
+    "GarlicCrust": true,
+    "Quantity": 1
+  },
+  {
+    "Size": "XL",
+    "Crust": "Brooklyn",
+    "Cheese": "-",
+    "Sauce": "=Tomato",
+    "Toppings": [],
+    "Bake": "Normal",
+    "Cut": "Uncut",
+    "Oregano": false,
+    "GarlicCrust": false,
+    "Quantity": 25
+  }
+]

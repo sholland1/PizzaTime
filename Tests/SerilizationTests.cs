@@ -3,59 +3,54 @@ using System.Text.Json;
 namespace Tests;
 
 public class SerializationTests {
-    [Theory]
-    [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
-    public void RoundTripA(TestPizza.ValidData p) {
-        var serialized = JsonSerializer.Serialize(p.Pizza, PizzaSerializer.Options);
-        var roundTrip = JsonSerializer.Deserialize<UnvalidatedPizza>(serialized, PizzaSerializer.Options);
-        Assert.Equal(p.Pizza, roundTrip);
+    [Fact]
+    public void RoundTripA() {
+        var pizzas = TestPizza.ValidPizzas();
+        var serialized = JsonSerializer.Serialize(pizzas, PizzaSerializer.Options);
+        var roundTrip = JsonSerializer.Deserialize<List<UnvalidatedPizza>>(serialized, PizzaSerializer.Options)!
+            .Select(p => p.Validate());
+        Assert.Equal(pizzas, roundTrip);
     }
 
-    [Theory]
-    [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
-    public void RoundTripB(TestPizza.ValidData p) {
-        var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, p.JsonFile));
-        var deserialized = JsonSerializer.Deserialize<UnvalidatedPizza>(json, PizzaSerializer.Options);
+    [Fact]
+    public void RoundTripB() {
+        var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, "ValidPizzas.json"));
+        var deserialized = JsonSerializer.Deserialize<List<UnvalidatedPizza>>(json, PizzaSerializer.Options)!
+            .Select(p => p.Validate());
         var roundTrip = JsonSerializer.Serialize(deserialized, PizzaSerializer.Options);
         Assert.Equal(json, roundTrip);
     }
 
-    [Theory]
-    [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
-    public void DeserializeWorks(TestPizza.ValidData p) {
-        var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, p.JsonFile));
-        var deserialized = JsonSerializer.Deserialize<UnvalidatedPizza>(json, PizzaSerializer.Options);
-        Assert.Equal(p.Pizza, deserialized);
+    [Fact]
+    public void DeserializeWorks() {
+        var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, "ValidPizzas.json"));
+        var deserialized = JsonSerializer.Deserialize<List<UnvalidatedPizza>>(json, PizzaSerializer.Options)!
+            .Select(p => p.Validate());
+        Assert.Equal(TestPizza.ValidPizzas(), deserialized);
     }
 
-    [Theory]
-    [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
-    public void SerializeWorks(TestPizza.ValidData p) {
-        var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, p.JsonFile));
-        var serialized = JsonSerializer.Serialize(p.Pizza, PizzaSerializer.Options);
+    [Fact]
+    public void SerializeWorks() {
+        var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, "ValidPizzas.json"));
+        var serialized = JsonSerializer.Serialize(TestPizza.ValidPizzas(), PizzaSerializer.Options);
         Assert.Equal(json, serialized);
     }
 
-    [Theory]
-    [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
-    public void DeserializeDoesntWorkForValidPizza(TestPizza.ValidData p) {
-        var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, p.JsonFile));
+    [Fact]
+    public void DeserializeDoesntWorkForValidPizza() {
+        var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, "ValidPizzas.json"));
         Assert.Throws<NotSupportedException>(() => {
-            var deserialized = JsonSerializer.Deserialize<Pizza>(json, PizzaSerializer.Options);
+            var deserialized = JsonSerializer.Deserialize<List<Pizza>>(json, PizzaSerializer.Options);
             Assert.Fail($"Should throw before here. {deserialized}");
         });
     }
 
-    [Theory]
-    [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
-    public void SerializeWorksForValidPizza(TestPizza.ValidData p) {
-        var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, p.JsonFile));
-        p.Pizza.Parse().Match(
-            vp => {
-                var serialized = JsonSerializer.Serialize(vp, PizzaSerializer.Options);
-                Assert.Equal(json, serialized);
-            },
-            es => Assert.Fail("Shouldn't fail."));
+    [Fact]
+    public void SerializeWorksForValidPizza() {
+        var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, "ValidPizzas.json"));
+        var ps = TestPizza.ValidPizzas().Select(p => p.Validate());
+        var serialized = JsonSerializer.Serialize(ps, PizzaSerializer.Options);
+        Assert.Equal(json, serialized);
     }
 
     [Theory]

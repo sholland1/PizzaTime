@@ -6,8 +6,8 @@ namespace Tests;
 public class ValidationTests {
     [Theory]
     [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
-    public void ValidationWorks(TestPizza.ValidData p) =>
-        p.Pizza.Parse().MapFailure(FailWithErrors);
+    public void ValidationWorks(UnvalidatedPizza p) =>
+        p.Parse().MapFailure(FailWithErrors);
 
     [Theory]
     [MemberData(nameof(TestPizza.GenerateInvalidPizzas), MemberType = typeof(TestPizza))]
