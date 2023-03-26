@@ -13,9 +13,66 @@ public static class PizzaSerializer {
             new ToppingJsonConverter(),
             new PaymentJsonConverter(),
             new ServiceMethodJsonConverter(),
-            new OrderTimingJsonCoverter()
+            new OrderTimingJsonCoverter(),
+            new OptionsJsonConverter(),
         }
     };
+}
+
+public class OptionsJsonConverter : JsonConverter<DominosApi.Options> {
+    public override DominosApi.Options? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions _) {
+        if (reader.TokenType != JsonTokenType.StartObject) {
+            throw new NotSupportedException($"Invalid Options! Token: {reader.TokenType}");
+        }
+
+        var options = new Dictionary<string, Dictionary<string, string>?>();
+        while (reader.Read()) {
+            if (reader.TokenType == JsonTokenType.EndObject) {
+                break;
+            }
+            if (reader.TokenType == JsonTokenType.PropertyName) {
+                var option = reader.GetString()!;
+                reader.Read();
+                if (reader.TokenType == JsonTokenType.Number) {
+                    options.Add(option, null);
+                }
+                else {
+                    var optionValues = new Dictionary<string, string>();
+                    while (reader.Read()) {
+                        if (reader.TokenType == JsonTokenType.PropertyName) {
+                            var optionValue = reader.GetString()!;
+                            reader.Read();
+                            optionValues.Add(optionValue, reader.GetString()!);
+                        }
+
+                        if (reader.TokenType == JsonTokenType.EndObject) {
+                            options.Add(option, optionValues);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return new(options);
+    }
+
+    public override void Write(Utf8JsonWriter writer, DominosApi.Options value, JsonSerializerOptions options) {
+        writer.WriteStartObject();
+        foreach (var (option, optionValues) in value) {
+            writer.WritePropertyName(option);
+            if (optionValues is null) {
+                writer.WriteNumberValue(0);
+            } else {
+                writer.WriteStartObject();
+                foreach (var (optionValue, optionValueName) in optionValues) {
+                    writer.WriteString(optionValue, optionValueName);
+                }
+                writer.WriteEndObject();
+            }
+        }
+        writer.WriteEndObject();
+    }
 }
 
 public class OrderTimingJsonCoverter : JsonConverter<OrderTiming> {

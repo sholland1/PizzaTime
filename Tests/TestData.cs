@@ -70,7 +70,6 @@ public static class TestPayment {
 public static class TestPizza {
     public const string DataDirectory = "../../../Data";
 
-    public record ValidData(UnvalidatedPizza Pizza, string JsonFile, string SummaryFile);
     public record InvalidData(string JsonFile, string[] InvalidProperties);
 
     public static IEnumerable<object[]> GenerateValidPizzas() => ValidPizzas().Select(p => new[] { p });
