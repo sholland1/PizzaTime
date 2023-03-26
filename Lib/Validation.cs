@@ -1,8 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
-using FluentValidation.Results;
 using static BuilderHelpers;
 
+//TODO: test invalid cheeseless Pan/Brooklyn pizza
+//TODO: test invalid marinaraless Pan pizza
 public class PizzaValidator : AbstractValidator<UnvalidatedPizza> {
     public PizzaValidator() {
         //Enums
@@ -57,6 +58,17 @@ public class PizzaValidator : AbstractValidator<UnvalidatedPizza> {
                 RuleFor(p => p.GarlicCrust).Equal(false);
                 RuleFor(p => p.Oregano).Equal(false);
             });
+        When(p => p.Crust.In(Crust.HandmadePan, Crust.Brooklyn),
+            () => {
+                RuleFor(p => p.Cheese).Must(c => c is not Cheese.None);
+                When(p => p.Cheese is Cheese.Sides,
+                    () => {
+                        RuleFor(p => ((Cheese.Sides)p.Cheese).Left).NotNull();
+                        RuleFor(p => ((Cheese.Sides)p.Cheese).Right).NotNull();
+                    });
+            });
+        When(p => p.Crust == Crust.HandmadePan && p.Sauce.HasValue,
+            () => RuleFor(p => p.Sauce!.Value.SauceType).NotEqual(SauceType.Marinara));
 
         //Other
         RuleFor(p => p.Toppings)

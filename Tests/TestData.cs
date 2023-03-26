@@ -108,8 +108,8 @@ public static class TestPizza {
 
     public static IPizzaBuilder Complex =
         Build.Medium.Pan()
-            .SetCheese(None, Extra)
-            .SetSauce(Marinara, Extra)
+            .SetCheese(Light, Extra)
+            .SetSauce(HoneyBBQ, Extra)
             .AddTopping(Pepperoni)
             .AddTopping(Bacon, Left, Extra)
             .AddTopping(Mushrooms, Right, Light)

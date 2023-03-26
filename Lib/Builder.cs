@@ -1,3 +1,4 @@
+//TODO: Disallow cheeseless Pan/Brooklyn
 public class PizzaBuilder<TBuilder> : IPizzaBuilder
     where TBuilder : PizzaBuilder<TBuilder> {
     protected Size _size;

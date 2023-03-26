@@ -71,8 +71,8 @@ Constraints:
 
   HandTossed Instructions(Cut, Bake, GarlicCrust)
   Thin Instructions(Cut, Oregano)
-  Pan Instructions(Cut, Bake)
-  Brooklyn Instructions(Cut, Bake)
+  Pan Instructions(MustHaveCheese, NoMarinara, Cut, Bake)
+  Brooklyn Instructions(MustHaveCheese, Cut, Bake)
   GlutenFree Instructions(Cut, Bake)
 
   10 Toppings per side (Light,Normal=1, Extra=2)

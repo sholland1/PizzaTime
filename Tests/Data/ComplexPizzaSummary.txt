@@ -1,6 +1,6 @@
 Medium HandmadePan Pizza x2
-  with (None|Extra) cheese
-  with Extra Marinara sauce
+  with (Light|Extra) cheese
+  with Extra HoneyBBQ sauce
   well done
   square cut
 Toppings:
