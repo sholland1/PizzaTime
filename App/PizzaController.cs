@@ -6,12 +6,12 @@ public class PizzaController {
     public PizzaController(IPizzaRepo repo, IPizzaApi api, IConsoleUI consoleUI) =>
         (_repo, _api, _consoleUI) = (repo, api, consoleUI);
 
-    public void FastPizza() {
+    public async Task FastPizza() {
         var userPizza = _repo.GetPizza("defaultPizza");
         var userOrder = _repo.GetOrderInfo("defaultOrderInfo");
         var userPayment = _repo.GetPaymentInfo("defaultPaymentInfo");
 
-        var cartResult = _api.AddPizzaToCart(userPizza);
+        var cartResult = await _api.AddPizzaToCart(userPizza);
         if (!cartResult.Success) {
             _consoleUI.PrintLine($"Pizza was not added to cart: {cartResult.Message}");
             return;
@@ -19,7 +19,7 @@ public class PizzaController {
 
         _consoleUI.PrintLine($"Pizza was added to cart:\n{cartResult.Summarize()}\n");
 
-        var priceResult = _api.CheckCartTotal();
+        var priceResult = await _api.CheckCartTotal();
         if (!priceResult.Success) {
             _consoleUI.PrintLine($"Failed to check cart price:\n{priceResult.Message}");
             return;
@@ -37,7 +37,7 @@ public class PizzaController {
 
         _consoleUI.PrintLine("Ordering pizza...");
 
-        var orderResult = _api.OrderPizza(userOrder, userPayment);
+        var orderResult = await _api.OrderPizza(userOrder, userPayment);
         if (!orderResult.Success) {
             _consoleUI.PrintLine($"Failed to place order: {orderResult.Message}");
             return;

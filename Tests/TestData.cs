@@ -198,31 +198,31 @@ public class DummyPizzaApi : IPizzaApi {
     public DummyPizzaApi(bool cartFail = false, bool priceFail = false, bool orderFail = false) =>
         (_cartFail, _priceFail, _orderFail) = (cartFail, priceFail, orderFail);
 
-    public ApiResult AddPizzaToCart(Pizza userPizza) {
+    public Task<ApiResult> AddPizzaToCart(Pizza userPizza) {
         ApiResult result = new(!_cartFail,
             _cartFail
             ? "Pizza was not added to cart."
             : "Pizza added to cart.");
         Calls.Add(new(nameof(AddPizzaToCart), userPizza, result));
-        return result;
+        return Task.FromResult(result);
     }
 
-    public ApiResult CheckCartTotal() {
+    public Task<ApiResult> CheckCartTotal() {
         ApiResult result = new(!_priceFail,
             _priceFail
             ? "Failed to check cart price."
             : $"Cart price is ${Calls.Count(c => c.Method == nameof(AddPizzaToCart))*8.25:F2}.");
         Calls.Add(new(nameof(CheckCartTotal), "", result));
-        return result;
+        return Task.FromResult(result);
     }
 
-    public ApiResult OrderPizza(OrderInfo userOrder, PaymentInfo userPayment) {
+    public Task<ApiResult> OrderPizza(OrderInfo userOrder, PaymentInfo userPayment) {
         ApiResult result = new(!_orderFail,
             _orderFail
             ? "Failed to place order."
             : "Order was placed.");
         Calls.Add(new(nameof(OrderPizza), (userOrder, userPayment), result));
-        return result;
+        return Task.FromResult(result);
     }
 }
 

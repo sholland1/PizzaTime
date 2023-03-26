@@ -2,13 +2,13 @@ public class FastPizzaTests {
     [Theory]
     [InlineData("")]
     [InlineData("y")]
-    public void HappyPathTest(string userChoice) {
+    public async Task HappyPathTest(string userChoice) {
         var consoleUI = new DummyConsoleUI(userChoice);
         var pizzaRepo = new DummyPizzaRepository();
         var pizzaApi = new DummyPizzaApi();
         var controller = new PizzaController(pizzaRepo, pizzaApi, consoleUI);
 
-        controller.FastPizza();
+        await controller.FastPizza();
 
         Assert.Equal($"""
             Pizza was added to cart:
@@ -28,13 +28,13 @@ public class FastPizzaTests {
     }
 
     [Fact]
-    public void CancelOrderTest() {
+    public async Task CancelOrderTest() {
         var consoleUI = new DummyConsoleUI("n");
         var pizzaRepo = new DummyPizzaRepository();
         var pizzaApi = new DummyPizzaApi();
         var controller = new PizzaController(pizzaRepo, pizzaApi, consoleUI);
 
-        controller.FastPizza();
+        await controller.FastPizza();
 
         Assert.Equal($"""
             Pizza was added to cart:
