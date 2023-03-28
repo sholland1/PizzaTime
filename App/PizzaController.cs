@@ -17,9 +17,9 @@ public class PizzaController {
             return;
         }
 
-        _consoleUI.PrintLine($"Pizza was added to cart:\n{cartResult.Summarize()}\n");
+        _consoleUI.PrintLine($"Pizza was added to cart.\n{cartResult.Summarize()}\n");
 
-        var priceResult = await _api.CheckCartTotal();
+        var priceResult = await _api.GetCartSummary();
         if (!priceResult.Success) {
             _consoleUI.PrintLine($"Failed to check cart price:\n{priceResult.Message}");
             return;

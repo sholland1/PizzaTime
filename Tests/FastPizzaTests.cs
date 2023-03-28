@@ -11,7 +11,7 @@ public class FastPizzaTests {
         await controller.FastPizza();
 
         Assert.Equal($"""
-            Pizza was added to cart:
+            Pizza was added to cart.
             {pizzaApi.Calls[0].Result.Summarize()}
  
             Cart summary:
@@ -37,7 +37,7 @@ public class FastPizzaTests {
         await controller.FastPizza();
 
         Assert.Equal($"""
-            Pizza was added to cart:
+            Pizza was added to cart.
             {pizzaApi.Calls[0].Result.Summarize()}
  
             Cart summary:

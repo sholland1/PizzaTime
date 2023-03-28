@@ -5,7 +5,7 @@ using System.Text.Json;
 
 public interface IPizzaApi {
     Task<ApiResult> AddPizzaToCart(Pizza userPizza);
-    Task<ApiResult> CheckCartTotal();
+    Task<ApiResult> GetCartSummary();
     Task<ApiResult> OrderPizza(OrderInfo userOrder, PaymentInfo userPayment);
 }
 
@@ -40,13 +40,42 @@ public class DominosApi : IPizzaApi {
         _orderID = result.Order.OrderID;
         _products = result.Order.Products;
 
-        return new ApiResult(true, $"Pizza added to cart. Product Count: {_products.Count} Order Number: {result.Order.OrderID}");
+        return new(true, $"  Product Count: {_products.Count}\n  Order Number: {result.Order.OrderID}");
     }
 
-    public Task<ApiResult> CheckCartTotal() =>
-        Task.FromResult(_products.Count == 0
-        ? new ApiResult(true, "Cart is empty.")
-        : new ApiResult(true, "Cart price is $9.99."));
+    public async Task<ApiResult> GetCartSummary() {
+        if (_products.Count == 0 || _orderID == null) {
+            return new(false, "Cart is empty.");
+        }
+
+        ValidateRequest request = new() {
+            Order = new() {
+                OrderID = _orderID ?? "",
+                Products = _products,
+                ServiceMethod = "Carryout",
+                StoreID = _config.StoreID
+            }
+        };
+        var requestJson = JsonSerializer.Serialize(request, PizzaSerializer.Options);
+
+        using var client = new HttpClient();
+        var response = await client.PostAsync(
+            "https://order.dominos.com/power/price-order",
+            new StringContent(requestJson, Encoding.UTF8, "application/json"));
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<PriceResponse>(content)!;
+
+        if (result.Order.OrderID != _orderID) {
+            return new(false, "Order ID mismatch.");
+        }
+        if (result.Order.Products.Count != _products.Count) {
+            return new(false, "Product count mismatch.");
+        }
+
+        return new(true, $"  Price: ${result.Order.Amounts.Payment}\n  Estimated Wait: {result.Order.EstimatedWaitMinutes} minutes");
+    }
 
     public Task<ApiResult> OrderPizza(OrderInfo userOrder, PaymentInfo userPayment) =>
         Task.FromResult(_products.Count == 0
@@ -61,6 +90,27 @@ public class DominosApi : IPizzaApi {
     private class ValidateResponse {
         public Order Order { get; set; } = new();
     }
+
+    private class PriceRequest {
+        public Order Order { get; set; } = new();
+    }
+    private class PriceResponse {
+        public PricedOrder Order { get; set; } = new();
+    }
+
+    private class PricedOrder {
+        public string OrderID { get; set; } = "";
+        public List<PricedProduct> Products { get; set; } = new();
+
+        public Amounts Amounts { get; set; } = new();
+        public string EstimatedWaitMinutes { get; set; } = "";
+    }
+
+    public class Amounts {
+        public decimal Payment { get; set; } = 0;
+    }
+
+    public class PricedProduct { }
 
     private class Order {
         public string OrderID { get; set; } = "";
@@ -230,12 +280,12 @@ public class DummyPizzaApi2 : IPizzaApi {
         return Task.FromResult(result);
     }
 
-    public Task<ApiResult> CheckCartTotal() {
+    public Task<ApiResult> GetCartSummary() {
         ApiResult result = new(!_priceFail,
             _priceFail
             ? "Failed to check cart price."
             : $"Cart price is ${Calls.Count(c => c.Method == nameof(AddPizzaToCart))*8.25:F2}.");
-        Calls.Add(new(nameof(CheckCartTotal), "", result));
+        Calls.Add(new(nameof(GetCartSummary), "", result));
         return Task.FromResult(result);
     }
 

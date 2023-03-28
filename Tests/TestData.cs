@@ -212,12 +212,12 @@ public class DummyPizzaApi : IPizzaApi {
         return Task.FromResult(result);
     }
 
-    public Task<ApiResult> CheckCartTotal() {
+    public Task<ApiResult> GetCartSummary() {
         ApiResult result = new(!_priceFail,
             _priceFail
             ? "Failed to check cart price."
             : $"Cart price is ${Calls.Count(c => c.Method == nameof(AddPizzaToCart))*8.25:F2}.");
-        Calls.Add(new(nameof(CheckCartTotal), "", result));
+        Calls.Add(new(nameof(GetCartSummary), "", result));
         return Task.FromResult(result);
     }
 
