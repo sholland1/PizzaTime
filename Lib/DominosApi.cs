@@ -3,35 +3,31 @@ using System.Text;
 using System.Text.Json;
 
 public class DominosApi : IOrderApi {
-    public async Task<ValidateResponse> ValidateOrder(ValidateRequest request) {
-        var requestJson = JsonSerializer.Serialize(request, PizzaSerializer.Options);
+    public async Task<ValidateResponse> ValidateOrder(ValidateRequest request) =>
+        await PostAsync<ValidateRequest, ValidateResponse>(
+            "/power/validate-order", request);
 
-        using var client = new HttpClient();
-        var response = await client.PostAsync(
-            "https://order.dominos.com/power/validate-order",
-            new StringContent(requestJson, Encoding.UTF8, "application/json"));
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<ValidateResponse>(content)!;
-    }
-
-    public async Task<PriceResponse> PriceOrder(PriceRequest request) {
-        var requestJson = JsonSerializer.Serialize(request, PizzaSerializer.Options);
-
-        using var client = new HttpClient();
-        var response = await client.PostAsync(
-            "https://order.dominos.com/power/price-order",
-            new StringContent(requestJson, Encoding.UTF8, "application/json"));
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<PriceResponse>(content)!;
-    }
+    public async Task<PriceResponse> PriceOrder(PriceRequest request) =>
+        await PostAsync<PriceRequest, PriceResponse>(
+            "/power/price-order", request);
 
     // public Task<OrderResponse> PlaceOrder(OrderRequest request) {
     //     throw new NotImplementedException();
     // }
+
+    private async Task<TResponse> PostAsync<TRequest, TResponse>(string url, TRequest request) {
+        var requestJson = JsonSerializer.Serialize(request);
+
+        using HttpClient client = new() {
+            BaseAddress = new Uri("https://order.dominos.com"),
+        };
+        var response = await client.PostAsync(url,
+            new StringContent(requestJson, Encoding.UTF8, "application/json"));
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<TResponse>(content)!;
+    }
 }
 
 public interface IOrderApi {
