@@ -11,13 +11,10 @@ public class ValidationTests {
 
     [Theory]
     [MemberData(nameof(TestPizza.GenerateInvalidPizzas), MemberType = typeof(TestPizza))]
-    public void InvalidationWorks(TestPizza.InvalidData p) {
-        var json = File.ReadAllText(Path.Combine(TestPizza.DataDirectory, p.JsonFile));
-        var invalidPizza = JsonSerializer.Deserialize<UnvalidatedPizza>(json, PizzaSerializer.Options)!;
-        invalidPizza.Parse().Match(
+    public void InvalidationWorks(TestPizza.InvalidData p) =>
+        p.Pizza.Parse().Match(
             vp => Assert.Fail("Shouldn't be valid."),
             es => AssertSameInvalidProps(p.InvalidProperties, es));
-    }
 
     [Fact]
     public void InvalidationWorks2() {

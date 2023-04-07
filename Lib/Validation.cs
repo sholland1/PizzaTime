@@ -2,8 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using static BuilderHelpers;
 
-//TODO: test invalid cheeseless Pan/Brooklyn pizza
-//TODO: test invalid marinaraless Pan pizza
 public class PizzaValidator : AbstractValidator<UnvalidatedPizza> {
     public PizzaValidator() {
         //Enums

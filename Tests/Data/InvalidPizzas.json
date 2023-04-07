@@ -1,0 +1,103 @@
+[
+  {
+    "Pizza": {
+      "Size": "Large",
+      "Crust": "GlutenFree",
+      "Cheese": "=",
+      "Sauce": "=Tomato",
+      "Toppings": [
+        "A=Pepperoni",
+        "L-Ham",
+        "L-Beef",
+        "L-Salami",
+        "L-ItalianSausage",
+  
+        "L-PremiumChicken",
+        "L-Bacon",
+        "L-PhillySteak",
+        "L-HotBuffaloSauce",
+        "L-JalapenoPeppers",
+  
+        "R^Onions",
+        "R^BananaPeppers",
+        "R^DicedTomatoes",
+        "R^BlackOlives",
+        "R^Mushrooms"
+      ],
+      "Bake": "WellDone",
+      "Cut": "Pie",
+      "Oregano": true,
+      "GarlicCrust": true,
+      "Quantity": 0
+    },
+    "InvalidProperties": [ "Crust", "GarlicCrust", "Oregano", "Quantity", "Toppings" ]
+  },
+  {
+    "Pizza": {
+      "Size": "XL",
+      "Crust": "HandTossed",
+      "Cheese": "^^",
+      "Sauce": "=Tomato",
+      "Toppings": [
+        "A=Pepperoni",
+        "A=Pepperoni"
+      ],
+      "Bake": "WellDone",
+      "Cut": "Square",
+      "Oregano": true,
+      "GarlicCrust": true,
+      "Quantity": -1
+    },
+    "InvalidProperties": [ "Crust", "Oregano", "Quantity", "Toppings" ]
+  },
+  {
+    "Pizza": {
+      "Size": "XL",
+      "Crust": "Thin",
+      "Cheese": "=",
+      "Sauce": "=Tomato",
+      "Toppings": [
+        "A=Pepperoni",
+        "L-Pepperoni"
+      ],
+      "Bake": "WellDone",
+      "Cut": "Uncut",
+      "Oregano": true,
+      "GarlicCrust": true,
+      "Quantity": 26
+    },
+    "InvalidProperties": [ "Bake", "Crust", "GarlicCrust", "Quantity", "Toppings" ]
+  },
+  {
+    "Pizza": {
+      "Size": "XL",
+      "Crust": "Brooklyn",
+      "Cheese": "_",
+      "Sauce": "=Tomato",
+      "Toppings": [
+        "A=Pepperoni"
+      ],
+      "Bake": "Normal",
+      "Cut": "Pie",
+      "Oregano": false,
+      "GarlicCrust": false,
+      "Quantity": 1
+    },
+    "InvalidProperties": [ "Cheese" ]
+  },
+  {
+    "Pizza": {
+      "Size": "Medium",
+      "Crust": "HandmadePan",
+      "Cheese": "_",
+      "Sauce": "=Marinara",
+      "Toppings": [],
+      "Bake": "Normal",
+      "Cut": "Pie",
+      "Oregano": false,
+      "GarlicCrust": false,
+      "Quantity": 1
+    },
+    "InvalidProperties": [ "Cheese", "Sauce.Value.SauceType" ]
+  }
+]

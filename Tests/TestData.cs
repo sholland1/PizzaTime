@@ -1,3 +1,4 @@
+using System.Text.Json;
 using static BuilderHelpers;
 using static TestPizza;
 
@@ -70,7 +71,7 @@ public static class TestPayment {
 public static class TestPizza {
     public const string DataDirectory = "../../../Data";
 
-    public record InvalidData(string JsonFile, string[] InvalidProperties);
+    public record InvalidData(UnvalidatedPizza Pizza, string[] InvalidProperties);
 
     public static IEnumerable<object[]> GenerateValidPizzas() => ValidPizzas().Select(p => new[] { p });
     public static IEnumerable<object[]> GenerateInvalidPizzas() => InvalidPizzas().Select(p => new[] { p });
@@ -83,11 +84,10 @@ public static class TestPizza {
         yield return XLPizza.Build(25);
     }
 
-    public static IEnumerable<InvalidData> InvalidPizzas() {
-        yield return new("InvalidPizza0.json", new[] { "Crust", "GarlicCrust", "Oregano", "Quantity", "Toppings" });
-        yield return new("InvalidPizza1.json", new[] { "Crust", "Oregano", "Quantity", "Toppings" });
-        yield return new("InvalidPizza2.json", new[] { "Bake", "Crust", "GarlicCrust", "Quantity", "Toppings" });
-    }
+    public static IEnumerable<InvalidData> InvalidPizzas() =>
+        JsonSerializer.Deserialize<IEnumerable<InvalidData>>(
+            File.ReadAllText(Path.Combine(DataDirectory, "InvalidPizzas.json")),
+            PizzaSerializer.Options)!;
 
     // public static void WritePizzaFile(int pizza, bool json = true, bool summary = true) {
     //     var p = ValidPizzas().ElementAt(pizza);
