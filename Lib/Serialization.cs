@@ -19,8 +19,8 @@ public static class PizzaSerializer {
     };
 }
 
-public class OptionsJsonConverter : JsonConverter<DominosApi.Options> {
-    public override DominosApi.Options? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions _) {
+public class OptionsJsonConverter : JsonConverter<DominosCart.Options> {
+    public override DominosCart.Options? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions _) {
         if (reader.TokenType != JsonTokenType.StartObject) {
             throw new NotSupportedException($"Invalid Options! Token: {reader.TokenType}");
         }
@@ -57,7 +57,7 @@ public class OptionsJsonConverter : JsonConverter<DominosApi.Options> {
         return new(options);
     }
 
-    public override void Write(Utf8JsonWriter writer, DominosApi.Options value, JsonSerializerOptions options) {
+    public override void Write(Utf8JsonWriter writer, DominosCart.Options value, JsonSerializerOptions options) {
         writer.WriteStartObject();
         foreach (var (option, optionValues) in value) {
             writer.WritePropertyName(option);

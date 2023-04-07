@@ -193,42 +193,42 @@ public class DummyConsoleUI : IConsoleUI {
     public override string ToString() => string.Join("", PrintedMessages);
 }
 
-public class DummyPizzaApi : IPizzaApi {
+public class DummyPizzaCart : ICart {
     private readonly bool _cartFail;
     private readonly bool _priceFail;
     private readonly bool _orderFail;
 
-    public List<ApiCall> Calls = new();
+    public List<MethodCall> Calls = new();
 
-    public DummyPizzaApi(bool cartFail = false, bool priceFail = false, bool orderFail = false) =>
+    public DummyPizzaCart(bool cartFail = false, bool priceFail = false, bool orderFail = false) =>
         (_cartFail, _priceFail, _orderFail) = (cartFail, priceFail, orderFail);
 
-    public Task<ApiResult> AddPizzaToCart(Pizza userPizza) {
-        ApiResult result = new(!_cartFail,
+    public Task<CartResult> AddPizza(Pizza userPizza) {
+        CartResult result = new(!_cartFail,
             _cartFail
             ? "Pizza was not added to cart."
             : "Pizza added to cart.");
-        Calls.Add(new(nameof(AddPizzaToCart), userPizza, result));
+        Calls.Add(new(nameof(AddPizza), userPizza, result));
         return Task.FromResult(result);
     }
 
-    public Task<ApiResult> GetCartSummary() {
-        ApiResult result = new(!_priceFail,
+    public Task<CartResult> GetSummary() {
+        CartResult result = new(!_priceFail,
             _priceFail
             ? "Failed to check cart price."
-            : $"Cart price is ${Calls.Count(c => c.Method == nameof(AddPizzaToCart))*8.25:F2}.");
-        Calls.Add(new(nameof(GetCartSummary), "", result));
+            : $"Cart price is ${Calls.Count(c => c.Method == nameof(AddPizza))*8.25:F2}.");
+        Calls.Add(new(nameof(GetSummary), "", result));
         return Task.FromResult(result);
     }
 
-    public Task<ApiResult> OrderPizza(OrderInfo userOrder, PaymentInfo userPayment) {
-        ApiResult result = new(!_orderFail,
+    public Task<CartResult> PlaceOrder(OrderInfo userOrder, PaymentInfo userPayment) {
+        CartResult result = new(!_orderFail,
             _orderFail
             ? "Failed to place order."
             : "Order was placed.");
-        Calls.Add(new(nameof(OrderPizza), (userOrder, userPayment), result));
+        Calls.Add(new(nameof(PlaceOrder), (userOrder, userPayment), result));
         return Task.FromResult(result);
     }
 }
 
-public record ApiCall(string Method, object Body, ApiResult Result);
+public record MethodCall(string Method, object Body, CartResult Result);

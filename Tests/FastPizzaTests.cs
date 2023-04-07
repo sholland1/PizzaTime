@@ -5,7 +5,7 @@ public class FastPizzaTests {
     public async Task HappyPathTest(string userChoice) {
         var consoleUI = new DummyConsoleUI(userChoice);
         var pizzaRepo = new DummyPizzaRepository();
-        var pizzaApi = new DummyPizzaApi();
+        var pizzaApi = new DummyPizzaCart();
         var controller = new PizzaController(pizzaRepo, pizzaApi, consoleUI);
 
         await controller.FastPizza();
@@ -31,7 +31,7 @@ public class FastPizzaTests {
     public async Task CancelOrderTest() {
         var consoleUI = new DummyConsoleUI("n");
         var pizzaRepo = new DummyPizzaRepository();
-        var pizzaApi = new DummyPizzaApi();
+        var pizzaApi = new DummyPizzaCart();
         var controller = new PizzaController(pizzaRepo, pizzaApi, consoleUI);
 
         await controller.FastPizza();

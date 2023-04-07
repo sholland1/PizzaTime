@@ -3,21 +3,21 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json;
 
-public interface IPizzaApi {
-    Task<ApiResult> AddPizzaToCart(Pizza userPizza);
-    Task<ApiResult> GetCartSummary();
-    Task<ApiResult> OrderPizza(OrderInfo userOrder, PaymentInfo userPayment);
+public interface ICart {
+    Task<CartResult> AddPizza(Pizza userPizza);
+    Task<CartResult> GetSummary();
+    Task<CartResult> PlaceOrder(OrderInfo userOrder, PaymentInfo userPayment);
 }
 
-public class DominosApi : IPizzaApi {
+public class DominosCart : ICart {
     private readonly DominosConfig _config;
 
     private List<Product> _products = new();
     private string? _orderID = null;
 
-    public DominosApi(DominosConfig config) => _config = config;
+    public DominosCart(DominosConfig config) => _config = config;
 
-    public async Task<ApiResult> AddPizzaToCart(Pizza userPizza) {
+    public async Task<CartResult> AddPizza(Pizza userPizza) {
         ValidateRequest request = new() {
             Order = new() {
                 OrderID = _orderID ?? "",
@@ -43,7 +43,7 @@ public class DominosApi : IPizzaApi {
         return new(true, $"  Product Count: {_products.Count}\n  Order Number: {result.Order.OrderID}");
     }
 
-    public async Task<ApiResult> GetCartSummary() {
+    public async Task<CartResult> GetSummary() {
         if (_products.Count == 0 || _orderID == null) {
             return new(false, "Cart is empty.");
         }
@@ -77,10 +77,10 @@ public class DominosApi : IPizzaApi {
         return new(true, $"  Price: ${result.Order.Amounts.Payment}\n  Estimated Wait: {result.Order.EstimatedWaitMinutes} minutes");
     }
 
-    public Task<ApiResult> OrderPizza(OrderInfo userOrder, PaymentInfo userPayment) =>
-        Task.FromResult(_products.Count == 0
-        ? new ApiResult(false, "No pizza!")
-        : new ApiResult(true, "Order was placed."));
+    public Task<CartResult> PlaceOrder(OrderInfo userOrder, PaymentInfo userPayment) =>
+        Task.FromResult<CartResult>(_products.Count == 0
+        ? new(false, "No pizza!")
+        : new(true, "Order was placed."));
 
     public void SetOrderID(string orderID) => _orderID = orderID;
 
@@ -140,7 +140,7 @@ public class DominosApi : IPizzaApi {
 }
 
 public static class ApiHelpers {
-    public static DominosApi.Product ToProduct(this Pizza pizza, int id) => new(
+    public static DominosCart.Product ToProduct(this Pizza pizza, int id) => new(
         ID: id,
         Code: GetCode(pizza.Size, pizza.Crust),
         Qty: pizza.Quantity,
@@ -261,51 +261,51 @@ public class DominosConfig {
     public int StoreID { get; set; }
 }
 
-public class DummyPizzaApi2 : IPizzaApi {
+public class DummyPizzaCart2 : ICart {
     private readonly bool _cartFail;
     private readonly bool _priceFail;
     private readonly bool _orderFail;
 
-    public List<ApiCall2> Calls = new();
+    public List<MethodCall2> Calls = new();
 
-    public DummyPizzaApi2(bool cartFail = false, bool priceFail = false, bool orderFail = false) =>
+    public DummyPizzaCart2(bool cartFail = false, bool priceFail = false, bool orderFail = false) =>
         (_cartFail, _priceFail, _orderFail) = (cartFail, priceFail, orderFail);
 
-    public Task<ApiResult> AddPizzaToCart(Pizza userPizza) {
-        ApiResult result = new(!_cartFail,
+    public Task<CartResult> AddPizza(Pizza userPizza) {
+        CartResult result = new(!_cartFail,
             _cartFail
             ? "Pizza was not added to cart."
             : "Pizza added to cart.");
-        Calls.Add(new(nameof(AddPizzaToCart), userPizza, result));
+        Calls.Add(new(nameof(AddPizza), userPizza, result));
         return Task.FromResult(result);
     }
 
-    public Task<ApiResult> GetCartSummary() {
-        ApiResult result = new(!_priceFail,
+    public Task<CartResult> GetSummary() {
+        CartResult result = new(!_priceFail,
             _priceFail
             ? "Failed to check cart price."
-            : $"Cart price is ${Calls.Count(c => c.Method == nameof(AddPizzaToCart))*8.25:F2}.");
-        Calls.Add(new(nameof(GetCartSummary), "", result));
+            : $"Cart price is ${Calls.Count(c => c.Method == nameof(AddPizza))*8.25:F2}.");
+        Calls.Add(new(nameof(GetSummary), "", result));
         return Task.FromResult(result);
     }
 
-    public Task<ApiResult> OrderPizza(OrderInfo userOrder, PaymentInfo userPayment) {
-        ApiResult result = new(!_orderFail,
+    public Task<CartResult> PlaceOrder(OrderInfo userOrder, PaymentInfo userPayment) {
+        CartResult result = new(!_orderFail,
             _orderFail
             ? "Failed to place order."
             : "Order was placed.");
-        Calls.Add(new(nameof(OrderPizza), (userOrder, userPayment), result));
+        Calls.Add(new(nameof(PlaceOrder), (userOrder, userPayment), result));
         return Task.FromResult(result);
     }
 }
 
-public record ApiCall2(string Method, object Body, ApiResult Result);
+public record MethodCall2(string Method, object Body, CartResult Result);
 
-public class ApiResult {
+public class CartResult {
     public bool Success { get; }
     public string Message { get; }
 
-    public ApiResult(bool success, string message) {
+    public CartResult(bool success, string message) {
         Success = success;
         Message = message;
     }
