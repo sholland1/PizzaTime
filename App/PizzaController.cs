@@ -27,10 +27,10 @@ public class PizzaController {
 
         _consoleUI.PrintLine($"Cart summary:\n{priceResult.Summarize()}\n");
 
-        var answer = _consoleUI.Prompt("Confirm order? [Y/n]: ") ?? "y";
+        var answer = _consoleUI.Prompt("Confirm order? [Y/n]: ");
         _consoleUI.PrintLine();
 
-        if (IsAffirmative(answer)) {
+        if (!IsAffirmative(answer)) {
             _consoleUI.PrintLine("Order cancelled.");
             return;
         }
@@ -47,5 +47,5 @@ public class PizzaController {
         _consoleUI.PrintLine("Done.");
     }
 
-    private static bool IsAffirmative(string answer) => answer.ToLower() != "y";
+    private static bool IsAffirmative(string? answer) => (answer?.ToLower() ?? "y") == "y";
 }

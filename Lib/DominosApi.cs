@@ -19,7 +19,7 @@ public class DominosApi : IOrderApi {
         var requestJson = JsonSerializer.Serialize(request);
 
         using HttpClient client = new() {
-            BaseAddress = new Uri("https://order.dominos.com"),
+            BaseAddress = new("https://order.dominos.com"),
         };
         var response = await client.PostAsync(url,
             new StringContent(requestJson, Encoding.UTF8, "application/json"));
