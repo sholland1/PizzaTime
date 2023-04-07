@@ -1,7 +1,4 @@
 using System.Diagnostics;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Text.Json;
 
 public interface ICart {
     Task<CartResult> AddPizza(Pizza userPizza);
@@ -11,11 +8,12 @@ public interface ICart {
 
 public class DominosCart : ICart {
     private readonly DominosConfig _config;
+    private readonly IOrderApi _api;
 
     private List<Product> _products = new();
     private string? _orderID = null;
 
-    public DominosCart(DominosConfig config) => _config = config;
+    public DominosCart(DominosConfig config, IOrderApi api) => (_config, _api) = (config, api);
 
     public async Task<CartResult> AddPizza(Pizza userPizza) {
         ValidateRequest request = new() {
@@ -26,16 +24,7 @@ public class DominosCart : ICart {
                 StoreID = _config.StoreID
             }
         };
-        var requestJson = JsonSerializer.Serialize(request, PizzaSerializer.Options);
-
-        using var client = new HttpClient();
-        var response = await client.PostAsync(
-            "https://order.dominos.com/power/validate-order",
-            new StringContent(requestJson, Encoding.UTF8, "application/json"));
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<ValidateResponse>(content)!;
+        var result = await _api.ValidateOrder(request);
 
         _orderID = result.Order.OrderID;
         _products = result.Order.Products;
@@ -48,7 +37,7 @@ public class DominosCart : ICart {
             return new(false, "Cart is empty.");
         }
 
-        ValidateRequest request = new() {
+        PriceRequest request = new() {
             Order = new() {
                 OrderID = _orderID ?? "",
                 Products = _products,
@@ -56,16 +45,7 @@ public class DominosCart : ICart {
                 StoreID = _config.StoreID
             }
         };
-        var requestJson = JsonSerializer.Serialize(request, PizzaSerializer.Options);
-
-        using var client = new HttpClient();
-        var response = await client.PostAsync(
-            "https://order.dominos.com/power/price-order",
-            new StringContent(requestJson, Encoding.UTF8, "application/json"));
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<PriceResponse>(content)!;
+        var result = await _api.PriceOrder(request);
 
         if (result.Order.OrderID != _orderID) {
             return new(false, "Order ID mismatch.");
@@ -82,65 +62,10 @@ public class DominosCart : ICart {
         ? new(false, "No pizza!")
         : new(true, "Order was placed."));
 
-    public void SetOrderID(string orderID) => _orderID = orderID;
-
-    private class ValidateRequest {
-        public Order Order { get; set; } = new();
-    }
-    private class ValidateResponse {
-        public Order Order { get; set; } = new();
-    }
-
-    private class PriceRequest {
-        public Order Order { get; set; } = new();
-    }
-    private class PriceResponse {
-        public PricedOrder Order { get; set; } = new();
-    }
-
-    private class PricedOrder {
-        public string OrderID { get; set; } = "";
-        public List<PricedProduct> Products { get; set; } = new();
-
-        public Amounts Amounts { get; set; } = new();
-        public string EstimatedWaitMinutes { get; set; } = "";
-    }
-
-    public class Amounts {
-        public decimal Payment { get; set; } = 0;
-    }
-
-    public class PricedProduct { }
-
-    private class Order {
-        public string OrderID { get; set; } = "";
-        public List<Product> Products { get; set; } = new();
-        public string ServiceMethod { get; set; } = "";
-        public int StoreID { get; set; } = 0;
-    }
-
-    public class Options : Dictionary<string, Dictionary<string, string>?> {
-        public Options() : base() { }
-        public Options(Dictionary<string, Dictionary<string, string>?> ts) : base(ts) { }
-
-        public override bool Equals(object? obj) {
-            if (obj is not Dictionary<string, Dictionary<string, string>> o) return false;
-            if (this.Count != o.Count) return false;
-            if (this.Keys.Except(o.Keys).Any()) return false;
-            return true;
-        }
-
-        public override int GetHashCode() => base.GetHashCode();
-        public override void GetObjectData(SerializationInfo info, StreamingContext context) => base.GetObjectData(info, context);
-        public override void OnDeserialization(object? sender) => base.OnDeserialization(sender);
-        public override string? ToString() => base.ToString();
-    }
-
-    public record Product(int ID, string Code, int Qty, string? Instructions, Options Options);
 }
 
 public static class ApiHelpers {
-    public static DominosCart.Product ToProduct(this Pizza pizza, int id) => new(
+    public static Product ToProduct(this Pizza pizza, int id) => new(
         ID: id,
         Code: GetCode(pizza.Size, pizza.Crust),
         Qty: pizza.Quantity,

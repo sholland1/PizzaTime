@@ -6,8 +6,8 @@ AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
 };
 
 PizzaRepository repo = new();
-DominosConfig config = new() { StoreID = 1000 };
-DominosCart cart = new(config);
+DominosApi api = new();
+DominosCart cart = new(config, api);
 
 var p1 = repo.GetPizza("defaultPizza");
 var result1 = await cart.AddPizza(p1);

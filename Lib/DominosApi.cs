@@ -1,0 +1,95 @@
+using System.Runtime.Serialization;
+using System.Text;
+using System.Text.Json;
+
+public class DominosApi : IOrderApi {
+    public async Task<ValidateResponse> ValidateOrder(ValidateRequest request) {
+        var requestJson = JsonSerializer.Serialize(request, PizzaSerializer.Options);
+
+        using var client = new HttpClient();
+        var response = await client.PostAsync(
+            "https://order.dominos.com/power/validate-order",
+            new StringContent(requestJson, Encoding.UTF8, "application/json"));
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<ValidateResponse>(content)!;
+    }
+
+    public async Task<PriceResponse> PriceOrder(PriceRequest request) {
+        var requestJson = JsonSerializer.Serialize(request, PizzaSerializer.Options);
+
+        using var client = new HttpClient();
+        var response = await client.PostAsync(
+            "https://order.dominos.com/power/price-order",
+            new StringContent(requestJson, Encoding.UTF8, "application/json"));
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<PriceResponse>(content)!;
+    }
+
+    // public Task<OrderResponse> PlaceOrder(OrderRequest request) {
+    //     throw new NotImplementedException();
+    // }
+}
+
+public interface IOrderApi {
+    Task<ValidateResponse> ValidateOrder(ValidateRequest request);
+    Task<PriceResponse> PriceOrder(PriceRequest request);
+    // Task<OrderResponse> PlaceOrder(OrderRequest request);
+}
+
+public class ValidateRequest {
+    public Order Order { get; set; } = new();
+}
+public class ValidateResponse {
+    public Order Order { get; set; } = new();
+}
+
+public class PriceRequest {
+    public Order Order { get; set; } = new();
+}
+public class PriceResponse {
+    public PricedOrder Order { get; set; } = new();
+}
+
+public class PricedOrder {
+    public string OrderID { get; set; } = "";
+    public List<PricedProduct> Products { get; set; } = new();
+
+    public Amounts Amounts { get; set; } = new();
+    public string EstimatedWaitMinutes { get; set; } = "";
+}
+
+public class Amounts {
+    public decimal Payment { get; set; } = 0;
+}
+
+public class PricedProduct { }
+
+public class Order {
+    public string OrderID { get; set; } = "";
+    public List<Product> Products { get; set; } = new();
+    public string ServiceMethod { get; set; } = "";
+    public int StoreID { get; set; } = 0;
+}
+
+public class Options : Dictionary<string, Dictionary<string, string>?> {
+    public Options() : base() { }
+    public Options(Dictionary<string, Dictionary<string, string>?> ts) : base(ts) { }
+
+    public override bool Equals(object? obj) {
+        if (obj is not Dictionary<string, Dictionary<string, string>> o) return false;
+        if (this.Count != o.Count) return false;
+        if (this.Keys.Except(o.Keys).Any()) return false;
+        return true;
+    }
+
+    public override int GetHashCode() => base.GetHashCode();
+    public override void GetObjectData(SerializationInfo info, StreamingContext context) => base.GetObjectData(info, context);
+    public override void OnDeserialization(object? sender) => base.OnDeserialization(sender);
+    public override string? ToString() => base.ToString();
+}
+
+public record Product(int ID, string Code, int Qty, string? Instructions, Options Options);
