@@ -2,11 +2,12 @@ public class FastPizzaTests {
     [Theory]
     [InlineData("")]
     [InlineData("y")]
+    [InlineData("Y")]
     public async Task HappyPathTest(string userChoice) {
-        var consoleUI = new DummyConsoleUI(userChoice);
-        var pizzaRepo = new DummyPizzaRepository();
-        var pizzaApi = new DummyPizzaCart();
-        var controller = new PizzaController(pizzaRepo, pizzaApi, consoleUI);
+        DummyConsoleUI consoleUI = new(userChoice);
+        DummyPizzaRepository pizzaRepo = new();
+        DummyPizzaCart pizzaApi = new();
+        PizzaController controller = new(pizzaRepo, pizzaApi, consoleUI);
 
         await controller.FastPizza();
 
@@ -29,10 +30,10 @@ public class FastPizzaTests {
 
     [Fact]
     public async Task CancelOrderTest() {
-        var consoleUI = new DummyConsoleUI("n");
-        var pizzaRepo = new DummyPizzaRepository();
-        var pizzaApi = new DummyPizzaCart();
-        var controller = new PizzaController(pizzaRepo, pizzaApi, consoleUI);
+        DummyConsoleUI consoleUI = new("n");
+        DummyPizzaRepository pizzaRepo = new();
+        DummyPizzaCart pizzaApi = new();
+        PizzaController controller = new(pizzaRepo, pizzaApi, consoleUI);
 
         await controller.FastPizza();
 
