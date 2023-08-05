@@ -6,8 +6,7 @@ namespace Tests;
 public class ValidationTests {
     [Theory]
     [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
-    public void ValidationWorks(UnvalidatedPizza p) =>
-        p.Parse().MapFailure(FailWithErrors);
+    public void ValidationWorks(UnvalidatedPizza p) => p.Validate();
 
     [Theory]
     [MemberData(nameof(TestPizza.GenerateInvalidPizzas), MemberType = typeof(TestPizza))]
@@ -30,8 +29,7 @@ public class ValidationTests {
 
     [Theory]
     [MemberData(nameof(TestOrder.GenerateValidOrders), MemberType = typeof(TestOrder))]
-    public void OrderInfoValidationWorks(TestOrder.ValidData o) =>
-        o.OrderInfo.Parse().MapFailure(FailWithErrors);
+    public void OrderInfoValidationWorks(TestOrder.ValidData o) => o.OrderInfo.Validate();
 
     [Theory]
     [MemberData(nameof(TestOrder.GenerateInvalidOrders), MemberType = typeof(TestOrder))]
@@ -54,7 +52,7 @@ public class ValidationTests {
     [Theory]
     [MemberData(nameof(TestPayment.GenerateValidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoValidationWorks(TestPayment.ValidData p) =>
-        p.PaymentInfo.Parse().MapFailure(FailWithErrors);
+        p.PaymentInfo.Validate();
 
     [Theory]
     [MemberData(nameof(TestPayment.GenerateInvalidPayments), MemberType = typeof(TestPayment))]
@@ -65,12 +63,6 @@ public class ValidationTests {
             vp => Assert.Fail("Shouldn't be valid."),
             es => AssertSameInvalidProps(p.InvalidProperties, es));
     }
-
-    private static void FailWithErrors(List<ValidationFailure> es) =>
-        Assert.Fail(
-            string.Join("\n", es
-                .Select(e => e.ErrorMessage)
-                .Prepend("Shouldn't be invalid.")));
 
     private static void AssertSameInvalidProps(string[] invalidProperties, List<ValidationFailure> errors) {
         var properties = errors

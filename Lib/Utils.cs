@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using FluentValidation.Results;
 
 static class Utils {
     public static bool In<T>(this T source, params T[] items) => items.Contains(source);
@@ -17,6 +18,22 @@ static class Utils {
         && s[2] == '/'
         && int.TryParse(s[3..], out var _year)
         && month.Between(1, 12);
+}
+
+public abstract record Validation<T> {
+    public sealed record Failure(List<ValidationFailure> Value) : Validation<T>;
+    public sealed record Success(T Value) : Validation<T>;
+
+    public R Match<R>(Func<T, R> success, Func<List<ValidationFailure>, R> failure) => this switch {
+        Success s => success(s.Value),
+        Failure f => failure(f.Value),
+        _ => throw new UnreachableException($"Invalid Result! {this}")
+    };
+
+    public void Match(Action<T> success, Action<List<ValidationFailure>> failure) =>
+        Match(
+            x => { success(x); return 0; },
+            x => { failure(x); return 1; });
 }
 
 public abstract record Result<TFailure, TSuccess> {
