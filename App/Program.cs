@@ -1,4 +1,4 @@
-AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
+AppDomain.CurrentDomain.UnhandledException += (_, args) => {
     var ex = (Exception)args.ExceptionObject;
     Console.Error.WriteLine($"Unhandled exception: {ex.Message}");
     Console.Error.WriteLine(ex.StackTrace);
