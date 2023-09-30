@@ -75,7 +75,15 @@
     "Crust": "Brooklyn",
     "Cheese": "-",
     "Sauce": "=Tomato",
-    "Toppings": [],
+    "Toppings": [
+      "A-Pineapple",
+      "A-CheddarCheese",
+      "A-GreenPeppers",
+      "A-Spinach",
+      "A-RoastedRedPeppers",
+      "A-FetaCheese",
+      "A-ShreddedParmesanAsiago"
+    ],
     "Bake": "Normal",
     "Cut": "Uncut",
     "Oregano": false,

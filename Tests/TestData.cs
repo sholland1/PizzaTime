@@ -149,6 +149,13 @@ public static class TestPizza {
 
     public static IPizzaBuilder XLPizza =
         Build.XL.Brooklyn()
+            .AddTopping(Pineapple, amount: Light)
+            .AddTopping(CheddarCheese, amount: Light)
+            .AddTopping(GreenPeppers, amount: Light)
+            .AddTopping(Spinach, amount: Light)
+            .AddTopping(RoastedRedPeppers, amount: Light)
+            .AddTopping(FetaCheese, amount: Light)
+            .AddTopping(ShreddedParmesanAsiago, amount: Light)
             .SetCheese(Light)
             .SetCut(Uncut);
 }

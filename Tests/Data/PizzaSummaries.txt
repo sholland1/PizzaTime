@@ -44,4 +44,11 @@ No Toppings
 XL Brooklyn Pizza x25
   with Light cheese
   uncut
-No Toppings
+Toppings:
+ Light Pineapple
+ Light CheddarCheese
+ Light GreenPeppers
+ Light Spinach
+ Light RoastedRedPeppers
+ Light FetaCheese
+ Light ShreddedParmesanAsiago
