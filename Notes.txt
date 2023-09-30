@@ -1,3 +1,5 @@
+It takes 24 clicks to order my pizza!
+
 Delivery
   Address
 Carryout
