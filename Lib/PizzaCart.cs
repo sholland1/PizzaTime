@@ -10,7 +10,7 @@ public class DominosCart : ICart {
     private readonly DominosConfig _config;
     private readonly IOrderApi _api;
 
-    private List<Product> _products = new();
+    protected List<Product> _products = new();
     private string? _orderID = null;
 
     public DominosCart(DominosConfig config, IOrderApi api) => (_config, _api) = (config, api);
