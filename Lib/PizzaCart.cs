@@ -83,8 +83,12 @@ public static class ApiHelpers {
         return items.Count == 0 ? null : string.Join('-', items);
         static IEnumerable<string> GetItems(Pizza pizza) {
             if (pizza.Bake == Bake.WellDone) yield return "WD";
-            if (pizza.Crust == Crust.Thin && pizza.Cut == Cut.Pie) yield return "PIECT";
-            if (pizza.Crust != Crust.Thin && pizza.Cut == Cut.Square) yield return "SQCT";
+            if (pizza.Crust == Crust.HandTossed && !pizza.GarlicCrust) yield return "NGO";
+            if (pizza.Crust == Crust.Thin) {
+                if (!pizza.Oregano) yield return "NOOR";
+                if (pizza.Cut == Cut.Pie) yield return "PIECT";
+            }
+            else if (pizza.Cut == Cut.Square) yield return "SQCT";
             if (pizza.Cut == Cut.Uncut) yield return "UNCT";
         }
     }
