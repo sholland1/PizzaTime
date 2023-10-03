@@ -34,7 +34,7 @@
     "Size": "Small",
     "Crust": "Thin",
     "Cheese": "_",
-    "Sauce": "=Tomato",
+    "Sauce": "=Marinara",
     "Toppings": [
       "A=Pepperoni",
       "L-Ham",
@@ -50,7 +50,7 @@
       "R^BananaPeppers",
       "R^DicedTomatoes",
       "R^BlackOlives",
-      "R=Mushrooms"
+      "R=ShreddedProvoloneCheese"
     ],
     "Bake": "Normal",
     "Cut": "Square",
@@ -76,6 +76,7 @@
     "Cheese": "-",
     "Sauce": "=Tomato",
     "Toppings": [
+      "A-Mushrooms",
       "A-Pineapple",
       "A-CheddarCheese",
       "A-GreenPeppers",

@@ -16,6 +16,7 @@ Toppings:
 *
 Small Thin Pizza x1
   with no cheese
+  with Normal Marinara sauce
   square cut
   with oregano
 Toppings:
@@ -33,7 +34,7 @@ Toppings:
  Extra BananaPeppers on the Right
  Extra DicedTomatoes on the Right
  Extra BlackOlives on the Right
- Mushrooms on the Right
+ ShreddedProvoloneCheese on the Right
 *
 Small HandTossed Pizza x1
   well done
@@ -45,6 +46,7 @@ XL Brooklyn Pizza x25
   with Light cheese
   uncut
 Toppings:
+ Light Mushrooms
  Light Pineapple
  Light CheddarCheese
  Light GreenPeppers

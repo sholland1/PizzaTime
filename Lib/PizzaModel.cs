@@ -126,8 +126,8 @@ public enum ToppingType {
     Ham, Beef, Salami, Pepperoni, ItalianSausage,
     PremiumChicken, Bacon, PhillySteak, HotBuffaloSauce,
     JalapenoPeppers, Onions, BananaPeppers, DicedTomatoes,
-    BlackOlives, Mushrooms, Pineapple, CheddarCheese,
-    GreenPeppers, Spinach, RoastedRedPeppers,
+    BlackOlives, Mushrooms, Pineapple, ShreddedProvoloneCheese,
+    CheddarCheese, GreenPeppers, Spinach, RoastedRedPeppers,
     FetaCheese, ShreddedParmesanAsiago
 }
 

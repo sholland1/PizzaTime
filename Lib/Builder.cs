@@ -1,4 +1,6 @@
 //TODO: Disallow cheeseless Pan/Brooklyn
+//TODO: Disallow Shredded Provolone Cheese Pan/Brooklyn
+//TODO: Disallow more than 5 toppings on Pan
 public class PizzaBuilder<TBuilder> : IPizzaBuilder
     where TBuilder : PizzaBuilder<TBuilder> {
     protected Size _size;
@@ -132,6 +134,7 @@ public static class BuilderHelpers {
     public static readonly ToppingType BlackOlives = ToppingType.BlackOlives;
     public static readonly ToppingType Mushrooms = ToppingType.Mushrooms;
     public static readonly ToppingType Pineapple = ToppingType.Pineapple;
+    public static readonly ToppingType ShreddedProvoloneCheese = ToppingType.ShreddedProvoloneCheese;
     public static readonly ToppingType CheddarCheese = ToppingType.CheddarCheese;
     public static readonly ToppingType GreenPeppers = ToppingType.GreenPeppers;
     public static readonly ToppingType Spinach = ToppingType.Spinach;

@@ -123,6 +123,7 @@ public static class TestPizza {
 
     public static IPizzaBuilder SmallThin =
         Build.Small.Thin()
+            .SetSauce(Marinara)
             .AddTopping(Pepperoni)
             .AddTopping(Ham, Left, Light)
             .AddTopping(Beef, Left, Light)
@@ -137,7 +138,7 @@ public static class TestPizza {
             .AddTopping(BananaPeppers, Right, Extra)
             .AddTopping(DicedTomatoes, Right, Extra)
             .AddTopping(BlackOlives, Right, Extra)
-            .AddTopping(Mushrooms, Right)
+            .AddTopping(ShreddedProvoloneCheese, Right)
             .SetNoCheese()
             .WithOregano();
 
@@ -149,6 +150,7 @@ public static class TestPizza {
 
     public static IPizzaBuilder XLPizza =
         Build.XL.Brooklyn()
+            .AddTopping(Mushrooms, amount: Light)
             .AddTopping(Pineapple, amount: Light)
             .AddTopping(CheddarCheese, amount: Light)
             .AddTopping(GreenPeppers, amount: Light)
