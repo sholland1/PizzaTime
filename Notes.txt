@@ -120,3 +120,40 @@ Pizza
   Oregano (bool)
   Garlic Crust (bool)
   Quantity (int)
+
+Normalize Product object
+X: Tomato Sauce
+C: Cheese
+
+Handle toppings normally
+if no "X"
+  add "X": { "1/1": "1" }
+if contains "X": { "1/1": "0.0" }
+  remove it, and add "X": 0
+
+if no "C"
+  add "C": { "1/1": "1" }
+if contains "C": { "1/1": "0.0" }
+  remove it, and add "C": 0
+
+if no "Options"
+  add {
+      "C": { "1/1": "1" },
+      "X": { "1/1": "1" }
+  }
+
+Domino's Pizza Builder Bugs
+Bug #1:
+Choose large HandTossed
+Add ShreddedProvolone
+Switch to Brooklyn
+Click Add to order
+
+The pizza still has provolone even though it's not allowed on brooklyn pizzas.
+
+Bug #2:
+Choose large HandTossed
+Change special instructions
+Click Add to order
+
+The special instructions are ignored on the pizza.
