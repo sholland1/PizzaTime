@@ -52,7 +52,7 @@ public class PriceResponse {
 
 public class PricedOrder {
     public string OrderID { get; set; } = "";
-    public List<PricedProduct> Products { get; set; } = new();
+    public List<Product> Products { get; set; } = new();
 
     public Amounts Amounts { get; set; } = new();
     public string EstimatedWaitMinutes { get; set; } = "";
@@ -77,8 +77,8 @@ public class Options : Dictionary<string, Dictionary<string, string>?> {
 
     public override bool Equals(object? obj) {
         if (obj is not Dictionary<string, Dictionary<string, string>> o) return false;
-        if (this.Count != o.Count) return false;
-        if (this.Keys.Except(o.Keys).Any()) return false;
+        if (Count != o.Count) return false;
+        if (Keys.Except(o.Keys).Any()) return false;
         return true;
     }
 
@@ -88,4 +88,4 @@ public class Options : Dictionary<string, Dictionary<string, string>?> {
     public override string? ToString() => base.ToString();
 }
 
-public record Product(int ID, string Code, int Qty, string? Instructions, Options Options);
+public record Product(int ID, string Code, int Qty, string? Instructions, Options? Options);

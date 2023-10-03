@@ -110,7 +110,7 @@ public static class ApiHelpers {
 
     private static (string, Dictionary<string, string>?) FromCheese(Cheese cheese) => ("C",
         cheese.Match<Dictionary<string, string>?>(
-            full: x => new() { { "1/1", GetA(x) } },
+            full: x => OptVal("1/1", GetA(x)),
             sides: (l, r) => new() {
                 {GetL(Location.Left), GetA(l)},
                 {GetL(Location.Right), GetA(r)}
@@ -133,9 +133,11 @@ public static class ApiHelpers {
         };
         var l = "1/1";
         var a = GetA(s.Amount);
-        yield return (t, new() {{ l, a }});
+        yield return (t, OptVal(l, a));
         if (s.SauceType != SauceType.Tomato) yield return ("X", null);
     }
+
+    private static Dictionary<string, string> OptVal(string l, string a) => new() { { l, a } };
 
     public static (string, Dictionary<string, string>?) FromTopping(Topping topping) {
         var t = topping.ToppingType switch {
@@ -166,7 +168,7 @@ public static class ApiHelpers {
         };
         var l = GetL(topping.Location);
         var a = GetA(topping.Amount);
-        return (t, new() {{ l, a }});
+        return (t, OptVal(l, a));
     }
 
     private static string GetL(Location loc) => loc switch {
@@ -210,7 +212,7 @@ public class DummyPizzaCart2 : ICart {
         CartResult result = new(!_priceFail,
             _priceFail
             ? "Failed to check cart price."
-            : $"Cart price is ${Calls.Count(c => c.Method == nameof(AddPizza))*8.25:F2}.");
+            : $"Cart price is ${Calls.Count(c => c.Method == nameof(AddPizza)) * 8.25:F2}.");
         Calls.Add(new(nameof(GetSummary), "", result));
         return Task.FromResult(result);
     }
