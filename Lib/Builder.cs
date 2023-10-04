@@ -138,7 +138,7 @@ public static class BuilderHelpers {
     public static readonly ToppingType CheddarCheese = ToppingType.CheddarCheese;
     public static readonly ToppingType GreenPeppers = ToppingType.GreenPeppers;
     public static readonly ToppingType Spinach = ToppingType.Spinach;
-    public static readonly ToppingType RoastedRedPeppers = ToppingType.RoastedRedPeppers;
+    // public static readonly ToppingType RoastedRedPeppers = ToppingType.RoastedRedPeppers;
     public static readonly ToppingType FetaCheese = ToppingType.FetaCheese;
     public static readonly ToppingType ShreddedParmesanAsiago = ToppingType.ShreddedParmesanAsiago;
 

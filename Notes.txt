@@ -112,7 +112,7 @@ Pizza
                Cheddar Cheese
                Green Peppers
                Spinach
-               Roasted Red Peppers
+               Roasted Red Peppers (discontinued)
                Feta Cheese
                Shredded Parmesan Asiago)
   Bake (Normal, Well Done)

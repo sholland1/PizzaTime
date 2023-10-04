@@ -51,6 +51,5 @@ Toppings:
  Light CheddarCheese
  Light GreenPeppers
  Light Spinach
- Light RoastedRedPeppers
  Light FetaCheese
  Light ShreddedParmesanAsiago

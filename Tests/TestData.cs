@@ -155,7 +155,7 @@ public static class TestPizza {
             .AddTopping(CheddarCheese, amount: Light)
             .AddTopping(GreenPeppers, amount: Light)
             .AddTopping(Spinach, amount: Light)
-            .AddTopping(RoastedRedPeppers, amount: Light)
+            // .AddTopping(RoastedRedPeppers, amount: Light)
             .AddTopping(FetaCheese, amount: Light)
             .AddTopping(ShreddedParmesanAsiago, amount: Light)
             .SetCheese(Light)

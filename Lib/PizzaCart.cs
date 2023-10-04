@@ -165,7 +165,7 @@ public static class ApiHelpers {
             ToppingType.CheddarCheese => "E",
             ToppingType.GreenPeppers => "G",
             ToppingType.Spinach => "Si",
-            ToppingType.RoastedRedPeppers => "Rr",
+            // ToppingType.RoastedRedPeppers => "Rr",
             ToppingType.FetaCheese => "Fe",
             ToppingType.ShreddedParmesanAsiago => "Cs",
             _ => throw new UnreachableException($"Unknown topping type: {topping.ToppingType}")
