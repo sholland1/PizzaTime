@@ -65,6 +65,38 @@ public class DominosCart : ICart {
 }
 
 public static class ApiHelpers {
+    public static IEnumerable<Product> Normalize(this IEnumerable<Product> ps) => ps.Select(Normalize);
+
+    public static Product Normalize(this Product p) =>
+        p with { Options = p.Options.Normalize() };
+
+    //TODO: don't mutate the dictionaries
+    private static Options Normalize(this Options? o) {
+        var val = OptVal("1/1", "1");
+        if (o is null) {
+            return new() {
+                ["C"] = val,
+                ["X"] = val
+            };
+        }
+
+        if (!o.ContainsKey("C")) {
+            o["C"] = val;
+        }
+        else if (o["C"] is not null && o["C"]!.ContainsKey("1/1") && o["C"]!["1/1"] == "0.0") {
+            o["C"] = null;
+        }
+
+        if (!o.ContainsKey("X")) {
+            o["X"] = val;
+        }
+        else if (o["X"] is not null && o["X"]!.ContainsKey("1/1") && o["X"]!["1/1"] == "0.0") {
+            o["X"] = null;
+        }
+
+        return o;
+    }
+
     public static Product ToProduct(this Pizza pizza, int id) => new(
         ID: id,
         Code: GetCode(pizza.Size, pizza.Crust),
