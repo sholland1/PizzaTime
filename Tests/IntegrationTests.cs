@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 public class IntegrationTests {
     private IConfiguration Configuration { get; }
@@ -10,7 +11,7 @@ public class IntegrationTests {
     [Fact(Skip = "integration test")]
     public async Task RealRoundTripOrder() {
         var storeID = Configuration["StoreID"]!;
-        DominosApi api = new();
+        DominosApi api = new(new DummyLogger<DominosApi>());
         TestDominosCart cart = new(new() { StoreID = storeID }, api);
 
         var pizzas = TestPizza.ValidPizzas().Select(p => p.Validate()).ToList();
@@ -40,4 +41,11 @@ public class IntegrationTests {
         public TestDominosCart(DominosConfig config, IOrderApi api) : base(config, api) { }
         public List<Product> Products => _products;
     }
+}
+
+class DummyLogger<T> : ILogger<T> {
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+    public bool IsEnabled(LogLevel logLevel) => true;
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
+        Console.WriteLine(formatter(state, exception));
 }

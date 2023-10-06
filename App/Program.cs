@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
+
 AppDomain.CurrentDomain.UnhandledException += (_, args) => {
     var ex = (Exception)args.ExceptionObject;
     Console.Error.WriteLine($"Unhandled exception: {ex.Message}");
@@ -8,10 +10,10 @@ AppDomain.CurrentDomain.UnhandledException += (_, args) => {
 var builder = new ConfigurationBuilder().AddUserSecrets<Program>();
 var config = builder.Build();
 
-var storeID = int.Parse(config["StoreID"]!);
+var storeID = config["StoreID"]!;
 
 PizzaRepository repo = new();
-DominosApi api = new();
+DominosApi api = new(new NullLogger<DominosApi>());
 DominosCart cart = new(new() { StoreID = storeID }, api);
 
 var p1 = repo.GetPizza("defaultPizza");

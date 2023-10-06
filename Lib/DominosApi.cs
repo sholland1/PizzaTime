@@ -1,8 +1,12 @@
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 public class DominosApi : IOrderApi {
+    private readonly ILogger<DominosApi> _log;
+    public DominosApi(ILogger<DominosApi> log) => _log = log;
+
     public async Task<ValidateResponse> ValidateOrder(ValidateRequest request) =>
         await PostAsync<ValidateRequest, ValidateResponse>(
             "/power/validate-order", request);
@@ -17,15 +21,19 @@ public class DominosApi : IOrderApi {
 
     private async Task<TResponse> PostAsync<TRequest, TResponse>(string url, TRequest request) {
         var requestJson = JsonSerializer.Serialize(request);
+        _log.LogDebug("{url}\nRequest:\n{requestJson}", url, requestJson);
 
         using HttpClient client = new() {
             BaseAddress = new("https://order.dominos.com"),
         };
         var response = await client.PostAsync(url,
             new StringContent(requestJson, Encoding.UTF8, "application/json"));
+        var statusCode = response.StatusCode;
+        _log.LogDebug("Response: {statusCode}", statusCode);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
+        _log.LogDebug(content);
         return JsonSerializer.Deserialize<TResponse>(content)!;
     }
 }
