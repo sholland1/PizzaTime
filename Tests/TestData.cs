@@ -230,12 +230,12 @@ public class DummyPizzaCart : ICart {
         return Task.FromResult(result);
     }
 
-    public Task<CartResult> PlaceOrder(OrderInfo userOrder, PaymentInfo userPayment) {
+    public Task<CartResult> PlaceOrder(PaymentInfo userPayment) {
         CartResult result = new(!_orderFail,
             _orderFail
             ? "Failed to place order."
             : "Order was placed.");
-        Calls.Add(new(nameof(PlaceOrder), (userOrder, userPayment), result));
+        Calls.Add(new(nameof(PlaceOrder), userPayment, result));
         return Task.FromResult(result);
     }
 }

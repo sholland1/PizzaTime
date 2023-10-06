@@ -7,7 +7,7 @@ public class FastPizzaTests {
         DummyConsoleUI consoleUI = new(userChoice);
         DummyPizzaRepository pizzaRepo = new();
         DummyPizzaCart pizzaApi = new();
-        PizzaController controller = new(pizzaRepo, pizzaApi, consoleUI);
+        PizzaController controller = new(pizzaRepo, _ => pizzaApi, consoleUI);
 
         await controller.FastPizza();
 

@@ -1,17 +1,19 @@
 public class PizzaController {
     private readonly IPizzaRepo _repo;
-    private readonly ICart _cart;
+    private readonly Func<OrderInfo, ICart> _startOrder;
     private readonly IConsoleUI _consoleUI;
 
-    public PizzaController(IPizzaRepo repo, ICart cart, IConsoleUI consoleUI) =>
-        (_repo, _cart, _consoleUI) = (repo, cart, consoleUI);
+    public PizzaController(IPizzaRepo repo, Func<OrderInfo, ICart> startOrder, IConsoleUI consoleUI) =>
+        (_repo, _startOrder, _consoleUI) = (repo, startOrder, consoleUI);
 
     public async Task FastPizza() {
         var userPizza = _repo.GetPizza("defaultPizza");
         var userOrder = _repo.GetOrderInfo("defaultOrderInfo");
         var userPayment = _repo.GetPaymentInfo("defaultPaymentInfo");
 
-        var cartResult = await _cart.AddPizza(userPizza);
+        var cart = _startOrder(userOrder);
+
+        var cartResult = await cart.AddPizza(userPizza);
         if (!cartResult.Success) {
             _consoleUI.PrintLine($"Pizza was not added to cart: {cartResult.Message}");
             return;
@@ -19,7 +21,7 @@ public class PizzaController {
 
         _consoleUI.PrintLine($"Pizza was added to cart.\n{cartResult.Summarize()}\n");
 
-        var priceResult = await _cart.GetSummary();
+        var priceResult = await cart.GetSummary();
         if (!priceResult.Success) {
             _consoleUI.PrintLine($"Failed to check cart price:\n{priceResult.Message}");
             return;
@@ -37,7 +39,7 @@ public class PizzaController {
 
         _consoleUI.PrintLine("Ordering pizza...");
 
-        var orderResult = await _cart.PlaceOrder(userOrder, userPayment);
+        var orderResult = await cart.PlaceOrder(userPayment);
         if (!orderResult.Success) {
             _consoleUI.PrintLine($"Failed to place order: {orderResult.Message}");
             return;

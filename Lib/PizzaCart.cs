@@ -3,25 +3,25 @@ using System.Diagnostics;
 public interface ICart {
     Task<CartResult> AddPizza(Pizza userPizza);
     Task<CartResult> GetSummary();
-    Task<CartResult> PlaceOrder(OrderInfo userOrder, PaymentInfo userPayment);
+    Task<CartResult> PlaceOrder(PaymentInfo userPayment);
 }
 
 public class DominosCart : ICart {
-    private readonly DominosConfig _config;
     private readonly IOrderApi _api;
+    private readonly OrderInfo _orderInfo;
 
     protected List<Product> _products = new();
     private string? _orderID = null;
 
-    public DominosCart(DominosConfig config, IOrderApi api) => (_config, _api) = (config, api);
+    public DominosCart(IOrderApi api, OrderInfo orderInfo) => (_api, _orderInfo) = (api, orderInfo);
 
     public async Task<CartResult> AddPizza(Pizza userPizza) {
         ValidateRequest request = new() {
             Order = new() {
                 OrderID = _orderID ?? "",
                 Products = _products.Append(userPizza.ToProduct(_products.Count + 1)).ToList(),
-                ServiceMethod = "Carryout", //TODO: stop hard-coding
-                StoreID = _config.StoreID
+                ServiceMethod = _orderInfo.ServiceMethod.Match(_ => "", _ => "Carryout"), //TODO: stop hard-coding
+                StoreID = _orderInfo.StoreId
             }
         };
         var response = await _api.ValidateOrder(request);
@@ -41,8 +41,8 @@ public class DominosCart : ICart {
             Order = new() {
                 OrderID = _orderID,
                 Products = _products,
-                ServiceMethod = "Carryout", //TODO: stop hard-coding
-                StoreID = _config.StoreID,
+                ServiceMethod = _orderInfo.ServiceMethod.Match(_ => "", _ => "Carryout"), //TODO: stop hard-coding
+                StoreID = _orderInfo.StoreId,
                 Coupons = new() { new() { Code = "9220" } } //TODO: stop hard-coding
             }
         };
@@ -61,24 +61,23 @@ public class DominosCart : ICart {
         return new(true, $"  Price: ${response.Order.Amounts.Payment}\n  Estimated Wait: {response.Order.EstimatedWaitMinutes} minutes");
     }
 
-    public async Task<CartResult> PlaceOrder(OrderInfo userOrder, PaymentInfo userPayment) {
+    public async Task<CartResult> PlaceOrder(PaymentInfo userPayment) {
         if (_products.Count == 0 || _orderID == null) {
             return new(false, "Cart is empty.");
         }
 
-        //TODO: stop hard-coding
         PlaceRequest request = new() {
             Order = new() {
-                Coupons = new() { new() { Code = "9220" } },
+                Coupons = new() { new() { Code = "9220" } },//TODO: stop hard-coding
                 Email = userPayment.Email,
                 FirstName = userPayment.FirstName,
                 LastName = userPayment.LastName,
                 Phone = userPayment.Phone,
                 OrderID = _orderID,
-                Payments = new() { GetPayment(userPayment, 8.71M) },
+                Payments = new() { GetPayment(userPayment, 8.71M) },//TODO: stop hard-coding
                 Products = _products,
-                ServiceMethod = "DriveThru",
-                StoreID = _config.StoreID,
+                ServiceMethod = _orderInfo.ServiceMethod.Match(_ => "", _ => "DriveThru"), //TODO: stop hard-coding
+                StoreID = _orderInfo.StoreId,
             }
         };
 
@@ -259,10 +258,6 @@ public static class ApiHelpers {
     };
 }
 
-public class DominosConfig {
-    public required string StoreID { get; set; }
-}
-
 public class DummyPizzaCart2 : ICart {
     private readonly bool _cartFail;
     private readonly bool _priceFail;
@@ -291,12 +286,12 @@ public class DummyPizzaCart2 : ICart {
         return Task.FromResult(result);
     }
 
-    public Task<CartResult> PlaceOrder(OrderInfo userOrder, PaymentInfo userPayment) {
+    public Task<CartResult> PlaceOrder(PaymentInfo userPayment) {
         CartResult result = new(!_orderFail,
             _orderFail
             ? "Failed to place order."
             : "Order was placed.");
-        Calls.Add(new(nameof(PlaceOrder), (userOrder, userPayment), result));
+        Calls.Add(new(nameof(PlaceOrder), userPayment, result));
         return Task.FromResult(result);
     }
 }

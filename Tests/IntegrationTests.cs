@@ -12,7 +12,13 @@ public class IntegrationTests {
     public async Task RealRoundTripOrder() {
         var storeID = Configuration["StoreID"]!;
         DominosApi api = new(new DummyLogger<DominosApi>());
-        TestDominosCart cart = new(new() { StoreID = storeID }, api);
+
+         UnvalidatedOrderInfo orderInfo = new() {
+            StoreId = storeID,
+            ServiceMethod = new ServiceMethod.Carryout(PickupLocation.Window),
+            Timing = new OrderTiming.Now()
+        };
+        TestDominosCart cart = new(api, orderInfo.Validate());
 
         var pizzas = TestPizza.ValidPizzas().Select(p => p.Validate()).ToList();
 
@@ -33,12 +39,12 @@ public class IntegrationTests {
             Phone = "000-123-1234",
             Payment = new Payment.PayWithCard(1000_2000_3000_4000, "01/25", "123", "12345")
         };
-        var finalResult = await cart.PlaceOrder(null, paymentInfo.Validate());
+        var finalResult = await cart.PlaceOrder(paymentInfo.Validate());
         Assert.False(finalResult.Success);
     }
 
     private class TestDominosCart : DominosCart {
-        public TestDominosCart(DominosConfig config, IOrderApi api) : base(config, api) { }
+        public TestDominosCart(IOrderApi api, OrderInfo orderInfo) : base(api, orderInfo) { }
         public List<Product> Products => _products;
     }
 }
