@@ -2,14 +2,14 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 public class UnvalidatedOrderInfo {
-    public required int StoreId { get; init; }
+    public required string StoreId { get; init; }
     public required ServiceMethod ServiceMethod { get; init; }
     public required OrderTiming Timing { get; init; }
 
     public UnvalidatedOrderInfo() {}
 
     [SetsRequiredMembers]
-    public UnvalidatedOrderInfo(int storeId, ServiceMethod serviceMethod, OrderTiming timing) {
+    public UnvalidatedOrderInfo(string storeId, ServiceMethod serviceMethod, OrderTiming timing) {
         StoreId = storeId;
         ServiceMethod = serviceMethod;
         Timing = timing;
@@ -129,16 +129,16 @@ public class UnvalidatedPaymentInfo {
 }
 
 public abstract record Payment {
-    public T Match<T>(Func<T> store, Func<long, string, string, string, T> card) => this switch {
+    public T Match<T>(Func<T> store, Func<PayWithCard, T> card) => this switch {
         PayAtStore => store(),
-        PayWithCard c => card(c.CardNumber, c.Expiration, c.SecurityCode, c.BillingZip),
+        PayWithCard c => card(c),
         _ => throw new UnreachableException($"Invalid Payment! {this}")
     };
 
-    public void Match(Action store, Action<long, string, string, string> card) {
+    public void Match(Action store, Action<PayWithCard> card) {
         switch (this) {
             case PayAtStore: store(); break;
-            case PayWithCard c: card(c.CardNumber, c.Expiration, c.SecurityCode, c.BillingZip); break;
+            case PayWithCard c: card(c); break;
             default: throw new UnreachableException($"Invalid Payment! {this}");
         }
     }
@@ -146,5 +146,8 @@ public abstract record Payment {
     public sealed record PayAtStore : Payment;
     public sealed record PayWithCard(
         long CardNumber, string Expiration,
-        string SecurityCode, string BillingZip) : Payment;
+        string SecurityCode, string BillingZip) : Payment {
+        //TODO: implement card type
+        public string Type => "VISA";
+    }
 }

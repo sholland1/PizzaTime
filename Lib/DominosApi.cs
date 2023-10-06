@@ -11,9 +11,9 @@ public class DominosApi : IOrderApi {
         await PostAsync<PriceRequest, PriceResponse>(
             "/power/price-order", request);
 
-    // public Task<OrderResponse> PlaceOrder(OrderRequest request) {
-    //     throw new NotImplementedException();
-    // }
+    public async Task<PlaceResponse> PlaceOrder(PlaceRequest request) =>
+        await PostAsync<PlaceRequest, PlaceResponse>(
+            "/power/place-order", request);
 
     private async Task<TResponse> PostAsync<TRequest, TResponse>(string url, TRequest request) {
         var requestJson = JsonSerializer.Serialize(request);
@@ -33,18 +33,54 @@ public class DominosApi : IOrderApi {
 public interface IOrderApi {
     Task<ValidateResponse> ValidateOrder(ValidateRequest request);
     Task<PriceResponse> PriceOrder(PriceRequest request);
-    // Task<OrderResponse> PlaceOrder(OrderRequest request);
+    Task<PlaceResponse> PlaceOrder(PlaceRequest request);
+}
+
+public class PlaceRequest {
+    public required Order2 Order { get; init; }
+}
+
+public class Order2 : Order {
+    public string Email { get; init; } = "";
+    public string FirstName { get; init; } = "";
+    public string LastName { get; init; } = "";
+    public string Phone { get; init; } = "";
+    public List<OrderPayment> Payments { get; init; } = new();
+    public int? Status { get; init; }
+    public List<StatusCode> StatusItems { get; init; } = new();
+}
+
+public class StatusCode {
+    public required string Code { get; init; }
+}
+
+public class PlaceResponse {
+    public Order2 Order { get; init; } = new();
+    public int? Status { get; init; }
+    public List<StatusCode> StatusItems { get; init; } = new();
+}
+
+public class OrderPayment {
+    public required decimal Amount { get; init; }
+    //TODO: make type for card types (Mastercard, Visa...)
+    public required string CardType { get; init; }
+    public required string Expiration { get; init; }
+    public required string Number { get; init; }
+    public required string PostalCode { get; init; }
+    public required string SecurityCode { get; init; }
+    //TODO: make type for payment types (Credit Card...)
+    public required string Type { get; init; }
 }
 
 public class ValidateRequest {
-    public Order Order { get; set; } = new();
+    public required Order Order { get; init; }
 }
 public class ValidateResponse {
     public Order Order { get; set; } = new();
 }
 
 public class PriceRequest {
-    public Order Order { get; set; } = new();
+    public required Order Order { get; init; }
 }
 public class PriceResponse {
     public PricedOrder Order { get; set; } = new();
@@ -53,7 +89,6 @@ public class PriceResponse {
 public class PricedOrder {
     public string OrderID { get; set; } = "";
     public List<Product> Products { get; set; } = new();
-
     public Amounts Amounts { get; set; } = new();
     public string EstimatedWaitMinutes { get; set; } = "";
 }
@@ -62,13 +97,16 @@ public class Amounts {
     public decimal Payment { get; set; } = 0;
 }
 
-public class PricedProduct { }
-
 public class Order {
     public string OrderID { get; set; } = "";
     public List<Product> Products { get; set; } = new();
     public string ServiceMethod { get; set; } = "";
-    public int StoreID { get; set; } = 0;
+    public string StoreID { get; set; } = "0";
+    public List<Coupon> Coupons { get; set; } = new();
+}
+
+public class Coupon {
+    public required string Code { get; init; }
 }
 
 public class Options : Dictionary<string, Dictionary<string, string>?> {

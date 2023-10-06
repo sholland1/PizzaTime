@@ -24,7 +24,7 @@ public static class SummaryUtils {
         Phone: {p.Phone}
         {p.Payment.Match(
             () => "Pay at Store",
-            (card, exp, code, zip) => $"Pay with card ending in {card % 10000}")}
+            c => $"Pay with card ending in {c.CardNumber % 10000}")}
         """;
 
     public static string Summarize(this UnvalidatedPizza p) =>

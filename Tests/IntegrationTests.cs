@@ -1,16 +1,15 @@
 using Microsoft.Extensions.Configuration;
 
 public class IntegrationTests {
-    public IConfiguration Configuration { get; }
+    private IConfiguration Configuration { get; }
     public IntegrationTests() {
         var builder = new ConfigurationBuilder().AddUserSecrets<IntegrationTests>();
         Configuration = builder.Build();
     }
 
-    //TODO: test a round trip from my format -> domino's format -> api -> domino's format
     [Fact(Skip = "integration test")]
     public async Task RealRoundTripOrder() {
-        var storeID = int.Parse(Configuration["StoreID"]!);
+        var storeID = Configuration["StoreID"]!;
         DominosApi api = new();
         TestDominosCart cart = new(new() { StoreID = storeID }, api);
 
@@ -25,6 +24,16 @@ public class IntegrationTests {
         var result = await cart.GetSummary();
         Assert.True(result.Success);
         Assert.Equal(products, cart.Products);
+
+        UnvalidatedPaymentInfo paymentInfo = new() {
+            FirstName = "Test",
+            LastName = "Testington",
+            Email = "test@gmail.org",
+            Phone = "000-123-1234",
+            Payment = new Payment.PayWithCard(1000_2000_3000_4000, "01/25", "123", "12345")
+        };
+        var finalResult = await cart.PlaceOrder(null, paymentInfo.Validate());
+        Assert.False(finalResult.Success);
     }
 
     private class TestDominosCart : DominosCart {

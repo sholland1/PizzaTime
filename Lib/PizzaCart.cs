@@ -20,16 +20,16 @@ public class DominosCart : ICart {
             Order = new() {
                 OrderID = _orderID ?? "",
                 Products = _products.Append(userPizza.ToProduct(_products.Count + 1)).ToList(),
-                ServiceMethod = "Carryout",
+                ServiceMethod = "Carryout", //TODO: stop hard-coding
                 StoreID = _config.StoreID
             }
         };
-        var result = await _api.ValidateOrder(request);
+        var response = await _api.ValidateOrder(request);
 
-        _orderID = result.Order.OrderID;
-        _products = result.Order.Products;
+        _orderID = response.Order.OrderID;
+        _products = response.Order.Products.Normalize().ToList();
 
-        return new(true, $"  Product Count: {_products.Count}\n  Order Number: {result.Order.OrderID}");
+        return new(true, $"  Product Count: {_products.Count}\n  Order Number: {response.Order.OrderID}");
     }
 
     public async Task<CartResult> GetSummary() {
@@ -39,29 +39,67 @@ public class DominosCart : ICart {
 
         PriceRequest request = new() {
             Order = new() {
-                OrderID = _orderID ?? "",
+                OrderID = _orderID,
                 Products = _products,
-                ServiceMethod = "Carryout",
-                StoreID = _config.StoreID
+                ServiceMethod = "Carryout", //TODO: stop hard-coding
+                StoreID = _config.StoreID,
+                Coupons = new() { new() { Code = "9220" } } //TODO: stop hard-coding
             }
         };
-        var result = await _api.PriceOrder(request);
+        var response = await _api.PriceOrder(request);
 
-        if (result.Order.OrderID != _orderID) {
+        if (response.Order.OrderID != _orderID) {
             return new(false, "Order ID mismatch.");
         }
-        if (result.Order.Products.Count != _products.Count) {
+        if (response.Order.Products.Count != _products.Count) {
             return new(false, "Product count mismatch.");
         }
+        if (!response.Order.Products.Normalize().SequenceEqual(_products)) {
+            return new(false, "Products don't match.");
+        }
 
-        return new(true, $"  Price: ${result.Order.Amounts.Payment}\n  Estimated Wait: {result.Order.EstimatedWaitMinutes} minutes");
+        return new(true, $"  Price: ${response.Order.Amounts.Payment}\n  Estimated Wait: {response.Order.EstimatedWaitMinutes} minutes");
     }
 
-    public Task<CartResult> PlaceOrder(OrderInfo userOrder, PaymentInfo userPayment) =>
-        Task.FromResult<CartResult>(_products.Count == 0
-        ? new(false, "No pizza!")
-        : new(true, "Order was placed."));
+    public async Task<CartResult> PlaceOrder(OrderInfo userOrder, PaymentInfo userPayment) {
+        if (_products.Count == 0 || _orderID == null) {
+            return new(false, "Cart is empty.");
+        }
 
+        //TODO: stop hard-coding
+        PlaceRequest request = new() {
+            Order = new() {
+                Coupons = new() { new() { Code = "9220" } },
+                Email = userPayment.Email,
+                FirstName = userPayment.FirstName,
+                LastName = userPayment.LastName,
+                Phone = userPayment.Phone,
+                OrderID = _orderID,
+                Payments = new() { GetPayment(userPayment, 8.71M) },
+                Products = _products,
+                ServiceMethod = "DriveThru",
+                StoreID = _config.StoreID,
+            }
+        };
+
+        var response = await _api.PlaceOrder(request);
+        return response.Status == -1
+            ? new(false, string.Join("\n", response.StatusItems))
+            : new(true, "Order was placed.");
+    }
+
+    private static OrderPayment GetPayment(PaymentInfo payment, decimal price) =>
+        payment.Payment.Match<OrderPayment>(
+            () => throw new NotImplementedException(),
+            c => new() {
+                Amount = price,
+                CardType = c.Type,
+                Expiration = c.Expiration,
+                Number = $"{c.CardNumber}",
+                PostalCode = c.BillingZip,
+                SecurityCode = c.SecurityCode,
+                Type = "CreditCard"
+            });
 }
 
 public static class ApiHelpers {
@@ -222,7 +260,7 @@ public static class ApiHelpers {
 }
 
 public class DominosConfig {
-    public int StoreID { get; set; }
+    public required string StoreID { get; set; }
 }
 
 public class DummyPizzaCart2 : ICart {

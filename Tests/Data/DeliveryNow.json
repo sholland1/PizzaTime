@@ -1,5 +1,5 @@
 {
-  "StoreId": 2,
+  "StoreId": "2",
   "ServiceMethod": {
     "AddressType": "House",
     "Name": "My House",

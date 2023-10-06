@@ -84,6 +84,30 @@ public class PizzaValidator : AbstractValidator<UnvalidatedPizza> {
 }
 
 public static class ValidationHelpers {
+    // public static Result<List<ValidationFailure>, ValidPizza> Parse(this Pizza pizza) {
+    //     PizzaValidator validator = new();
+    //     var result = validator.Validate(pizza);
+    //     return result.IsValid
+    //         ? new Result<List<ValidationFailure>, ValidPizza>.Success(new(pizza))
+    //         : new Result<List<ValidationFailure>, ValidPizza>.Failure(result.Errors);
+    // }
+
+    // public static Result<List<ValidationFailure>, ValidOrderInfo> Parse(this OrderInfo orderInfo) {
+    //     OrderInfoValidator validator = new();
+    //     var result = validator.Validate(orderInfo);
+    //     return result.IsValid
+    //         ? new Result<List<ValidationFailure>, ValidOrderInfo>.Success(new(orderInfo))
+    //         : new Result<List<ValidationFailure>, ValidOrderInfo>.Failure(result.Errors);
+    // }
+
+    // public static Result<List<ValidationFailure>, ValidPaymentInfo> Parse(this PaymentInfo paymentInfo) {
+    //     PaymentInfoValidator validator = new();
+    //     var result = validator.Validate(paymentInfo);
+    //     return result.IsValid
+    //         ? new Result<List<ValidationFailure>, ValidPaymentInfo>.Success(new(paymentInfo))
+    //         : new Result<List<ValidationFailure>, ValidPaymentInfo>.Failure(result.Errors);
+    // }
+
     public static Pizza Validate(this UnvalidatedPizza pizza) {
         PizzaValidator validator = new();
         validator.ValidateAndThrow(pizza);
@@ -143,7 +167,7 @@ public class Pizza : UnvalidatedPizza {
 
 public class OrderInfoValidator : AbstractValidator<UnvalidatedOrderInfo> {
     public OrderInfoValidator() {
-        RuleFor(o => o.StoreId).GreaterThanOrEqualTo(0);
+        RuleFor(o => int.Parse(o.StoreId)).GreaterThanOrEqualTo(0).WithName("StoreId");
         When(o => o.ServiceMethod is ServiceMethod.Carryout,
             () => RuleFor(o => ((ServiceMethod.Carryout)o.ServiceMethod).Location).IsInEnum());
         When(o => o.ServiceMethod is ServiceMethod.Delivery,
@@ -166,7 +190,7 @@ public class PaymentInfoValidator : AbstractValidator<UnvalidatedPaymentInfo> {
         RuleFor(p => p.Phone).Matches(@"\d{3}-\d{3}-\d{4}");
 
         When(p => p.Payment is Payment.PayWithCard,
-            () => RuleFor(p => ((Payment.PayWithCard)p.Payment)).SetValidator(new PayWithCardValidator()));
+            () => RuleFor(p => (Payment.PayWithCard)p.Payment).SetValidator(new PayWithCardValidator()));
     }
 }
 
