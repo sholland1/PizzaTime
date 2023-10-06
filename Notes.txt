@@ -40,13 +40,13 @@ Choose (pizza --choose-from-file):
 
 FromScratch (pizza --scratch)
   Maybe TUI application (Terminal.Gui?)
-  
+
  \|/
 --+--
  /|\
 _|_|_
 _|_|_
- | | 
+ | |
 
 Display:
 Medium HandmadePan Pizza x2
