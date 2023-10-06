@@ -11,20 +11,22 @@ public class FastPizzaTests {
 
         await controller.FastPizza();
 
-        Assert.Equal($"""
+        var expected = $"""
             Pizza was added to cart.
             {pizzaApi.Calls[0].Result.Summarize()}
- 
+
             Cart summary:
             {pizzaApi.Calls[1].Result.Summarize()}
- 
+
             Confirm order? [Y/n]: 
             Ordering pizza...
             Order summary:
             {pizzaApi.Calls[2].Result.Summarize()}
             Done.
- 
-            """, consoleUI.ToString());
+
+            """;
+        var actual = consoleUI.ToString();
+        Assert.Equal(expected, actual);
         Assert.Equal(3, pizzaApi.Calls.Count);
     }
 
@@ -33,21 +35,23 @@ public class FastPizzaTests {
         DummyConsoleUI consoleUI = new("n");
         DummyPizzaRepository pizzaRepo = new();
         DummyPizzaCart pizzaApi = new();
-        PizzaController controller = new(pizzaRepo, pizzaApi, consoleUI);
+        PizzaController controller = new(pizzaRepo, _ => pizzaApi, consoleUI);
 
         await controller.FastPizza();
 
-        Assert.Equal($"""
+        var expected = $"""
             Pizza was added to cart.
             {pizzaApi.Calls[0].Result.Summarize()}
- 
+
             Cart summary:
             {pizzaApi.Calls[1].Result.Summarize()}
- 
+
             Confirm order? [Y/n]: 
             Order cancelled.
- 
-            """, consoleUI.ToString());
+
+            """;
+        var actual = consoleUI.ToString();
+        Assert.Equal(expected, actual);
         Assert.Equal(2, pizzaApi.Calls.Count);
     }
 }
