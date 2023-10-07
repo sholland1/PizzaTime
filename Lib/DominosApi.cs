@@ -70,13 +70,11 @@ public class PlaceResponse {
 
 public class OrderPayment {
     public required decimal Amount { get; init; }
-    //TODO: make type for card types (Mastercard, Visa...)
     public required string CardType { get; init; }
     public required string Expiration { get; init; }
     public required string Number { get; init; }
     public required string PostalCode { get; init; }
     public required string SecurityCode { get; init; }
-    //TODO: make type for payment types (Credit Card...)
     public required string Type { get; init; }
 }
 

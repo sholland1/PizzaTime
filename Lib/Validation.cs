@@ -196,9 +196,7 @@ public class PaymentInfoValidator : AbstractValidator<UnvalidatedPaymentInfo> {
 
 public class PayWithCardValidator : AbstractValidator<Payment.PayWithCard> {
     public PayWithCardValidator() {
-        RuleFor(p => p.CardNumber.ToString())
-            .CreditCard()
-            .WithName("CardNumber");
+        RuleFor(p => p.CardNumber).CreditCard();
         RuleFor(p => p.Expiration).Must(Utils.MatchesMMyy);
         RuleFor(p => p.SecurityCode).Matches("^\\d{3}$");
         RuleFor(p => p.BillingZip).Matches("^\\d{5}$");

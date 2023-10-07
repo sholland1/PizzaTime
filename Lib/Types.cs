@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
 public class UnvalidatedOrderInfo {
     public required string StoreId { get; init; }
@@ -145,9 +146,32 @@ public abstract record Payment {
 
     public sealed record PayAtStore : Payment;
     public sealed record PayWithCard(
-        long CardNumber, string Expiration,
+        string CardNumber, string Expiration,
         string SecurityCode, string BillingZip) : Payment {
-        //TODO: implement card type
-        public string Type => "VISA";
+        public string Type {
+            //https://cache.dominos.com/olo/6_118_2/assets/build/js/site/base-site.js
+            get {
+                var s = CardNumber;
+                if (Regex.IsMatch(s, @"^5[1-5]"))
+                    return "MASTERCARD";
+                if (Regex.IsMatch(s, @"^6(?:011|5)"))
+                    return "DISCOVER";
+                if (Regex.IsMatch(s, @"^5[06-9]|^6\d"))
+                    return "MAESTRO";
+                if (Regex.IsMatch(s, @"^4"))
+                    return "VISA";
+                if (Regex.IsMatch(s, @"^374622"))
+                    return "OPTIMA";
+                if (Regex.IsMatch(s, @"^3[47]"))
+                    return "AMEX";
+                if (Regex.IsMatch(s, @"^(?:2131|1800|35)"))
+                    return "JCB";
+                if (Regex.IsMatch(s, @"^3(?:0[0-5]|[68])"))
+                    return "DINERS";
+                if (Regex.IsMatch(s, @"^(?:5[1-5]\d{2}|222[1-9]|22[3-9]\d|2[3-6]\d{2}|27[01]\d|2720)"))
+                    return "MASTERCARD";
+                return "";
+            }
+        }
     }
 }

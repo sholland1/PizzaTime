@@ -59,7 +59,7 @@ public static class TestPayment {
         UnvalidatedPaymentInfo payAtStore = new(
             "FName", "LName", "user@yahoo.com", "123-123-1234",
             new Payment.PayAtStore());
-        Payment.PayWithCard cardPayment = new(1000_2000_3000_4000, "01/23", "123", "12345");
+        Payment.PayWithCard cardPayment = new("1000200030004000", "01/23", "123", "12345");
         UnvalidatedPaymentInfo payWithCard = new(
             "FName", "LName", "user@yahoo.com", "123-123-1234", cardPayment);
 

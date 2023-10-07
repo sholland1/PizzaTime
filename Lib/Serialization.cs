@@ -179,7 +179,7 @@ public class PaymentJsonConverter : JsonConverter<Payment> {
     }
 
     private static Payment.PayWithCard ReadPayWithCard(ref Utf8JsonReader reader) {
-        var CardNumber = 0L;
+        string? CardNumber = null;
         string? Expiration = null;
         string? SecurityCode = null;
         string? BillingZip = null;
@@ -190,7 +190,7 @@ public class PaymentJsonConverter : JsonConverter<Payment> {
                 reader.Read();
                 switch (property) {
                     case nameof(CardNumber):
-                        CardNumber = reader.GetInt64();
+                        CardNumber = reader.GetString();
                         break;
                     case nameof(Expiration):
                         Expiration = reader.GetString();
@@ -207,7 +207,7 @@ public class PaymentJsonConverter : JsonConverter<Payment> {
             }
 
             if (reader.TokenType == JsonTokenType.EndObject) {
-                return new(CardNumber, Expiration!, SecurityCode!, BillingZip!);
+                return new(CardNumber!, Expiration!, SecurityCode!, BillingZip!);
             }
         }
 
@@ -223,7 +223,7 @@ public class PaymentJsonConverter : JsonConverter<Payment> {
         if (value is Payment.PayWithCard pp) {
             writer.WriteStartObject();
             writer.WritePropertyName(nameof(pp.CardNumber));
-            writer.WriteNumberValue(pp.CardNumber);
+            writer.WriteStringValue(pp.CardNumber);
             writer.WritePropertyName(nameof(pp.Expiration));
             writer.WriteStringValue(pp.Expiration);
             writer.WritePropertyName(nameof(pp.SecurityCode));

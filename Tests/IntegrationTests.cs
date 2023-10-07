@@ -37,7 +37,7 @@ public class IntegrationTests {
             LastName = "Testington",
             Email = "test@gmail.org",
             Phone = "000-123-1234",
-            Payment = new Payment.PayWithCard(1000_2000_3000_4000, "01/25", "123", "12345")
+            Payment = new Payment.PayWithCard("1000200030004000", "01/25", "123", "12345")
         };
         var finalResult = await cart.PlaceOrder(paymentInfo.Validate());
         Assert.False(finalResult.Success);

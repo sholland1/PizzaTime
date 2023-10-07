@@ -94,7 +94,7 @@ public class DominosCart : ICart {
                 Amount = price,
                 CardType = c.Type,
                 Expiration = c.Expiration,
-                Number = $"{c.CardNumber}",
+                Number = c.CardNumber,
                 PostalCode = c.BillingZip,
                 SecurityCode = c.SecurityCode,
                 Type = "CreditCard"
