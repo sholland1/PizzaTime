@@ -157,3 +157,18 @@ Change special instructions
 Click Add to order
 
 The special instructions are ignored on the pizza.
+
+Bug #3
+Type Optima card number starting with 374622
+Reads it as AMEX card
+The regex is wrong in https://cache.dominos.com/olo/6_118_2/assets/build/js/site/base-site.js
+It is /^3746-22/ instead of /^374622/
+
+ServiceMethods
+Delivery
+Carryout
+  Carside
+  DriveThru
+  InStore??
+
+FutureOrderTime [15 minute increments]
