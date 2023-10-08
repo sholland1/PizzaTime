@@ -53,8 +53,14 @@ public abstract record ServiceMethod {
         }
     }
 
-    public sealed record Delivery(Address Address) : ServiceMethod;
-    public sealed record Carryout(PickupLocation Location) : ServiceMethod;
+    public abstract string Name { get; }
+
+    public sealed record Delivery(Address Address) : ServiceMethod {
+        public override string Name => "Delivery";
+    }
+    public sealed record Carryout(PickupLocation Location) : ServiceMethod {
+        public override string Name => "Carryout";
+    }
 }
 
 public record Address(
@@ -64,7 +70,7 @@ public record Address(
 
 public enum AddressType { House, Apartment, Business, Hotel, Other }
 
-public enum PickupLocation { InStore, Window, Carside }
+public enum PickupLocation { InStore, DriveThru, Carside }
 
 public abstract record OrderTiming {
     public T Match<T>(Func<T> now, Func<DateTime, T> later) => this switch {

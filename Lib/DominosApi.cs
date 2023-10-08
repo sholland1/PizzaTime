@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json;
@@ -55,17 +56,21 @@ public class Order2 : Order {
     public string Phone { get; init; } = "";
     public List<OrderPayment> Payments { get; init; } = new();
     public int? Status { get; init; }
-    public List<StatusCode> StatusItems { get; init; } = new();
+    public List<StatusItem> StatusItems { get; init; } = new();
 }
 
-public class StatusCode {
-    public required string Code { get; init; }
+public class StatusItem {
+    public string Code { get; set; } = "";
+    public int PulseCode { get; set; } = 0;
+    public string PulseText { get; set; } = "";
+    public override string ToString() =>
+        $"Code: \"{Code}\", PulseCode: {PulseCode}, PulseText: \"{PulseText}\"";
 }
 
 public class PlaceResponse {
     public Order2 Order { get; init; } = new();
     public int? Status { get; init; }
-    public List<StatusCode> StatusItems { get; init; } = new();
+    public List<StatusItem> StatusItems { get; init; } = new();
 }
 
 public class OrderPayment {
@@ -97,6 +102,7 @@ public class PricedOrder {
     public List<Product> Products { get; set; } = new();
     public Amounts Amounts { get; set; } = new();
     public string EstimatedWaitMinutes { get; set; } = "";
+    public List<Coupon> Coupons { get; set; } = new();
 }
 
 public class Amounts {
@@ -109,10 +115,28 @@ public class Order {
     public string ServiceMethod { get; set; } = "";
     public string StoreID { get; set; } = "0";
     public List<Coupon> Coupons { get; set; } = new();
+    public OrderAddress? Address { get; set; }
+    public string? FutureOrderTime { get; set; }
+}
+
+public class OrderAddress {
+    public required string City { get; set; }
+    public required string PostalCode { get; set; }
+    public required string Region { get; set; }
+    public required string Street { get; set; }
+    public required string StreetName { get; set; }
+    public required string StreetNumber { get; set; }
+    public required string Type { get; set; }
+    public string? UnitNumber { get; set; }
+    public string? UnitType { get; set; }
 }
 
 public class Coupon {
+    [SetsRequiredMembers]
+    public Coupon(string code) => Code = code;
     public required string Code { get; init; }
+    public int Status { get; init; } = 0;
+    public List<StatusItem> StatusItems { get; init; } = new();
 }
 
 public class Options : Dictionary<string, Dictionary<string, string>?> {

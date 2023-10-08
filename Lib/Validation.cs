@@ -177,10 +177,11 @@ public class OrderInfoValidator : AbstractValidator<UnvalidatedOrderInfo> {
 
 public class AddressValidator : AbstractValidator<Address> {
     public AddressValidator() {
-        RuleFor(d => d.AddressType).IsInEnum();
-        RuleFor(d => d.Apt).GreaterThanOrEqualTo(0);
-        RuleFor(d => d.State).Matches("^[A-Z][A-Z]$");
-        RuleFor(d => d.ZipCode).Matches("^\\d{5}$");
+        RuleFor(a => a.StreetAddress).Matches("^\\d+ ");
+        RuleFor(a => a.AddressType).IsInEnum();
+        RuleFor(a => a.Apt).GreaterThanOrEqualTo(0);
+        RuleFor(a => a.State).Matches("^[A-Z]{2}$");
+        RuleFor(a => a.ZipCode).Matches("^\\d{5}$");
     }
 }
 

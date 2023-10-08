@@ -37,7 +37,7 @@ public static class TestOrder {
             new("3", new ServiceMethod.Delivery(new(AddressType.Business, "The Business", "1234 Main St", 123, "12345", "ACity", "NY")), new OrderTiming.Later(new(2021, 10, 30, 21, 30, 0))),
             "DeliveryLater.json", "DeliveryLaterSummary.txt");
         yield return new(
-            new("4", new ServiceMethod.Carryout(PickupLocation.Window), new OrderTiming.Later(new(2021, 10, 31, 21, 30, 0))),
+            new("4", new ServiceMethod.Carryout(PickupLocation.DriveThru), new OrderTiming.Later(new(2021, 10, 31, 21, 30, 0))),
             "CarryoutLater.json", "CarryoutLaterSummary.txt");
     }
 }

@@ -15,7 +15,7 @@ public class IntegrationTests {
 
          UnvalidatedOrderInfo orderInfo = new() {
             StoreId = storeID,
-            ServiceMethod = new ServiceMethod.Carryout(PickupLocation.Window),
+            ServiceMethod = new ServiceMethod.Carryout(PickupLocation.DriveThru),
             Timing = new OrderTiming.Now()
         };
         TestDominosCart cart = new(api, orderInfo.Validate());
@@ -27,6 +27,8 @@ public class IntegrationTests {
         }
 
         var products = pizzas.Select((p, i) => p.ToProduct(i + 1)).ToList();
+        Coupon coupon = new("9220");
+        cart.AddCoupon(coupon);
 
         var result = await cart.GetSummary();
         Assert.True(result.Success);
