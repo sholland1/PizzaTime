@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -23,7 +24,9 @@ public class IntegrationTests {
         var pizzas = TestPizza.ValidPizzas().Select(p => p.Validate()).ToList();
 
         foreach (var p in pizzas) {
-            _ = await cart.AddPizza(p);
+            var pResult = await cart.AddPizza(p);
+            DebugWriteResult(pResult);
+            Thread.Sleep(1000);
         }
 
         var products = pizzas.Select((p, i) => p.ToProduct(i + 1)).ToList();
@@ -31,6 +34,7 @@ public class IntegrationTests {
         cart.AddCoupon(coupon);
 
         var result = await cart.GetSummary();
+        DebugWriteResult(result);
         Assert.True(result.Success);
         Assert.Equal(products, cart.Products);
 
@@ -42,8 +46,12 @@ public class IntegrationTests {
             Payment = new Payment.PayWithCard("1000200030004000", "01/25", "123", "12345")
         };
         var finalResult = await cart.PlaceOrder(paymentInfo.Validate());
+        DebugWriteResult(finalResult);
         Assert.False(finalResult.Success);
     }
+
+    private static void DebugWriteResult(CartResult result) =>
+        Debug.WriteLine($"Success: {result.Success}, Message:\n{result.Message}");
 
     private class TestDominosCart : DominosCart {
         public TestDominosCart(IOrderApi api, OrderInfo orderInfo) : base(api, orderInfo) { }
@@ -52,8 +60,8 @@ public class IntegrationTests {
 }
 
 class DummyLogger<T> : ILogger<T> {
-    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => default;
     public bool IsEnabled(LogLevel logLevel) => true;
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
-        Console.WriteLine(formatter(state, exception));
+        Debug.WriteLine(formatter(state, exception));
 }
