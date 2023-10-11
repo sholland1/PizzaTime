@@ -25,5 +25,5 @@ public class PizzaRepository : IPizzaRepo {
     public NewOrder? GetDefaultOrder() =>
         DeserializeFromFile<UnvalidatedOrder>("defaultOrder.json")?.Validate();
 
-    public PaymentInfo? GetDefaultPaymentInfo() => GetPaymentInfo("defaultPaymentInfo.json");
+    public PaymentInfo? GetDefaultPaymentInfo() => GetPaymentInfo("defaultPaymentInfo");
 }

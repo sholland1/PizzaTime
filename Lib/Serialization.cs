@@ -15,8 +15,17 @@ public static class PizzaSerializer {
             new ServiceMethodJsonConverter(),
             new OrderTimingJsonCoverter(),
             new OptionsJsonConverter(),
+            new CouponJsonCoverter(),
         }
     };
+}
+
+public class CouponJsonCoverter : JsonConverter<Coupon> {
+    public override Coupon? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+        new(reader.GetString()!);
+
+    public override void Write(Utf8JsonWriter writer, Coupon value, JsonSerializerOptions options) =>
+        writer.WriteStringValue(value.Code);
 }
 
 public class OptionsJsonConverter : JsonConverter<Options> {
