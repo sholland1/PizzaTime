@@ -162,12 +162,12 @@ public class ServiceMethodJsonConverter : JsonConverter<ServiceMethod> {
             location => writer.WriteStringValue($"Carryout - {location}"));
 }
 
-public class PaymentJsonConverter : JsonConverter<Payment> {
-    public override Payment? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+public class PaymentJsonConverter : JsonConverter<UnvalidatedPaymentInfo> {
+    public override UnvalidatedPaymentInfo? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         if (reader.TokenType == JsonTokenType.String) {
             var value = reader.GetString();
             return value == "PayAtStore"
-                ? new Payment.PayAtStore()
+                ? PaymentInfo.PayAtStoreInstance
                 : throw new NotSupportedException($"Invalid Payment! Value: {value}");
         }
 
@@ -178,7 +178,7 @@ public class PaymentJsonConverter : JsonConverter<Payment> {
         throw new NotSupportedException($"Invalid Payment! Token: {reader.TokenType}");
     }
 
-    private static Payment.PayWithCard ReadPayWithCard(ref Utf8JsonReader reader) {
+    private static UnvalidatedPaymentInfo.PayWithCard ReadPayWithCard(ref Utf8JsonReader reader) {
         string? CardNumber = null;
         string? Expiration = null;
         string? SecurityCode = null;
@@ -214,27 +214,36 @@ public class PaymentJsonConverter : JsonConverter<Payment> {
         throw new NotSupportedException($"Invalid Payment.PayWithCard! Token: {reader.TokenType}");
     }
 
-    public override void Write(Utf8JsonWriter writer, Payment value, JsonSerializerOptions options) {
-        if (value is Payment.PayAtStore p) {
+    public override void Write(Utf8JsonWriter writer, UnvalidatedPaymentInfo value, JsonSerializerOptions options) {
+        if (value is UnvalidatedPaymentInfo.PayAtStore or PaymentInfo.ValidatedPayAtStore) {
             writer.WriteStringValue("PayAtStore");
             return;
         }
         
-        if (value is Payment.PayWithCard pp) {
-            writer.WriteStartObject();
-            writer.WritePropertyName(nameof(pp.CardNumber));
-            writer.WriteStringValue(pp.CardNumber);
-            writer.WritePropertyName(nameof(pp.Expiration));
-            writer.WriteStringValue(pp.Expiration);
-            writer.WritePropertyName(nameof(pp.SecurityCode));
-            writer.WriteStringValue(pp.SecurityCode);
-            writer.WritePropertyName(nameof(pp.BillingZip));
-            writer.WriteStringValue(pp.BillingZip);
-            writer.WriteEndObject();
+        if (value is UnvalidatedPaymentInfo.PayWithCard p) {
+            SerializeCard(writer, p.CardNumber, p.Expiration, p.SecurityCode, p.BillingZip);
+            return;
+        }
+
+        if (value is PaymentInfo.ValidatedPayWithCard pp) {
+            SerializeCard(writer, pp.CardNumber, pp.Expiration, pp.SecurityCode, pp.BillingZip);
             return;
         }
 
         throw new NotSupportedException($"Invalid Payment! Value: {value}");
+
+        void SerializeCard(Utf8JsonWriter writer, string CardNumber, string Expiration, string SecurityCode, string BillingZip) {
+            writer.WriteStartObject();
+            writer.WritePropertyName(nameof(CardNumber));
+            writer.WriteStringValue(CardNumber);
+            writer.WritePropertyName(nameof(Expiration));
+            writer.WriteStringValue(Expiration);
+            writer.WritePropertyName(nameof(SecurityCode));
+            writer.WriteStringValue(SecurityCode);
+            writer.WritePropertyName(nameof(BillingZip));
+            writer.WriteStringValue(BillingZip);
+            writer.WriteEndObject();
+        }
     }
 }
 

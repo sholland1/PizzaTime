@@ -7,7 +7,7 @@ public class UnvalidatedOrderInfo {
     public required ServiceMethod ServiceMethod { get; init; }
     public required OrderTiming Timing { get; init; }
 
-    public UnvalidatedOrderInfo() {}
+    public UnvalidatedOrderInfo() { }
 
     [SetsRequiredMembers]
     public UnvalidatedOrderInfo(string storeId, ServiceMethod serviceMethod, OrderTiming timing) {
@@ -18,7 +18,7 @@ public class UnvalidatedOrderInfo {
 
     [SetsRequiredMembers]
     public UnvalidatedOrderInfo(UnvalidatedOrderInfo o) :
-        this(o.StoreId, o.ServiceMethod, o.Timing) {}
+        this(o.StoreId, o.ServiceMethod, o.Timing) { }
 
     public static bool operator ==(UnvalidatedOrderInfo? a, UnvalidatedOrderInfo? b) => Equals(a, b);
     public static bool operator !=(UnvalidatedOrderInfo? a, UnvalidatedOrderInfo? b) => !Equals(a, b);
@@ -91,38 +91,35 @@ public abstract record OrderTiming {
     public sealed record Later(DateTime DateTime) : OrderTiming;
 }
 
-public class UnvalidatedPaymentInfo {
+public class UnvalidatedPersonalInfo {
     public required string FirstName { get; init; }
     public required string LastName { get; init; }
     public required string Email { get; init; }
     public required string Phone { get; init; }
-    public required Payment Payment { get; init; }
 
-    public UnvalidatedPaymentInfo() {}
+    public UnvalidatedPersonalInfo() { }
 
     [SetsRequiredMembers]
-    public UnvalidatedPaymentInfo(string firstName, string lastName, string email, string phone, Payment payment) {
+    public UnvalidatedPersonalInfo(string firstName, string lastName, string email, string phone) {
         FirstName = firstName;
         LastName = lastName;
         Email = email;
         Phone = phone;
-        Payment = payment;
     }
 
     [SetsRequiredMembers]
-    public UnvalidatedPaymentInfo(UnvalidatedPaymentInfo p) :
-        this(p.FirstName, p.LastName, p.Email, p.Phone, p.Payment) {}
+    public UnvalidatedPersonalInfo(UnvalidatedPersonalInfo p) :
+        this(p.FirstName, p.LastName, p.Email, p.Phone) { }
 
-    public static bool operator ==(UnvalidatedPaymentInfo? a, UnvalidatedPaymentInfo? b) => Equals(a, b);
-    public static bool operator !=(UnvalidatedPaymentInfo? a, UnvalidatedPaymentInfo? b) => !Equals(a, b);
+    public static bool operator ==(UnvalidatedPersonalInfo? a, UnvalidatedPersonalInfo? b) => Equals(a, b);
+    public static bool operator !=(UnvalidatedPersonalInfo? a, UnvalidatedPersonalInfo? b) => !Equals(a, b);
 
     public override bool Equals(object? obj) =>
-        obj is UnvalidatedPaymentInfo p
+        obj is UnvalidatedPersonalInfo p
         && FirstName == p.FirstName
         && LastName == p.LastName
         && Email == p.Email
-        && Phone == p.Phone
-        && Payment == p.Payment;
+        && Phone == p.Phone;
 
     public override int GetHashCode() {
         HashCode hash = new();
@@ -130,15 +127,57 @@ public class UnvalidatedPaymentInfo {
         hash.Add(LastName);
         hash.Add(Email);
         hash.Add(Phone);
-        hash.Add(Payment);
         return hash.ToHashCode();
     }
 }
 
-public abstract record Payment {
+public enum PaymentType { PayAtStore, PayWithCard }
+
+public class UnvalidatedOrder {
+    public List<UnvalidatedPizza> Pizzas { get; init; } = new();
+    public required List<Coupon> Coupons { get; init; }
+    public UnvalidatedOrderInfo OrderInfo { get; init; } = default!;
+    public required PaymentType PaymentType { get; init; }
+
+    public UnvalidatedOrder() { }
+
+    [SetsRequiredMembers]
+    public UnvalidatedOrder(List<UnvalidatedPizza> pizzas, List<Coupon> coupons, UnvalidatedOrderInfo orderInfo, PaymentType paymentType) {
+        Pizzas = pizzas;
+        Coupons = coupons;
+        OrderInfo = orderInfo;
+        PaymentType = paymentType;
+    }
+
+    [SetsRequiredMembers]
+    public UnvalidatedOrder(UnvalidatedOrder o) :
+        this(o.Pizzas, o.Coupons, o.OrderInfo, o.PaymentType) { }
+
+    public static bool operator ==(UnvalidatedOrder? a, UnvalidatedOrder? b) => Equals(a, b);
+    public static bool operator !=(UnvalidatedOrder? a, UnvalidatedOrder? b) => !Equals(a, b);
+
+    public override bool Equals(object? obj) =>
+        obj is UnvalidatedOrder p
+        && Pizzas.SequenceEqual(p.Pizzas)
+        && Coupons.SequenceEqual(p.Coupons)
+        && OrderInfo == p.OrderInfo
+        && PaymentType == p.PaymentType;
+
+    public override int GetHashCode() {
+        HashCode hash = new();
+        hash.Add(Pizzas);
+        hash.Add(Coupons);
+        hash.Add(OrderInfo);
+        hash.Add(PaymentType);
+        return hash.ToHashCode();
+    }
+}
+
+public abstract record UnvalidatedPaymentInfo {
     public T Match<T>(Func<T> store, Func<PayWithCard, T> card) => this switch {
-        PayAtStore => store(),
+        PayAtStore or PaymentInfo.ValidatedPayAtStore => store(),
         PayWithCard c => card(c),
+        PaymentInfo.ValidatedPayWithCard c => card(c),
         _ => throw new UnreachableException($"Invalid Payment! {this}")
     };
 
@@ -146,38 +185,41 @@ public abstract record Payment {
         switch (this) {
             case PayAtStore: store(); break;
             case PayWithCard c: card(c); break;
+            case PaymentInfo.ValidatedPayWithCard c: card(c); break;
             default: throw new UnreachableException($"Invalid Payment! {this}");
         }
     }
 
-    public sealed record PayAtStore : Payment;
+    public sealed record PayAtStore : UnvalidatedPaymentInfo {
+        internal PayAtStore() { }
+    }
+
+    //https://cache.dominos.com/olo/6_118_2/assets/build/js/site/base-site.js
+    protected string GetCardType(string s) {
+        if (Regex.IsMatch(s, @"^5[1-5]"))
+            return "MASTERCARD";
+        if (Regex.IsMatch(s, @"^6(?:011|5)"))
+            return "DISCOVER";
+        if (Regex.IsMatch(s, @"^5[06-9]|^6\d"))
+            return "MAESTRO";
+        if (Regex.IsMatch(s, @"^4"))
+            return "VISA";
+        if (Regex.IsMatch(s, @"^374622"))
+            return "OPTIMA";
+        if (Regex.IsMatch(s, @"^3[47]"))
+            return "AMEX";
+        if (Regex.IsMatch(s, @"^(?:2131|1800|35)"))
+            return "JCB";
+        if (Regex.IsMatch(s, @"^3(?:0[0-5]|[68])"))
+            return "DINERS";
+        if (Regex.IsMatch(s, @"^(?:5[1-5]\d{2}|222[1-9]|22[3-9]\d|2[3-6]\d{2}|27[01]\d|2720)"))
+            return "MASTERCARD";
+        return "";
+    }
+
     public sealed record PayWithCard(
         string CardNumber, string Expiration,
-        string SecurityCode, string BillingZip) : Payment {
-        public string Type {
-            //https://cache.dominos.com/olo/6_118_2/assets/build/js/site/base-site.js
-            get {
-                var s = CardNumber;
-                if (Regex.IsMatch(s, @"^5[1-5]"))
-                    return "MASTERCARD";
-                if (Regex.IsMatch(s, @"^6(?:011|5)"))
-                    return "DISCOVER";
-                if (Regex.IsMatch(s, @"^5[06-9]|^6\d"))
-                    return "MAESTRO";
-                if (Regex.IsMatch(s, @"^4"))
-                    return "VISA";
-                if (Regex.IsMatch(s, @"^374622"))
-                    return "OPTIMA";
-                if (Regex.IsMatch(s, @"^3[47]"))
-                    return "AMEX";
-                if (Regex.IsMatch(s, @"^(?:2131|1800|35)"))
-                    return "JCB";
-                if (Regex.IsMatch(s, @"^3(?:0[0-5]|[68])"))
-                    return "DINERS";
-                if (Regex.IsMatch(s, @"^(?:5[1-5]\d{2}|222[1-9]|22[3-9]\d|2[3-6]\d{2}|27[01]\d|2720)"))
-                    return "MASTERCARD";
-                return "";
-            }
-        }
+        string SecurityCode, string BillingZip) : UnvalidatedPaymentInfo {
+        public string Type => GetCardType(CardNumber);
     }
 }

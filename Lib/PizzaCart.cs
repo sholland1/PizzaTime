@@ -2,8 +2,10 @@ using System.Diagnostics;
 
 public interface ICart {
     Task<CartResult> AddPizza(Pizza userPizza);
+    void AddCoupon(Coupon coupon);
+    void RemoveCoupon(Coupon coupon);
     Task<CartResult> GetSummary();
-    Task<CartResult> PlaceOrder(PaymentInfo userPayment);
+    Task<CartResult> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment);
 }
 
 public class DominosCart : ICart {
@@ -87,7 +89,7 @@ public class DominosCart : ICart {
         return new(true, $"  Price: ${_currentTotal}\n  Estimated Wait: {response.Order.EstimatedWaitMinutes} minutes");
     }
 
-    public async Task<CartResult> PlaceOrder(PaymentInfo userPayment) {
+    public async Task<CartResult> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment) {
         if (_products.Count == 0 || _orderID == null || _currentTotal == null) {
             return new(false, "Cart is empty.");
         }
@@ -98,10 +100,10 @@ public class DominosCart : ICart {
             Order = new() {
                 Address = address,
                 Coupons = _coupons.ToList(),
-                Email = userPayment.Email,
-                FirstName = userPayment.FirstName,
-                LastName = userPayment.LastName,
-                Phone = userPayment.Phone,
+                Email = personalInfo.Email,
+                FirstName = personalInfo.FirstName,
+                LastName = personalInfo.LastName,
+                Phone = personalInfo.Phone,
                 OrderID = _orderID,
                 Payments = new() { GetPayment(userPayment, _currentTotal.Value) },
                 Products = _products,
@@ -137,7 +139,7 @@ public class DominosCart : ICart {
     }
 
     private static OrderPayment GetPayment(PaymentInfo payment, decimal price) =>
-        payment.Payment.Match<OrderPayment>(
+        payment.Match<OrderPayment>(
             () => throw new NotImplementedException(),
             c => new() {
                 Amount = price,
@@ -317,6 +319,10 @@ public class DummyPizzaCart2 : ICart {
     public DummyPizzaCart2(bool cartFail = false, bool priceFail = false, bool orderFail = false) =>
         (_cartFail, _priceFail, _orderFail) = (cartFail, priceFail, orderFail);
 
+    public void AddCoupon(Coupon coupon) {
+        throw new NotImplementedException();
+    }
+
     public Task<CartResult> AddPizza(Pizza userPizza) {
         CartResult result = new(!_cartFail,
             _cartFail
@@ -342,6 +348,14 @@ public class DummyPizzaCart2 : ICart {
             : "Order was placed.");
         Calls.Add(new(nameof(PlaceOrder), userPayment, result));
         return Task.FromResult(result);
+    }
+
+    public Task<CartResult> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment) {
+        throw new NotImplementedException();
+    }
+
+    public void RemoveCoupon(Coupon coupon) {
+        throw new NotImplementedException();
     }
 }
 

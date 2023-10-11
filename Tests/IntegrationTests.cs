@@ -38,14 +38,14 @@ public class IntegrationTests {
         Assert.True(result.Success);
         Assert.Equal(products, cart.Products);
 
-        UnvalidatedPaymentInfo paymentInfo = new() {
+        UnvalidatedPersonalInfo personalInfo = new() {
             FirstName = "Test",
             LastName = "Testington",
             Email = "test@gmail.org",
-            Phone = "000-123-1234",
-            Payment = new Payment.PayWithCard("1000200030004000", "01/25", "123", "12345")
+            Phone = "000-123-1234"
         };
-        var finalResult = await cart.PlaceOrder(paymentInfo.Validate());
+        var payment = new UnvalidatedPaymentInfo.PayWithCard("1000200030004000", "01/25", "123", "12345");
+        var finalResult = await cart.PlaceOrder(personalInfo.Validate(), payment.Validate());
         DebugWriteResult(finalResult);
         Assert.False(finalResult.Success);
     }

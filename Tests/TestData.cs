@@ -52,16 +52,12 @@ public static class TestPayment {
     public static IEnumerable<object[]> GenerateInvalidPayments() => InvalidPayments().Select(p => new[] { p });
 
     private static IEnumerable<InvalidData> InvalidPayments() {
-        yield return new("InvalidPaymentInfo0.json", new[] { "Email", "Payment.BillingZip", "Payment.CardNumber", "Payment.Expiration", "Payment.SecurityCode" , "Phone"});
+        yield return new("InvalidPaymentInfo0.json", new[] { "BillingZip", "CardNumber", "Expiration", "SecurityCode"});
     }
 
     public static IEnumerable<ValidData> ValidPayments() {
-        UnvalidatedPaymentInfo payAtStore = new(
-            "FName", "LName", "user@yahoo.com", "123-123-1234",
-            new Payment.PayAtStore());
-        Payment.PayWithCard cardPayment = new("1000200030004000", "01/23", "123", "12345");
-        UnvalidatedPaymentInfo payWithCard = new(
-            "FName", "LName", "user@yahoo.com", "123-123-1234", cardPayment);
+        UnvalidatedPaymentInfo payAtStore = PaymentInfo.PayAtStoreInstance;
+        UnvalidatedPaymentInfo payWithCard = new UnvalidatedPaymentInfo.PayWithCard("1000200030004000", "01/23", "123", "12345");
 
         yield return new(payWithCard, "defaultPaymentInfo.json", "PayWithCardSummary.txt");
         yield return new(payAtStore, "PayAtStoreInfo.json", "PayAtStoreSummary.txt");
@@ -186,6 +182,22 @@ public class DummyPizzaRepository : IPizzaRepo {
     public Pizza GetPizza(string name) => _pizzas[name].Validate();
     public OrderInfo GetOrderInfo(string name) => _orderInfos[name];
     public PaymentInfo GetPaymentInfo(string name) => _paymentInfos[name];
+
+    public PersonalInfo? GetPersonalInfo() => new UnvalidatedPersonalInfo {
+        FirstName = "Test",
+        LastName = "Testington",
+        Email = "test@gmail.org",
+        Phone = "000-123-1234"
+    }.Validate();
+
+    public NewOrder? GetDefaultOrder() => new UnvalidatedOrder {
+        Pizzas = new() { _pizzas.First().Value.Validate() },
+        Coupons = new() { new("1234") },
+        OrderInfo = _orderInfos.First().Value.Validate(),
+        PaymentType = PaymentType.PayWithCard
+    }.Validate();
+
+    public PaymentInfo? GetDefaultPaymentInfo() => _paymentInfos.First().Value.Validate();
 }
 
 public class DummyConsoleUI : IConsoleUI {
@@ -206,6 +218,7 @@ public class DummyPizzaCart : ICart {
     private readonly bool _cartFail;
     private readonly bool _priceFail;
     private readonly bool _orderFail;
+    public readonly HashSet<Coupon> Coupons = new();
 
     public List<MethodCall> Calls = new();
 
@@ -230,14 +243,17 @@ public class DummyPizzaCart : ICart {
         return Task.FromResult(result);
     }
 
-    public Task<CartResult> PlaceOrder(PaymentInfo userPayment) {
+    public Task<CartResult> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment) {
         CartResult result = new(!_orderFail,
             _orderFail
             ? "Failed to place order."
             : "Order was placed.");
-        Calls.Add(new(nameof(PlaceOrder), userPayment, result));
+        Calls.Add(new(nameof(PlaceOrder), (personalInfo, userPayment), result));
         return Task.FromResult(result);
     }
+
+    public void AddCoupon(Coupon coupon) => Coupons.Add(coupon);
+    public void RemoveCoupon(Coupon coupon) => Coupons.Remove(coupon);
 }
 
 public record MethodCall(string Method, object Body, CartResult Result);

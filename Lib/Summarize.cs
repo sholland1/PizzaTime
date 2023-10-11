@@ -18,11 +18,14 @@ public static class SummaryUtils {
         }.Where(s => s != "")
         .Select(s => $"  {s}"));
 
-    public static string Summarize(this UnvalidatedPaymentInfo p) => $"""
+    public static string Summarize(this UnvalidatedPersonalInfo p) => $"""
         Name: {p.FirstName} {p.LastName}
         Email: {p.Email}
         Phone: {p.Phone}
-        {p.Payment.Match(
+        """;
+
+    public static string Summarize(this UnvalidatedPaymentInfo p) => $"""
+        {p.Match(
             () => "Pay at Store",
             c => $"Pay with card ending in {c.CardNumber[(^4)..]}")}
         """;

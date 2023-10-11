@@ -76,7 +76,7 @@ public abstract record Cheese {
         this switch {
             Full f => full(f.Amount),
             Sides s => sides(s.Left, s.Right),
-            None n => none(),
+            None => none(),
             _ => throw new UnreachableException($"Invalid Cheese! {this}")
         };
 
@@ -84,7 +84,7 @@ public abstract record Cheese {
         switch (this) {
             case Full f: full(f.Amount); break;
             case Sides s: sides(s.Left, s.Right); break;
-            case None n: none(); break;
+            case None: none(); break;
             default: throw new UnreachableException($"Invalid Cheese! {this}");
         }
     }

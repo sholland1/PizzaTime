@@ -7,19 +7,36 @@ public class PizzaController {
         (_repo, _startOrder, _consoleUI) = (repo, startOrder, consoleUI);
 
     public async Task FastPizza() {
-        var userPizza = _repo.GetPizza("defaultPizza");
-        var userOrder = _repo.GetOrderInfo("defaultOrderInfo");
-        var userPayment = _repo.GetPaymentInfo("defaultPaymentInfo");
+        var userOrder = _repo.GetDefaultOrder()
+            ?? throw new InvalidOperationException("Implement create order.");
 
-        var cart = _startOrder(userOrder);
+        var personalInfo = _repo.GetPersonalInfo()
+            ?? throw new InvalidOperationException("Implement create personal info");
 
-        var cartResult = await cart.AddPizza(userPizza);
-        if (!cartResult.Success) {
-            _consoleUI.PrintLine($"Pizza was not added to cart: {cartResult.Message}");
-            return;
+        var userPayment = userOrder.PaymentType == PaymentType.PayAtStore
+            ? PaymentInfo.PayAtStoreInstance
+            : _repo.GetDefaultPaymentInfo()
+                ?? throw new InvalidOperationException("Implement create payment info");
+
+        var cart = _startOrder(userOrder.OrderInfo);
+
+        foreach (var pizza in userOrder.Pizzas) {
+            var cartResult = await cart.AddPizza(pizza);
+            if (!cartResult.Success) {
+                _consoleUI.PrintLine($"Pizza was not added to cart: {cartResult.Message}");
+                return;
+            }
+
+            _consoleUI.PrintLine($"Pizza was added to cart.\n{cartResult.Summarize()}\n");
         }
 
-        _consoleUI.PrintLine($"Pizza was added to cart.\n{cartResult.Summarize()}\n");
+        foreach (var coupon in userOrder.Coupons) {
+            cart.AddCoupon(coupon);
+            _consoleUI.PrintLine($"Coupon {coupon.Code} was added to cart.");
+        }
+        if (userOrder.Coupons.Any()) {
+            _consoleUI.PrintLine();
+        }
 
         var priceResult = await cart.GetSummary();
         if (!priceResult.Success) {
@@ -39,7 +56,7 @@ public class PizzaController {
 
         _consoleUI.PrintLine("Ordering pizza...");
 
-        var orderResult = await cart.PlaceOrder(userPayment);
+        var orderResult = await cart.PlaceOrder(personalInfo, userPayment);
         if (!orderResult.Success) {
             _consoleUI.PrintLine($"Failed to place order: {orderResult.Message}");
             return;

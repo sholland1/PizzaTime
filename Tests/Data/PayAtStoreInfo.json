@@ -1,7 +1,1 @@
-{
-  "FirstName": "FName",
-  "LastName": "LName",
-  "Email": "user@yahoo.com",
-  "Phone": "123-123-1234",
-  "Payment": "PayAtStore"
-}
+"PayAtStore"

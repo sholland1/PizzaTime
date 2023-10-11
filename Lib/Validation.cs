@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using static BuilderHelpers;
@@ -114,6 +115,17 @@ public static class ValidationHelpers {
         return new(pizza);
     }
 
+    public static NewOrder Validate(this UnvalidatedOrder order) {
+        OrderValidator validator = new();
+        validator.ValidateAndThrow(order);
+        return ConvertToValidOrder(order);
+    }
+
+    private static NewOrder ConvertToValidOrder(UnvalidatedOrder order) {
+        var validatedPizzas = order.Pizzas.Select(p => new Pizza(p)).ToList();
+        return new(validatedPizzas, order.Coupons, new(order.OrderInfo), order.PaymentType);
+    }
+
     public static OrderInfo Validate(this UnvalidatedOrderInfo orderInfo) {
         OrderInfoValidator validator = new();
         validator.ValidateAndThrow(orderInfo);
@@ -123,7 +135,15 @@ public static class ValidationHelpers {
     public static PaymentInfo Validate(this UnvalidatedPaymentInfo paymentInfo) {
         PaymentInfoValidator validator = new();
         validator.ValidateAndThrow(paymentInfo);
-        return new(paymentInfo);
+        return paymentInfo.Match(
+            () => PaymentInfo.PayAtStoreInstance,
+            p => new PaymentInfo.ValidatedPayWithCard(p.CardNumber, p.Expiration, p.SecurityCode, p.BillingZip));
+    }
+
+    public static PersonalInfo Validate(this UnvalidatedPersonalInfo personalInfo) {
+        PersonalInfoValidator validator = new();
+        validator.ValidateAndThrow(personalInfo);
+        return new(personalInfo);
     }
 
     public static Validation<Pizza> Parse(this UnvalidatedPizza pizza) {
@@ -132,6 +152,15 @@ public static class ValidationHelpers {
         return result.IsValid
             ? new Validation<Pizza>.Success(new(pizza))
             : new Validation<Pizza>.Failure(result.Errors);
+    }
+
+    public static Validation<NewOrder> Parse(this UnvalidatedOrder order) {
+        OrderValidator validator = new();
+        var result = validator.Validate(order);
+
+        return result.IsValid
+            ? new Validation<NewOrder>.Success(ConvertToValidOrder(order))
+            : new Validation<NewOrder>.Failure(result.Errors);
     }
 
     public static Validation<OrderInfo> Parse(this UnvalidatedOrderInfo orderInfo) {
@@ -146,14 +175,56 @@ public static class ValidationHelpers {
         PaymentInfoValidator validator = new();
         var result = validator.Validate(paymentInfo);
         return result.IsValid
-            ? new Validation<PaymentInfo>.Success(new(paymentInfo))
+            ? new Validation<PaymentInfo>.Success(paymentInfo.Match(
+                () => PaymentInfo.PayAtStoreInstance,
+                p => new PaymentInfo.ValidatedPayWithCard(p.CardNumber, p.Expiration, p.SecurityCode, p.BillingZip)))
             : new Validation<PaymentInfo>.Failure(result.Errors);
+    }
+
+    public static Validation<PersonalInfo> Parse(this UnvalidatedPersonalInfo personalInfo) {
+        PersonalInfoValidator validator = new();
+        var result = validator.Validate(personalInfo);
+        return result.IsValid
+            ? new Validation<PersonalInfo>.Success(new(personalInfo))
+            : new Validation<PersonalInfo>.Failure(result.Errors);
     }
 }
 
-public class PaymentInfo : UnvalidatedPaymentInfo {
+public class PersonalInfo : UnvalidatedPersonalInfo {
     [SetsRequiredMembers]
-    internal PaymentInfo(UnvalidatedPaymentInfo paymentInfo) : base(paymentInfo) { }
+    internal PersonalInfo(UnvalidatedPersonalInfo personalInfo) : base(personalInfo) { }
+}
+
+public record PaymentInfo : UnvalidatedPaymentInfo {
+
+    public sealed record ValidatedPayAtStore : PaymentInfo {
+        public static implicit operator PayAtStore(ValidatedPayAtStore p) => new();
+    }
+
+    public sealed record ValidatedPayWithCard(
+        string CardNumber, string Expiration,
+        string SecurityCode, string BillingZip) : PaymentInfo {
+        public string Type => GetCardType(CardNumber);
+
+        public static implicit operator PayWithCard(ValidatedPayWithCard p) =>
+            new(p.CardNumber, p.Expiration, p.SecurityCode, p.BillingZip);
+    }
+
+    public static PaymentInfo PayAtStoreInstance { get; } = new ValidatedPayAtStore();
+
+    public T Match<T>(Func<T> store, Func<ValidatedPayWithCard, T> card) => this switch {
+        ValidatedPayAtStore => store(),
+        ValidatedPayWithCard c => card(c),
+        _ => throw new UnreachableException($"Invalid Payment! {this}")
+    };
+
+    public void Match(Action store, Action<ValidatedPayWithCard> card) {
+        switch (this) {
+            case ValidatedPayAtStore: store(); break;
+            case ValidatedPayWithCard c: card(c); break;
+            default: throw new UnreachableException($"Invalid Payment! {this}");
+        }
+    }
 }
 
 public class OrderInfo : UnvalidatedOrderInfo {
@@ -161,11 +232,34 @@ public class OrderInfo : UnvalidatedOrderInfo {
     internal OrderInfo(UnvalidatedOrderInfo orderInfo) : base(orderInfo) { }
 }
 
-public class Pizza : UnvalidatedPizza {
-    internal Pizza(UnvalidatedPizza pizza) : base(pizza) {}
+public class NewOrder : UnvalidatedOrder {
+    [SetsRequiredMembers]
+    internal NewOrder(List<Pizza> pizzas, List<Coupon> coupons, OrderInfo orderInfo, PaymentType paymentType) {
+        base.Pizzas = pizzas.OfType<UnvalidatedPizza>().ToList();
+        base.OrderInfo = orderInfo;
+        Coupons = coupons;
+        PaymentType = paymentType;
+        Pizzas = pizzas;
+        OrderInfo = orderInfo;
+    }
+    public new List<Pizza> Pizzas { get; }
+    public new OrderInfo OrderInfo { get; }
 }
 
-public class OrderInfoValidator : AbstractValidator<UnvalidatedOrderInfo> {
+public class Pizza : UnvalidatedPizza {
+    internal Pizza(UnvalidatedPizza pizza) : base(pizza) { }
+}
+
+internal class OrderValidator : AbstractValidator<UnvalidatedOrder> {
+    public OrderValidator() {
+        RuleFor(o => o.Pizzas).NotEmpty();
+        RuleForEach(o => o.Pizzas).SetValidator(new PizzaValidator());
+        RuleFor(o => o.OrderInfo).SetValidator(new OrderInfoValidator());
+        RuleFor(o => o.PaymentType).IsInEnum();
+    }
+}
+
+internal class OrderInfoValidator : AbstractValidator<UnvalidatedOrderInfo> {
     public OrderInfoValidator() {
         RuleFor(o => int.Parse(o.StoreId)).GreaterThanOrEqualTo(0).WithName("StoreId");
         When(o => o.ServiceMethod is ServiceMethod.Carryout,
@@ -175,7 +269,7 @@ public class OrderInfoValidator : AbstractValidator<UnvalidatedOrderInfo> {
     }
 }
 
-public class AddressValidator : AbstractValidator<Address> {
+internal class AddressValidator : AbstractValidator<Address> {
     public AddressValidator() {
         RuleFor(a => a.StreetAddress).Matches("^\\d+ ");
         RuleFor(a => a.AddressType).IsInEnum();
@@ -185,17 +279,21 @@ public class AddressValidator : AbstractValidator<Address> {
     }
 }
 
-public class PaymentInfoValidator : AbstractValidator<UnvalidatedPaymentInfo> {
+internal class PaymentInfoValidator : AbstractValidator<UnvalidatedPaymentInfo> {
     public PaymentInfoValidator() {
-        RuleFor(p => p.Email).EmailAddress();
-        RuleFor(p => p.Phone).Matches(@"\d{3}-\d{3}-\d{4}");
-
-        When(p => p.Payment is Payment.PayWithCard,
-            () => RuleFor(p => (Payment.PayWithCard)p.Payment).SetValidator(new PayWithCardValidator()));
+        When(p => p is UnvalidatedPaymentInfo.PayWithCard,
+            () => RuleFor(p => (UnvalidatedPaymentInfo.PayWithCard)p).SetValidator(new PayWithCardValidator()));
     }
 }
 
-public class PayWithCardValidator : AbstractValidator<Payment.PayWithCard> {
+internal class PersonalInfoValidator : AbstractValidator<UnvalidatedPersonalInfo> {
+    public PersonalInfoValidator() {
+        RuleFor(p => p.Email).EmailAddress();
+        RuleFor(p => p.Phone).Matches(@"\d{3}-\d{3}-\d{4}");
+    }
+}
+
+internal class PayWithCardValidator : AbstractValidator<UnvalidatedPaymentInfo.PayWithCard> {
     public PayWithCardValidator() {
         RuleFor(p => p.CardNumber).CreditCard();
         RuleFor(p => p.Expiration).Must(Utils.MatchesMMyy);
