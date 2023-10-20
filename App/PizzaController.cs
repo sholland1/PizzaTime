@@ -20,14 +20,20 @@ public class PizzaController {
 
         var cart = _startOrder(userOrder.OrderInfo);
 
+        bool firstTime = true;
         foreach (var pizza in userOrder.Pizzas) {
             var cartResult = await cart.AddPizza(pizza);
             if (!cartResult.Success) {
-                _consoleUI.PrintLine($"Pizza was not added to cart: {cartResult.Message}");
+                _consoleUI.PrintLine(cartResult.Message);
                 return;
             }
 
-            _consoleUI.PrintLine($"Pizza was added to cart.\n{cartResult.Summarize()}\n");
+            if (firstTime) {
+                firstTime = false;
+                _consoleUI.PrintLine($"Order ID: {cartResult.OrderID}\n");
+            }
+
+            _consoleUI.PrintLine($"{cartResult.Message} Product Count: {cartResult.ProductCount}\n{pizza.Summarize()}\n");
         }
 
         foreach (var coupon in userOrder.Coupons) {
@@ -44,7 +50,16 @@ public class PizzaController {
             return;
         }
 
-        _consoleUI.PrintLine($"Cart summary:\n{priceResult.Summarize()}\n");
+        _consoleUI.PrintLine(
+            $"""
+            Cart summary:
+            {userOrder.OrderInfo.Summarize()}
+            Estimated Wait: {priceResult.WaitTime}
+            Price: ${priceResult.TotalPrice}
+
+            {userPayment.Summarize()}
+
+            """);
 
         var answer = _consoleUI.Prompt("Confirm order? [Y/n]: ");
         _consoleUI.PrintLine();
@@ -62,7 +77,7 @@ public class PizzaController {
             return;
         }
 
-        _consoleUI.PrintLine($"Order summary:\n{orderResult.Summarize()}");
+        _consoleUI.PrintLine($"Order summary:\n{orderResult.Message}");
         _consoleUI.PrintLine("Done.");
     }
 

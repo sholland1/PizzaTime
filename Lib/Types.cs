@@ -214,7 +214,7 @@ public abstract record UnvalidatedPaymentInfo {
             return "DINERS";
         if (Regex.IsMatch(s, @"^(?:5[1-5]\d{2}|222[1-9]|22[3-9]\d|2[3-6]\d{2}|27[01]\d|2720)"))
             return "MASTERCARD";
-        return "";
+        return "UNKNOWN";
     }
 
     public sealed record PayWithCard(

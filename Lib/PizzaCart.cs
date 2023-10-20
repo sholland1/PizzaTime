@@ -1,11 +1,25 @@
 using System.Diagnostics;
 
 public interface ICart {
-    Task<CartResult> AddPizza(Pizza userPizza);
+    Task<AddPizzaResult> AddPizza(Pizza userPizza);
     void AddCoupon(Coupon coupon);
     void RemoveCoupon(Coupon coupon);
-    Task<CartResult> GetSummary();
+    Task<SummaryResult> GetSummary();
     Task<CartResult> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment);
+}
+
+public class AddPizzaResult : CartResult {
+    public AddPizzaResult(bool success, string message) : base(success, message) { }
+
+    public required int ProductCount { get; init; } 
+    public string? OrderID { get; init; } 
+}
+
+public class SummaryResult : CartResult {
+    public SummaryResult(bool success, string message) : base(success, message) { }
+
+    public string? WaitTime { get; init; }
+    public decimal? TotalPrice { get; init; }
 }
 
 public class DominosCart : ICart {
@@ -15,15 +29,15 @@ public class DominosCart : ICart {
 
     protected List<Product> _products = new();
     private string? _orderID = null;
-    private decimal? _currentTotal = null;
+    private decimal _currentTotal = 0;
 
     public DominosCart(IOrderApi api, OrderInfo orderInfo) => (_api, _orderInfo) = (api, orderInfo);
 
     public void AddCoupon(Coupon coupon) => _coupons.Add(coupon);
     public void RemoveCoupon(Coupon coupon) => _coupons.Remove(coupon);
 
-    public async Task<CartResult> AddPizza(Pizza userPizza) {
-        _currentTotal = null;
+    public async Task<AddPizzaResult> AddPizza(Pizza userPizza) {
+        _currentTotal = 0;
 
         var timing = _orderInfo.Timing.Match<string?>(
             () => null, d => $"{MoveToNext15MinuteInterval(d):yyyy-MM-dd HH:mm:ss}");
@@ -44,7 +58,10 @@ public class DominosCart : ICart {
         _orderID = response.Order.OrderID;
         _products = response.Order.Products.Normalize().ToList();
 
-        return new(true, $"  Product Count: {_products.Count}\n  Order Number: {response.Order.OrderID}");
+        return new(true, "Pizza was added to cart.") {
+            ProductCount = _products.Count,
+            OrderID = response.Order.OrderID
+        };
     }
 
     private static DateTime MoveToNext15MinuteInterval(DateTime d) {
@@ -52,7 +69,7 @@ public class DominosCart : ICart {
         return d.AddMinutes(minutesToAdd);
     }
 
-    public async Task<CartResult> GetSummary() {
+    public async Task<SummaryResult> GetSummary() {
         if (_products.Count == 0 || _orderID == null) {
             return new(false, "Cart is empty.");
         }
@@ -86,11 +103,14 @@ public class DominosCart : ICart {
 
         _currentTotal = response.Order.Amounts.Payment;
 
-        return new(true, $"  Price: ${_currentTotal}\n  Estimated Wait: {response.Order.EstimatedWaitMinutes} minutes");
+        return new(true, "Found order summary.") {
+            TotalPrice = _currentTotal,
+            WaitTime = $"{response.Order.EstimatedWaitMinutes} minutes"
+        };
     }
 
     public async Task<CartResult> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment) {
-        if (_products.Count == 0 || _orderID == null || _currentTotal == null) {
+        if (_products.Count == 0 || _orderID == null || _currentTotal == 0) {
             return new(false, "Cart is empty.");
         }
 
@@ -105,7 +125,7 @@ public class DominosCart : ICart {
                 LastName = personalInfo.LastName,
                 Phone = personalInfo.Phone,
                 OrderID = _orderID,
-                Payments = new() { GetPayment(userPayment, _currentTotal.Value) },
+                Payments = new() { GetPayment(userPayment, _currentTotal) },
                 Products = _products,
                 ServiceMethod = GetDetailedServiceMethod(),
                 StoreID = _orderInfo.StoreId,
@@ -323,17 +343,21 @@ public class DummyPizzaCart2 : ICart {
         throw new NotImplementedException();
     }
 
-    public Task<CartResult> AddPizza(Pizza userPizza) {
-        CartResult result = new(!_cartFail,
+    private int _pizzaCount = 0;
+    public Task<AddPizzaResult> AddPizza(Pizza userPizza) {
+        AddPizzaResult result = new(!_cartFail,
             _cartFail
             ? "Pizza was not added to cart."
-            : "Pizza added to cart.");
+            : "Pizza was added to cart.") {
+                ProductCount = ++_pizzaCount,
+                OrderID = "test"
+            };
         Calls.Add(new(nameof(AddPizza), userPizza, result));
         return Task.FromResult(result);
     }
 
-    public Task<CartResult> GetSummary() {
-        CartResult result = new(!_priceFail,
+    public Task<SummaryResult> GetSummary() {
+        SummaryResult result = new(!_priceFail,
             _priceFail
             ? "Failed to check cart price."
             : $"Cart price is ${Calls.Count(c => c.Method == nameof(AddPizza)) * 8.25:F2}.");
@@ -341,17 +365,13 @@ public class DummyPizzaCart2 : ICart {
         return Task.FromResult(result);
     }
 
-    public Task<CartResult> PlaceOrder(PaymentInfo userPayment) {
+    public Task<CartResult> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment) {
         CartResult result = new(!_orderFail,
             _orderFail
             ? "Failed to place order."
             : "Order was placed.");
         Calls.Add(new(nameof(PlaceOrder), userPayment, result));
         return Task.FromResult(result);
-    }
-
-    public Task<CartResult> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment) {
-        throw new NotImplementedException();
     }
 
     public void RemoveCoupon(Coupon coupon) {
@@ -369,6 +389,4 @@ public class CartResult {
         Success = success;
         Message = message;
     }
-
-    public string Summarize() => Message;
 }

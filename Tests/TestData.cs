@@ -159,7 +159,17 @@ public static class TestPizza {
 }
 
 public class DummyPizzaRepository : IPizzaRepo {
-    private readonly Dictionary<string, UnvalidatedPizza> _pizzas = TestPizza.ValidPizzas().Zip(
+    public Dictionary<string, UnvalidatedOrderInfo> OrderInfos { get; } = TestOrder.ValidOrders()
+        .ToDictionary(
+            p => Path.GetFileNameWithoutExtension(p.JsonFile),
+            p => p.OrderInfo);
+
+    public Dictionary<string, UnvalidatedPaymentInfo> PaymentInfos { get; } = TestPayment.ValidPayments()
+        .ToDictionary(
+            p => Path.GetFileNameWithoutExtension(p.JsonFile),
+            p => p.PaymentInfo);
+
+    public Dictionary<string, UnvalidatedPizza> Pizzas { get; } = ValidPizzas().Zip(
         new[] {
             "defaultPizza",
             nameof(Complex),
@@ -169,19 +179,9 @@ public class DummyPizzaRepository : IPizzaRepo {
         })
         .ToDictionary(p => p.Second, p => p.First);
 
-    private readonly Dictionary<string, OrderInfo> _orderInfos = TestOrder.ValidOrders()
-        .ToDictionary(
-            p => Path.GetFileNameWithoutExtension(p.JsonFile),
-            p => p.OrderInfo.Validate());
-
-    private readonly Dictionary<string, PaymentInfo> _paymentInfos = TestPayment.ValidPayments()
-        .ToDictionary(
-            p => Path.GetFileNameWithoutExtension(p.JsonFile),
-            p => p.PaymentInfo.Validate());
-
-    public Pizza GetPizza(string name) => _pizzas[name].Validate();
-    public OrderInfo GetOrderInfo(string name) => _orderInfos[name];
-    public PaymentInfo GetPaymentInfo(string name) => _paymentInfos[name];
+    public Pizza GetPizza(string name) => Pizzas[name].Validate();
+    public OrderInfo GetOrderInfo(string name) => OrderInfos[name].Validate();
+    public PaymentInfo GetPaymentInfo(string name) => PaymentInfos[name].Validate();
 
     public PersonalInfo? GetPersonalInfo() => new UnvalidatedPersonalInfo {
         FirstName = "Test",
@@ -191,13 +191,13 @@ public class DummyPizzaRepository : IPizzaRepo {
     }.Validate();
 
     public NewOrder? GetDefaultOrder() => new UnvalidatedOrder {
-        Pizzas = new() { _pizzas.First().Value.Validate() },
+        Pizzas = Pizzas.Values.Take(2).ToList(),
         Coupons = new() { new("1234") },
-        OrderInfo = _orderInfos.First().Value.Validate(),
+        OrderInfo = OrderInfos.First().Value,
         PaymentType = PaymentType.PayWithCard
     }.Validate();
 
-    public PaymentInfo? GetDefaultPaymentInfo() => _paymentInfos.First().Value.Validate();
+    public PaymentInfo? GetDefaultPaymentInfo() => PaymentInfos.First().Value.Validate();
 }
 
 public class DummyConsoleUI : IConsoleUI {
@@ -225,20 +225,28 @@ public class DummyPizzaCart : ICart {
     public DummyPizzaCart(bool cartFail = false, bool priceFail = false, bool orderFail = false) =>
         (_cartFail, _priceFail, _orderFail) = (cartFail, priceFail, orderFail);
 
-    public Task<CartResult> AddPizza(Pizza userPizza) {
-        CartResult result = new(!_cartFail,
+    private int _pizzaCount = 0;
+    public Task<AddPizzaResult> AddPizza(Pizza userPizza) {
+        AddPizzaResult result = new(!_cartFail,
             _cartFail
             ? "Pizza was not added to cart."
-            : "Pizza added to cart.");
+            : "Pizza was added to cart.") {
+                ProductCount = ++_pizzaCount,
+                OrderID = "test"
+            };
         Calls.Add(new(nameof(AddPizza), userPizza, result));
         return Task.FromResult(result);
     }
 
-    public Task<CartResult> GetSummary() {
-        CartResult result = new(!_priceFail,
+    public Task<SummaryResult> GetSummary() {
+        var orderTotal = 8.25m * Calls.Count(c => c.Method == nameof(AddPizza));
+        SummaryResult result = new(!_priceFail,
             _priceFail
             ? "Failed to check cart price."
-            : $"Cart price is ${Calls.Count(c => c.Method == nameof(AddPizza))*8.25:F2}.");
+            : $"Cart price is ${orderTotal:F2}.") {
+                WaitTime = "10-15 minutes",
+                TotalPrice = orderTotal
+            };
         Calls.Add(new(nameof(GetSummary), "", result));
         return Task.FromResult(result);
     }
