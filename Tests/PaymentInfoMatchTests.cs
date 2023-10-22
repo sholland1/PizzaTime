@@ -1,5 +1,6 @@
-namespace Tests;
+using Hollandsoft.OrderPizza;
 
+namespace Tests;
 public class PaymentInfoMatchTests {
     [Fact]
     public void PayAtStoreInstance() {

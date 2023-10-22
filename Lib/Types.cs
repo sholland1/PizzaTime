@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
+namespace Hollandsoft.OrderPizza;
 public class UnvalidatedOrderInfo {
     public required string StoreId { get; init; }
     public required ServiceMethod ServiceMethod { get; init; }

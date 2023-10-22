@@ -1,8 +1,9 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
-using static BuilderHelpers;
+using static Hollandsoft.OrderPizza.BuilderHelpers;
 
+namespace Hollandsoft.OrderPizza;
 public class PizzaValidator : AbstractValidator<UnvalidatedPizza> {
     public PizzaValidator() {
         //Enums
@@ -85,30 +86,6 @@ public class PizzaValidator : AbstractValidator<UnvalidatedPizza> {
 }
 
 public static class ValidationHelpers {
-    // public static Result<List<ValidationFailure>, ValidPizza> Parse(this Pizza pizza) {
-    //     PizzaValidator validator = new();
-    //     var result = validator.Validate(pizza);
-    //     return result.IsValid
-    //         ? new Result<List<ValidationFailure>, ValidPizza>.Success(new(pizza))
-    //         : new Result<List<ValidationFailure>, ValidPizza>.Failure(result.Errors);
-    // }
-
-    // public static Result<List<ValidationFailure>, ValidOrderInfo> Parse(this OrderInfo orderInfo) {
-    //     OrderInfoValidator validator = new();
-    //     var result = validator.Validate(orderInfo);
-    //     return result.IsValid
-    //         ? new Result<List<ValidationFailure>, ValidOrderInfo>.Success(new(orderInfo))
-    //         : new Result<List<ValidationFailure>, ValidOrderInfo>.Failure(result.Errors);
-    // }
-
-    // public static Result<List<ValidationFailure>, ValidPaymentInfo> Parse(this PaymentInfo paymentInfo) {
-    //     PaymentInfoValidator validator = new();
-    //     var result = validator.Validate(paymentInfo);
-    //     return result.IsValid
-    //         ? new Result<List<ValidationFailure>, ValidPaymentInfo>.Success(new(paymentInfo))
-    //         : new Result<List<ValidationFailure>, ValidPaymentInfo>.Failure(result.Errors);
-    // }
-
     public static Pizza Validate(this UnvalidatedPizza pizza) {
         PizzaValidator validator = new();
         validator.ValidateAndThrow(pizza);
@@ -256,6 +233,9 @@ internal class OrderValidator : AbstractValidator<UnvalidatedOrder> {
         RuleForEach(o => o.Pizzas).SetValidator(new PizzaValidator());
         RuleFor(o => o.OrderInfo).SetValidator(new OrderInfoValidator());
         RuleFor(o => o.PaymentType).IsInEnum();
+        //TODO: don't know if this is true (shouldn't be PayAtStore though)
+        When(o => o.OrderInfo.ServiceMethod is ServiceMethod.Delivery,
+            () => RuleFor(o => o.PaymentType).Equal(PaymentType.PayWithCard));
     }
 }
 
@@ -266,6 +246,11 @@ internal class OrderInfoValidator : AbstractValidator<UnvalidatedOrderInfo> {
             () => RuleFor(o => ((ServiceMethod.Carryout)o.ServiceMethod).Location).IsInEnum());
         When(o => o.ServiceMethod is ServiceMethod.Delivery,
             () => RuleFor(o => ((ServiceMethod.Delivery)o.ServiceMethod).Address).SetValidator(new AddressValidator()));
+        When(o => o.Timing is OrderTiming.Later,
+            () => RuleFor(o => ((OrderTiming.Later)o.Timing).DateTime)
+                    .Must(d => d.Minute.In(0, 15, 30, 45)
+                                && d.Second == 0
+                                && d.Millisecond == 0));
     }
 }
 

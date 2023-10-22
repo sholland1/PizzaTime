@@ -1,3 +1,4 @@
+namespace Hollandsoft.OrderPizza;
 public interface IConsoleUI {
     void Print(string message);
     void PrintLine(string message);

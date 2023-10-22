@@ -1,3 +1,8 @@
+using Controllers;
+using Hollandsoft.OrderPizza;
+using TestData;
+
+namespace Tests;
 public class FastPizzaTests {
     [Theory]
     [InlineData("")]

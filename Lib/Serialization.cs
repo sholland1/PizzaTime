@@ -1,8 +1,9 @@
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using static BuilderHelpers;
+using static Hollandsoft.OrderPizza.BuilderHelpers;
 
+namespace Hollandsoft.OrderPizza;
 public static class PizzaSerializer {
     public static JsonSerializerOptions Options => new() {
         WriteIndented = true,

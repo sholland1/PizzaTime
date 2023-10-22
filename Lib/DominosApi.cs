@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
+namespace Hollandsoft.OrderPizza;
 public class DominosApi : IOrderApi {
     private readonly ILogger<DominosApi> _log;
     public DominosApi(ILogger<DominosApi> log) => _log = log;

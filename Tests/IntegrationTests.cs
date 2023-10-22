@@ -1,7 +1,10 @@
 using System.Diagnostics;
+using Hollandsoft.OrderPizza;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using TestData;
 
+namespace Tests.Integration;
 public class IntegrationTests {
     private IConfiguration Configuration { get; }
     public IntegrationTests() {
@@ -57,11 +60,11 @@ public class IntegrationTests {
         public TestDominosCart(IOrderApi api, OrderInfo orderInfo) : base(api, orderInfo) { }
         public List<Product> Products => _products;
     }
-}
 
-class DummyLogger<T> : ILogger<T> {
-    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => default;
-    public bool IsEnabled(LogLevel logLevel) => true;
-    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
-        Debug.WriteLine(formatter(state, exception));
+    private class DummyLogger<T> : ILogger<T> {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => default;
+        public bool IsEnabled(LogLevel logLevel) => true;
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
+            Debug.WriteLine(formatter(state, exception));
+    }
 }

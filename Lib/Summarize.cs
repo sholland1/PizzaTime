@@ -1,5 +1,6 @@
 using System.Diagnostics;
 
+namespace Hollandsoft.OrderPizza;
 public static class SummaryUtils {
     public static string Summarize(this UnvalidatedOrderInfo o) =>
         string.Join('\n', new[] {
