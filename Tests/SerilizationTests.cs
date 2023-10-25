@@ -57,16 +57,16 @@ public class SerializationTests {
     [Theory]
     [MemberData(nameof(TestPayment.GenerateValidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoRoundTripA(TestPayment.ValidData p) {
-        var serialized = JsonSerializer.Serialize(p.PaymentInfo, PizzaSerializer.Options);
-        var roundTrip = JsonSerializer.Deserialize<UnvalidatedPaymentInfo>(serialized, PizzaSerializer.Options);
-        Assert.Equal(p.PaymentInfo, roundTrip);
+        var serialized = JsonSerializer.Serialize(p.Payment, PizzaSerializer.Options);
+        var roundTrip = JsonSerializer.Deserialize<UnvalidatedPayment>(serialized, PizzaSerializer.Options);
+        Assert.Equal(p.Payment, roundTrip);
     }
 
     [Theory]
     [MemberData(nameof(TestPayment.GenerateValidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoRoundTripB(TestPayment.ValidData p) {
         var json = File.ReadAllText(Path.Combine(TestPayment.DataDirectory, p.JsonFile));
-        var deserialized = JsonSerializer.Deserialize<UnvalidatedPaymentInfo>(json, PizzaSerializer.Options);
+        var deserialized = JsonSerializer.Deserialize<UnvalidatedPayment>(json, PizzaSerializer.Options);
         var roundTrip = JsonSerializer.Serialize(deserialized, PizzaSerializer.Options);
         Assert.Equal(json, roundTrip);
     }
@@ -75,15 +75,15 @@ public class SerializationTests {
     [MemberData(nameof(TestPayment.GenerateValidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoDeserializeWorks(TestPayment.ValidData p) {
         var json = File.ReadAllText(Path.Combine(TestPayment.DataDirectory, p.JsonFile));
-        var deserialized = JsonSerializer.Deserialize<UnvalidatedPaymentInfo>(json, PizzaSerializer.Options);
-        Assert.Equal(p.PaymentInfo, deserialized);
+        var deserialized = JsonSerializer.Deserialize<UnvalidatedPayment>(json, PizzaSerializer.Options);
+        Assert.Equal(p.Payment, deserialized);
     }
 
     [Theory]
     [MemberData(nameof(TestPayment.GenerateValidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoSerializationWorks(TestPayment.ValidData p) {
         var json = File.ReadAllText(Path.Combine(TestPayment.DataDirectory, p.JsonFile));
-        var serialized = JsonSerializer.Serialize(p.PaymentInfo, PizzaSerializer.Options);
+        var serialized = JsonSerializer.Serialize(p.Payment, PizzaSerializer.Options);
         Assert.Equal(json, serialized);
     }
 

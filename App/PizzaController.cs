@@ -17,8 +17,8 @@ public class PizzaController {
             ?? throw new InvalidOperationException("Implement create personal info");
 
         var userPayment = userOrder.PaymentType == PaymentType.PayAtStore
-            ? PaymentInfo.PayAtStoreInstance
-            : _repo.GetDefaultPaymentInfo()
+            ?  Payment.PayAtStoreInstance
+            : _repo.GetDefaultPayment()
                 ?? throw new InvalidOperationException("Implement create payment info");
 
         var cart = _startOrder(userOrder.OrderInfo);

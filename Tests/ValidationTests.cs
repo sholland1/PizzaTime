@@ -53,13 +53,13 @@ public class ValidationTests {
     [Theory]
     [MemberData(nameof(TestPayment.GenerateValidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoValidationWorks(TestPayment.ValidData p) =>
-        p.PaymentInfo.Validate();
+        p.Payment.Validate();
 
     [Theory]
     [MemberData(nameof(TestPayment.GenerateInvalidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoInvalidationWorks(TestPayment.InvalidData p) {
         var json = File.ReadAllText(Path.Combine(TestPayment.DataDirectory, p.JsonFile));
-        var invalidPayment = JsonSerializer.Deserialize<UnvalidatedPaymentInfo>(json, PizzaSerializer.Options)!;
+        var invalidPayment = JsonSerializer.Deserialize<UnvalidatedPayment>(json, PizzaSerializer.Options)!;
         invalidPayment.Parse().Match(
             vp => Assert.Fail("Shouldn't be valid."),
             es => AssertSameInvalidProps(p.InvalidProperties, es));

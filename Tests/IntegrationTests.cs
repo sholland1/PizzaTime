@@ -47,7 +47,7 @@ public class IntegrationTests {
             Email = "test@gmail.org",
             Phone = "000-123-1234"
         };
-        var payment = new UnvalidatedPaymentInfo.PayWithCard("1000200030004000", "01/25", "123", "12345");
+        UnvalidatedPayment payment = new(new PaymentInfo.PayWithCard("1000200030004000", "01/25", "123", "12345"));
         var finalResult = await cart.PlaceOrder(personalInfo.Validate(), payment.Validate());
         DebugWriteResult(finalResult);
         Assert.False(finalResult.IsSuccess);

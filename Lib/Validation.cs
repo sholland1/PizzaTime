@@ -109,12 +109,10 @@ public static class ValidationHelpers {
         return new(orderInfo);
     }
 
-    public static PaymentInfo Validate(this UnvalidatedPaymentInfo paymentInfo) {
-        PaymentInfoValidator validator = new();
-        validator.ValidateAndThrow(paymentInfo);
-        return paymentInfo.Match(
-            () => PaymentInfo.PayAtStoreInstance,
-            p => new PaymentInfo.ValidatedPayWithCard(p.CardNumber, p.Expiration, p.SecurityCode, p.BillingZip));
+    public static Payment Validate(this UnvalidatedPayment payment) {
+        PaymentValidator validator = new();
+        validator.ValidateAndThrow(payment);
+        return new(payment.PaymentInfo);
     }
 
     public static PersonalInfo Validate(this UnvalidatedPersonalInfo personalInfo) {
@@ -148,14 +146,12 @@ public static class ValidationHelpers {
             : new Validation<OrderInfo>.Failure(result.Errors);
     }
 
-    public static Validation<PaymentInfo> Parse(this UnvalidatedPaymentInfo paymentInfo) {
-        PaymentInfoValidator validator = new();
-        var result = validator.Validate(paymentInfo);
+    public static Validation<Payment> Parse(this UnvalidatedPayment payment) {
+        PaymentValidator validator = new();
+        var result = validator.Validate(payment);
         return result.IsValid
-            ? new Validation<PaymentInfo>.Success(paymentInfo.Match(
-                () => PaymentInfo.PayAtStoreInstance,
-                p => new PaymentInfo.ValidatedPayWithCard(p.CardNumber, p.Expiration, p.SecurityCode, p.BillingZip)))
-            : new Validation<PaymentInfo>.Failure(result.Errors);
+            ? new Validation<Payment>.Success(new(payment.PaymentInfo))
+            : new Validation<Payment>.Failure(result.Errors);
     }
 
     public static Validation<PersonalInfo> Parse(this UnvalidatedPersonalInfo personalInfo) {
@@ -170,38 +166,6 @@ public static class ValidationHelpers {
 public class PersonalInfo : UnvalidatedPersonalInfo {
     [SetsRequiredMembers]
     internal PersonalInfo(UnvalidatedPersonalInfo personalInfo) : base(personalInfo) { }
-}
-
-public record PaymentInfo : UnvalidatedPaymentInfo {
-
-    public sealed record ValidatedPayAtStore : PaymentInfo {
-        public static implicit operator PayAtStore(ValidatedPayAtStore p) => new();
-    }
-
-    public sealed record ValidatedPayWithCard(
-        string CardNumber, string Expiration,
-        string SecurityCode, string BillingZip) : PaymentInfo {
-        public string Type => GetCardType(CardNumber);
-
-        public static implicit operator PayWithCard(ValidatedPayWithCard p) =>
-            new(p.CardNumber, p.Expiration, p.SecurityCode, p.BillingZip);
-    }
-
-    public static PaymentInfo PayAtStoreInstance { get; } = new ValidatedPayAtStore();
-
-    public T Match<T>(Func<T> store, Func<ValidatedPayWithCard, T> card) => this switch {
-        ValidatedPayAtStore => store(),
-        ValidatedPayWithCard c => card(c),
-        _ => throw new UnreachableException($"Invalid Payment! {this}")
-    };
-
-    public void Match(Action store, Action<ValidatedPayWithCard> card) {
-        switch (this) {
-            case ValidatedPayAtStore: store(); break;
-            case ValidatedPayWithCard c: card(c); break;
-            default: throw new UnreachableException($"Invalid Payment! {this}");
-        }
-    }
 }
 
 public class OrderInfo : UnvalidatedOrderInfo {
@@ -264,10 +228,10 @@ internal class AddressValidator : AbstractValidator<Address> {
     }
 }
 
-internal class PaymentInfoValidator : AbstractValidator<UnvalidatedPaymentInfo> {
-    public PaymentInfoValidator() {
-        When(p => p is UnvalidatedPaymentInfo.PayWithCard,
-            () => RuleFor(p => (UnvalidatedPaymentInfo.PayWithCard)p).SetValidator(new PayWithCardValidator()));
+internal class PaymentValidator : AbstractValidator<UnvalidatedPayment> {
+    public PaymentValidator() {
+        When(p => p.PaymentInfo is PaymentInfo.PayWithCard,
+            () => RuleFor(p => (PaymentInfo.PayWithCard)p.PaymentInfo).SetValidator(new PayWithCardValidator()));
     }
 }
 
@@ -278,7 +242,7 @@ internal class PersonalInfoValidator : AbstractValidator<UnvalidatedPersonalInfo
     }
 }
 
-internal class PayWithCardValidator : AbstractValidator<UnvalidatedPaymentInfo.PayWithCard> {
+internal class PayWithCardValidator : AbstractValidator<PaymentInfo.PayWithCard> {
     public PayWithCardValidator() {
         RuleFor(p => p.CardNumber).CreditCard();
         RuleFor(p => p.Expiration).Must(Utils.MatchesMMyy);

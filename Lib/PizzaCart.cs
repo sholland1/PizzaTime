@@ -6,7 +6,7 @@ public interface ICart {
     void AddCoupon(Coupon coupon);
     void RemoveCoupon(Coupon coupon);
     Task<CartResult<SummarySuccess>> GetSummary();
-    Task<CartResult<string>> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment);
+    Task<CartResult<string>> PlaceOrder(PersonalInfo personalInfo, Payment userPayment);
 }
 
 public record SummarySuccess(decimal TotalPrice, string WaitTime);
@@ -135,7 +135,7 @@ public class DominosCart : ICart {
         return Success(new SummarySuccess(_currentTotal, $"{response.Order.EstimatedWaitMinutes} minutes"));
     }
 
-    public async Task<CartResult<string>> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment) {
+    public async Task<CartResult<string>> PlaceOrder(PersonalInfo personalInfo, Payment userPayment) {
         if (_products.Count == 0 || _orderID == null || _currentTotal == 0) {
             return PlaceOrderFailure("Cart is empty.");
         }
@@ -184,7 +184,7 @@ public class DominosCart : ICart {
         };
     }
 
-    private static OrderPayment GetPayment(PaymentInfo payment, decimal price) =>
+    private static OrderPayment GetPayment(Payment payment, decimal price) =>
         payment.Match<OrderPayment>(
             () => throw new NotImplementedException(),
             c => new() {

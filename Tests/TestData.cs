@@ -48,19 +48,19 @@ public static class TestPayment {
     public const string DataDirectory = "../../../Data";
     public const string SummaryDirectory = "../../../Data/Summaries";
 
-    public record ValidData(UnvalidatedPaymentInfo PaymentInfo, string JsonFile, string SummaryFile);
+    public record ValidData(UnvalidatedPayment Payment, string JsonFile, string SummaryFile);
     public record InvalidData(string JsonFile, string[] InvalidProperties);
 
     public static IEnumerable<object[]> GenerateValidPayments() => ValidPayments().Select(p => new[] { p });
     public static IEnumerable<object[]> GenerateInvalidPayments() => InvalidPayments().Select(p => new[] { p });
 
     private static IEnumerable<InvalidData> InvalidPayments() {
-        yield return new("InvalidPaymentInfo0.json", new[] { "BillingZip", "CardNumber", "Expiration", "SecurityCode"});
+        yield return new("InvalidPaymentInfo0.json", new[] { "PaymentInfo.BillingZip", "PaymentInfo.CardNumber", "PaymentInfo.Expiration", "PaymentInfo.SecurityCode"});
     }
 
     public static IEnumerable<ValidData> ValidPayments() {
-        UnvalidatedPaymentInfo payAtStore = PaymentInfo.PayAtStoreInstance;
-        UnvalidatedPaymentInfo payWithCard = new UnvalidatedPaymentInfo.PayWithCard("1000200030004000", "01/23", "123", "12345");
+        UnvalidatedPayment payAtStore = Payment.PayAtStoreInstance;
+        UnvalidatedPayment payWithCard = new(new PaymentInfo.PayWithCard("1000200030004000", "01/23", "123", "12345"));
 
         yield return new(payWithCard, "defaultPaymentInfo.json", "PayWithCardSummary.txt");
         yield return new(payAtStore, "PayAtStoreInfo.json", "PayAtStoreSummary.txt");

@@ -4,17 +4,17 @@ namespace Hollandsoft.OrderPizza;
 public interface IPizzaRepo {
     PersonalInfo? GetPersonalInfo();
     NewOrder? GetDefaultOrder();
-    PaymentInfo? GetDefaultPaymentInfo();
+    Payment? GetDefaultPayment();
     Pizza? GetPizza(string name);
-    PaymentInfo? GetPaymentInfo(string name);
+    Payment? GetPayment(string name);
 }
 
 public class PizzaRepository : IPizzaRepo {
     public Pizza? GetPizza(string name) =>
         DeserializeFromFile<UnvalidatedPizza>($"{name}.json")?.Validate();
 
-    public PaymentInfo? GetPaymentInfo(string name) =>
-        DeserializeFromFile<UnvalidatedPaymentInfo>($"{name}.json")?.Validate();
+    public Payment? GetPayment(string name) =>
+        DeserializeFromFile<UnvalidatedPayment>($"{name}.json")?.Validate();
 
     static T? DeserializeFromFile<T>(string filename) =>
         JsonSerializer.Deserialize<T>(
@@ -26,5 +26,5 @@ public class PizzaRepository : IPizzaRepo {
     public NewOrder? GetDefaultOrder() =>
         DeserializeFromFile<UnvalidatedOrder>("defaultOrder.json")?.Validate();
 
-    public PaymentInfo? GetDefaultPaymentInfo() => GetPaymentInfo("defaultPaymentInfo");
+    public Payment? GetDefaultPayment() => GetPayment("defaultPayment");
 }

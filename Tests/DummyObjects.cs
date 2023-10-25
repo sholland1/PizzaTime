@@ -9,10 +9,10 @@ public class DummyPizzaRepository : IPizzaRepo {
             p => Path.GetFileNameWithoutExtension(p.JsonFile),
             p => p.OrderInfo);
 
-    public Dictionary<string, UnvalidatedPaymentInfo> PaymentInfos { get; } = TestPayment.ValidPayments()
+    public Dictionary<string, UnvalidatedPayment> Payments { get; } = TestPayment.ValidPayments()
         .ToDictionary(
             p => Path.GetFileNameWithoutExtension(p.JsonFile),
-            p => p.PaymentInfo);
+            p => p.Payment);
 
     public Dictionary<string, UnvalidatedPizza> Pizzas { get; } = ValidPizzas().Zip(
         new[] {
@@ -26,7 +26,7 @@ public class DummyPizzaRepository : IPizzaRepo {
 
     public Pizza GetPizza(string name) => Pizzas[name].Validate();
     public OrderInfo GetOrderInfo(string name) => OrderInfos[name].Validate();
-    public PaymentInfo GetPaymentInfo(string name) => PaymentInfos[name].Validate();
+    public Payment GetPayment(string name) => Payments[name].Validate();
 
     public PersonalInfo? GetPersonalInfo() => new UnvalidatedPersonalInfo {
         FirstName = "Test",
@@ -42,7 +42,7 @@ public class DummyPizzaRepository : IPizzaRepo {
         PaymentType = PaymentType.PayWithCard
     }.Validate();
 
-    public PaymentInfo? GetDefaultPaymentInfo() => PaymentInfos.First().Value.Validate();
+    public Payment? GetDefaultPayment() => Payments.First().Value.Validate();
 }
 
 public class DummyConsoleUI : IConsoleUI {
@@ -88,7 +88,7 @@ public class DummyPizzaCart : ICart {
         return Task.FromResult(result);
     }
 
-    public Task<CartResult<string>> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment) {
+    public Task<CartResult<string>> PlaceOrder(PersonalInfo personalInfo, Payment userPayment) {
         var result = _orderFail
             ? PlaceOrderFailure("Failed to check cart price.")
             : Success("Order was placed.");

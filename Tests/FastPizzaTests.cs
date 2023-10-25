@@ -38,7 +38,7 @@ public class FastPizzaTests {
             Estimated Wait: {summaryResult?.WaitTime}
             Price: ${summaryResult?.TotalPrice}
 
-            {repo.GetDefaultPaymentInfo()!.Summarize()}
+            {repo.GetDefaultPayment()!.Summarize()}
 
             Confirm order? [Y/n]: 
             Ordering pizza...
@@ -80,7 +80,7 @@ public class FastPizzaTests {
             Estimated Wait: {summaryResult?.WaitTime}
             Price: ${summaryResult?.TotalPrice}
 
-            {repo.GetDefaultPaymentInfo()!.Summarize()}
+            {repo.GetDefaultPayment()!.Summarize()}
 
             Confirm order? [Y/n]: 
             Order cancelled.

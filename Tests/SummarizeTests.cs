@@ -14,7 +14,7 @@ public class SummarizeTests {
     [Theory]
     [MemberData(nameof(TestPayment.GenerateValidPayments), MemberType = typeof(TestPayment))]
     public void SummarizePaymentWorks(TestPayment.ValidData data) {
-        var actual = data.PaymentInfo.Summarize();
+        var actual = data.Payment.Summarize();
         var expected = File.ReadAllText(Path.Combine(TestPayment.SummaryDirectory, data.SummaryFile));
         Assert.Equal(expected, actual);
     }

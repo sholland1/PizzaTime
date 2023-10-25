@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
+using static Hollandsoft.OrderPizza.PaymentInfo;
 
 namespace Hollandsoft.OrderPizza;
 public class UnvalidatedOrderInfo {
@@ -174,29 +175,42 @@ public class UnvalidatedOrder {
     }
 }
 
-public abstract record UnvalidatedPaymentInfo {
-    public T Match<T>(Func<T> store, Func<PayWithCard, T> card) => this switch {
-        PayAtStore or PaymentInfo.ValidatedPayAtStore => store(),
+public record UnvalidatedPayment(PaymentInfo PaymentInfo) {
+    public T Match<T>(Func<T> store, Func<PayWithCard, T> card) => PaymentInfo switch {
+        PayAtStore => store(),
         PayWithCard c => card(c),
-        PaymentInfo.ValidatedPayWithCard c => card(c),
-        _ => throw new UnreachableException($"Invalid Payment! {this}")
+        _ => throw new UnreachableException($"Invalid Payment! {PaymentInfo}")
     };
 
     public void Match(Action store, Action<PayWithCard> card) {
-        switch (this) {
+        switch (PaymentInfo) {
             case PayAtStore: store(); break;
             case PayWithCard c: card(c); break;
-            case PaymentInfo.ValidatedPayWithCard c: card(c); break;
-            default: throw new UnreachableException($"Invalid Payment! {this}");
+            default: throw new UnreachableException($"Invalid Payment! {PaymentInfo}");
         }
     }
+}
 
-    public sealed record PayAtStore : UnvalidatedPaymentInfo {
+public record Payment : UnvalidatedPayment {
+    internal Payment(PaymentInfo PaymentInfo) : base(PaymentInfo) { }
+    public static Payment PayAtStoreInstance => new(PaymentInfo.PayAtStoreInstance);
+}
+
+public abstract record PaymentInfo {
+    public sealed record PayAtStore : PaymentInfo {
         internal PayAtStore() { }
     }
 
+    public sealed record PayWithCard(
+        string CardNumber, string Expiration,
+        string SecurityCode, string BillingZip) : PaymentInfo {
+        public string Type => GetCardType(CardNumber);
+    }
+
+    public static PaymentInfo PayAtStoreInstance => new PayAtStore();
+
     //https://cache.dominos.com/olo/6_118_2/assets/build/js/site/base-site.js
-    protected string GetCardType(string s) {
+    protected static string GetCardType(string s) {
         if (Regex.IsMatch(s, @"^5[1-5]"))
             return "MASTERCARD";
         if (Regex.IsMatch(s, @"^6(?:011|5)"))
@@ -216,11 +230,5 @@ public abstract record UnvalidatedPaymentInfo {
         if (Regex.IsMatch(s, @"^(?:5[1-5]\d{2}|222[1-9]|22[3-9]\d|2[3-6]\d{2}|27[01]\d|2720)"))
             return "MASTERCARD";
         return "UNKNOWN";
-    }
-
-    public sealed record PayWithCard(
-        string CardNumber, string Expiration,
-        string SecurityCode, string BillingZip) : UnvalidatedPaymentInfo {
-        public string Type => GetCardType(CardNumber);
     }
 }
