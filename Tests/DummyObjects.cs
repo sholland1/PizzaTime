@@ -1,3 +1,4 @@
+using static Hollandsoft.OrderPizza.CartResult;
 using static TestData.TestPizza;
 using Hollandsoft.OrderPizza;
 
@@ -70,36 +71,27 @@ public class DummyPizzaCart : ICart {
         (_cartFail, _priceFail, _orderFail) = (cartFail, priceFail, orderFail);
 
     private int _pizzaCount = 0;
-    public Task<AddPizzaResult> AddPizza(Pizza userPizza) {
-        AddPizzaResult result = new(!_cartFail,
-            _cartFail
-            ? "Pizza was not added to cart."
-            : "Pizza was added to cart.") {
-                ProductCount = ++_pizzaCount,
-                OrderID = "test"
-            };
+    public Task<CartResult<AddPizzaSuccess>> AddPizza(Pizza userPizza) {
+        var result = _cartFail
+            ? AddPizzaFailure("Pizza was not added to cart.")
+            : Success(new AddPizzaSuccess(++_pizzaCount, "test"));
         Calls.Add(new(nameof(AddPizza), userPizza, result));
         return Task.FromResult(result);
     }
 
-    public Task<SummaryResult> GetSummary() {
+    public Task<CartResult<SummarySuccess>> GetSummary() {
         var orderTotal = 8.25m * Calls.Count(c => c.Method == nameof(AddPizza));
-        SummaryResult result = new(!_priceFail,
-            _priceFail
-            ? "Failed to check cart price."
-            : $"Cart price is ${orderTotal:F2}.") {
-                WaitTime = "10-15 minutes",
-                TotalPrice = orderTotal
-            };
+        var result = _priceFail
+            ? SummaryFailure("Failed to check cart price.")
+            : Success(new SummarySuccess(orderTotal, "10-15 minutes"));
         Calls.Add(new(nameof(GetSummary), "", result));
         return Task.FromResult(result);
     }
 
-    public Task<CartResult> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment) {
-        CartResult result = new(!_orderFail,
-            _orderFail
-            ? "Failed to place order."
-            : "Order was placed.");
+    public Task<CartResult<string>> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment) {
+        var result = _orderFail
+            ? PlaceOrderFailure("Failed to check cart price.")
+            : Success("Order was placed.");
         Calls.Add(new(nameof(PlaceOrder), (personalInfo, userPayment), result));
         return Task.FromResult(result);
     }
@@ -108,4 +100,4 @@ public class DummyPizzaCart : ICart {
     public void RemoveCoupon(Coupon coupon) => Coupons.Remove(coupon);
 }
 
-public record MethodCall(string Method, object Body, CartResult Result);
+public record MethodCall(string Method, object Body, object Result);

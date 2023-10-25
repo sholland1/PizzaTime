@@ -16,33 +16,34 @@ public class FastPizzaTests {
 
         await controller.FastPizza();
 
-        CartResult results(int i) => cart.Calls[i].Result;
+        object results(int i) => cart.Calls[i].Result;
 
-        var pizzaResults = cart.Calls.Take(2).Select(x => x.Result).OfType<AddPizzaResult>().ToList();
-        var summaryResult = (SummaryResult)cart.Calls[2].Result;
+        var pizzaResults = cart.Calls.Take(2).Select(x => x.Result).OfType<CartResult<AddPizzaSuccess>>().Select(x => x.SuccessValue).ToList();
+        var summaryResult = ((CartResult<SummarySuccess>)results(2)).SuccessValue;
+        var placeOrderResult = ((CartResult<string>)results(3)).SuccessValue;
 
         var expected = $"""
-            Order ID: {pizzaResults[0].OrderID}
+            Order ID: {pizzaResults[0]?.OrderID}
 
-            {pizzaResults[0].Message} Product Count: {pizzaResults[0].ProductCount}
+            Pizza was added to cart. Product Count: {pizzaResults[0]?.ProductCount}
             {repo.Pizzas.Values.ElementAt(0).Summarize()}
 
-            {pizzaResults[1].Message} Product Count: {pizzaResults[1].ProductCount}
+            Pizza was added to cart. Product Count: {pizzaResults[1]?.ProductCount}
             {repo.Pizzas.Values.ElementAt(1).Summarize()}
 
             Coupon {cart.Coupons.First().Code} was added to cart.
 
             Cart summary:
             {repo.GetDefaultOrder()?.OrderInfo?.Summarize()}
-            Estimated Wait: {summaryResult.WaitTime}
-            Price: ${summaryResult.TotalPrice}
+            Estimated Wait: {summaryResult?.WaitTime}
+            Price: ${summaryResult?.TotalPrice}
 
             {repo.GetDefaultPaymentInfo()!.Summarize()}
 
             Confirm order? [Y/n]: 
             Ordering pizza...
             Order summary:
-            {results(3).Message}
+            {placeOrderResult}
             Done.
 
             """;
@@ -60,24 +61,24 @@ public class FastPizzaTests {
 
         await controller.FastPizza();
 
-        var pizzaResults = cart.Calls.Take(2).Select(x => x.Result).OfType<AddPizzaResult>().ToList();
-        var summaryResult = (SummaryResult)cart.Calls[2].Result;
+        var pizzaResults = cart.Calls.Take(2).Select(x => x.Result).OfType<CartResult<AddPizzaSuccess>>().Select(x => x.SuccessValue).ToList();
+        var summaryResult = ((CartResult<SummarySuccess>)cart.Calls[2].Result).SuccessValue;
 
         var expected = $"""
-            Order ID: {pizzaResults[0].OrderID}
+            Order ID: {pizzaResults[0]?.OrderID}
 
-            {pizzaResults[0].Message} Product Count: {pizzaResults[0].ProductCount}
+            Pizza was added to cart. Product Count: {pizzaResults[0]?.ProductCount}
             {repo.Pizzas.Values.ElementAt(0).Summarize()}
 
-            {pizzaResults[1].Message} Product Count: {pizzaResults[1].ProductCount}
+            Pizza was added to cart. Product Count: {pizzaResults[1]?.ProductCount}
             {repo.Pizzas.Values.ElementAt(1).Summarize()}
 
             Coupon {cart.Coupons.First().Code} was added to cart.
 
             Cart summary:
             {repo.GetDefaultOrder()?.OrderInfo?.Summarize()}
-            Estimated Wait: {summaryResult.WaitTime}
-            Price: ${summaryResult.TotalPrice}
+            Estimated Wait: {summaryResult?.WaitTime}
+            Price: ${summaryResult?.TotalPrice}
 
             {repo.GetDefaultPaymentInfo()!.Summarize()}
 

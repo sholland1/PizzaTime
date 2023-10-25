@@ -26,17 +26,17 @@ public class PizzaController {
         bool firstTime = true;
         foreach (var pizza in userOrder.Pizzas) {
             var cartResult = await cart.AddPizza(pizza);
-            if (!cartResult.Success) {
-                _consoleUI.PrintLine(cartResult.Message);
-                return;
-            }
+            cartResult.Match(
+                _consoleUI.PrintLine,
+                v => {
+                    if (firstTime) {
+                        firstTime = false;
+                        _consoleUI.PrintLine($"Order ID: {v.OrderID}\n");
+                    }
 
-            if (firstTime) {
-                firstTime = false;
-                _consoleUI.PrintLine($"Order ID: {cartResult.OrderID}\n");
-            }
-
-            _consoleUI.PrintLine($"{cartResult.Message} Product Count: {cartResult.ProductCount}\n{pizza.Summarize()}\n");
+                    _consoleUI.PrintLine($"Pizza was added to cart. Product Count: {v.ProductCount}\n{pizza.Summarize()}\n");
+                });
+            if (cartResult.IsFailure) return;
         }
 
         foreach (var coupon in userOrder.Coupons) {
@@ -48,21 +48,19 @@ public class PizzaController {
         }
 
         var priceResult = await cart.GetSummary();
-        if (!priceResult.Success) {
-            _consoleUI.PrintLine($"Failed to check cart price:\n{priceResult.Message}");
-            return;
-        }
+        priceResult.Match(
+            message => _consoleUI.PrintLine($"Failed to check cart price:\n{message}"),
+            summary => _consoleUI.PrintLine(
+                $"""
+                Cart summary:
+                {userOrder.OrderInfo.Summarize()}
+                Estimated Wait: {summary.WaitTime}
+                Price: ${summary.TotalPrice}
 
-        _consoleUI.PrintLine(
-            $"""
-            Cart summary:
-            {userOrder.OrderInfo.Summarize()}
-            Estimated Wait: {priceResult.WaitTime}
-            Price: ${priceResult.TotalPrice}
+                {userPayment.Summarize()}
 
-            {userPayment.Summarize()}
-
-            """);
+                """));
+        if (priceResult.IsFailure) return;
 
         var answer = _consoleUI.Prompt("Confirm order? [Y/n]: ");
         _consoleUI.PrintLine();
@@ -75,13 +73,10 @@ public class PizzaController {
         _consoleUI.PrintLine("Ordering pizza...");
 
         var orderResult = await cart.PlaceOrder(personalInfo, userPayment);
-        if (!orderResult.Success) {
-            _consoleUI.PrintLine($"Failed to place order: {orderResult.Message}");
-            return;
-        }
-
-        _consoleUI.PrintLine($"Order summary:\n{orderResult.Message}");
-        _consoleUI.PrintLine("Done.");
+        _consoleUI.PrintLine(
+            orderResult.Match(
+                message => $"Failed to place order: {message}",
+                message => $"Order summary:\n{message}\nDone."));
     }
 
     private static bool IsAffirmative(string? answer) => (answer?.ToLower() ?? "y") == "y";

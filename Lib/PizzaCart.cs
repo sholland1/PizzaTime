@@ -1,21 +1,57 @@
+using static Hollandsoft.OrderPizza.CartResult;
+
 namespace Hollandsoft.OrderPizza;
 public interface ICart {
-    Task<AddPizzaResult> AddPizza(Pizza userPizza);
+    Task<CartResult<AddPizzaSuccess>> AddPizza(Pizza userPizza);
     void AddCoupon(Coupon coupon);
     void RemoveCoupon(Coupon coupon);
-    Task<SummaryResult> GetSummary();
-    Task<CartResult> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment);
+    Task<CartResult<SummarySuccess>> GetSummary();
+    Task<CartResult<string>> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment);
 }
 
-public record AddPizzaResult(bool Success, string Message, int ProductCount, string? OrderID) : CartResult(Success, Message) {
-    public AddPizzaResult(bool success, string message) : this(success, message, default, null) { }
+public record SummarySuccess(decimal TotalPrice, string WaitTime);
+public record AddPizzaSuccess(int ProductCount, string? OrderID);
+
+public static class CartResult {
+    public static CartResult<T> Success<T>(T value) where T : class => new CartResult<T>.Success(value);
+    private static CartResult<T> Failure<T>(string message) where T : class => new CartResult<T>.Failure(message);
+
+    public static CartResult<AddPizzaSuccess> AddPizzaFailure(string message) => Failure<AddPizzaSuccess>(message);
+    public static CartResult<SummarySuccess> SummaryFailure(string message) => Failure<SummarySuccess>(message);
+    public static CartResult<string> PlaceOrderFailure(string message) => Failure<string>(message);
 }
 
-public record SummaryResult(bool Success, string Message, string? WaitTime, decimal? TotalPrice) : CartResult(Success, Message) {
-    public SummaryResult(bool success, string message) : this(success, message, null, null) { }
+public abstract record CartResult<T> where T : class {
+    internal record Failure(string Message) : CartResult<T>;
+    internal record Success(T Value) : CartResult<T>;
+
+    public bool IsSuccess => this is Success;
+    public bool IsFailure => this is Failure;
+
+    public string? FailureMessage => (this as Failure)?.Message;
+    public T? SuccessValue => (this as Success)?.Value;
+
+    public U Match<U>(Func<string, U> failure, Func<T, U> success) =>
+        this switch {
+            Failure f => failure(f.Message),
+            Success s => success(s.Value),
+            _ => throw new NotImplementedException()
+        };
+
+    public void Match(Action<string> failure, Action<T> success) {
+        switch (this) {
+            case Failure f:
+                failure(f.Message);
+                break;
+            case Success s:
+                success(s.Value);
+                break;
+            default:
+                throw new NotImplementedException();
+        }
+    }
 }
 
-public record CartResult(bool Success, string Message);
 
 public class DominosCart : ICart {
     private readonly IOrderApi _api;
@@ -31,7 +67,7 @@ public class DominosCart : ICart {
     public void AddCoupon(Coupon coupon) => _coupons.Add(coupon);
     public void RemoveCoupon(Coupon coupon) => _coupons.Remove(coupon);
 
-    public async Task<AddPizzaResult> AddPizza(Pizza userPizza) {
+    public async Task<CartResult<AddPizzaSuccess>> AddPizza(Pizza userPizza) {
         _currentTotal = 0;
 
         var timing = _orderInfo.Timing.Match<string?>(
@@ -53,10 +89,8 @@ public class DominosCart : ICart {
         _orderID = response.Order.OrderID;
         _products = response.Order.Products.Normalize().ToList();
 
-        return new(true, "Pizza was added to cart.") {
-            ProductCount = _products.Count,
-            OrderID = response.Order.OrderID
-        };
+        return Success(
+            new AddPizzaSuccess(_products.Count, response.Order.OrderID));
     }
 
     private static DateTime MoveToNext15MinuteInterval(DateTime d) {
@@ -64,9 +98,9 @@ public class DominosCart : ICart {
         return d.AddMinutes(minutesToAdd);
     }
 
-    public async Task<SummaryResult> GetSummary() {
+    public async Task<CartResult<SummarySuccess>> GetSummary() {
         if (_products.Count == 0 || _orderID == null) {
-            return new(false, "Cart is empty.");
+            return SummaryFailure("Cart is empty.");
         }
 
         var address = _orderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
@@ -84,29 +118,26 @@ public class DominosCart : ICart {
         var response = await _api.PriceOrder(request);
 
         if (response.Order.OrderID != _orderID) {
-            return new(false, "Order ID mismatch.");
+            return SummaryFailure("Order ID mismatch.");
         }
         if (response.Order.Products.Count != _products.Count) {
-            return new(false, "Product count mismatch.");
+            return SummaryFailure("Product count mismatch.");
         }
         if (!response.Order.Products.Normalize().SequenceEqual(_products)) {
-            return new(false, "Product mismatch.");
+            return SummaryFailure("Product mismatch.");
         }
         if (!response.Order.Coupons.All(c => c.Status == 0)) {
-            return new(false, "Coupon not fulfilled.");
+            return SummaryFailure("Coupon not fulfilled.");
         }
 
         _currentTotal = response.Order.Amounts.Payment;
 
-        return new(true, "Found order summary.") {
-            TotalPrice = _currentTotal,
-            WaitTime = $"{response.Order.EstimatedWaitMinutes} minutes"
-        };
+        return Success(new SummarySuccess(_currentTotal, $"{response.Order.EstimatedWaitMinutes} minutes"));
     }
 
-    public async Task<CartResult> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment) {
+    public async Task<CartResult<string>> PlaceOrder(PersonalInfo personalInfo, PaymentInfo userPayment) {
         if (_products.Count == 0 || _orderID == null || _currentTotal == 0) {
-            return new(false, "Cart is empty.");
+            return PlaceOrderFailure("Cart is empty.");
         }
 
         var address = _orderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
@@ -129,8 +160,8 @@ public class DominosCart : ICart {
 
         var response = await _api.PlaceOrder(request);
         return response.Status == -1
-            ? new(false, string.Join("\n", response.Order.StatusItems))
-            : new(true, "Order was placed.");
+            ? PlaceOrderFailure(string.Join("\n", response.Order.StatusItems))
+            : Success("Order was placed.");
     }
 
     private string GetDetailedServiceMethod() =>

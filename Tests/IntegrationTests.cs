@@ -38,7 +38,7 @@ public class IntegrationTests {
 
         var result = await cart.GetSummary();
         DebugWriteResult(result);
-        Assert.True(result.Success);
+        Assert.True(result.IsSuccess);
         Assert.Equal(products, cart.Products);
 
         UnvalidatedPersonalInfo personalInfo = new() {
@@ -50,11 +50,15 @@ public class IntegrationTests {
         var payment = new UnvalidatedPaymentInfo.PayWithCard("1000200030004000", "01/25", "123", "12345");
         var finalResult = await cart.PlaceOrder(personalInfo.Validate(), payment.Validate());
         DebugWriteResult(finalResult);
-        Assert.False(finalResult.Success);
+        Assert.False(finalResult.IsSuccess);
     }
 
-    private static void DebugWriteResult(CartResult result) =>
-        Debug.WriteLine($"Success: {result.Success}, Message:\n{result.Message}");
+    private static void DebugWriteResult<T>(CartResult<T> result) where T : class {
+        var message = result.Match(
+            message => message,
+            value => value?.ToString());
+        Debug.WriteLine($"Success: {result.IsSuccess}, Message:\n{message}");
+    }
 
     private class TestDominosCart : DominosCart {
         public TestDominosCart(IOrderApi api, OrderInfo orderInfo) : base(api, orderInfo) { }
