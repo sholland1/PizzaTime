@@ -101,12 +101,12 @@ public static class TestPizza {
     //     }
     // }
 
-    public static UnvalidatedPizza BadEnumPizza =
+    public static UnvalidatedPizza BadEnumPizza =>
         new((Size)10, (Crust)10, new Cheese.Full((Amount)10), new((SauceType)10, (Amount)10),
             new(new Topping[] { new((ToppingType)99, (Location)10, (Amount)10) }),
             (Bake)10, (Cut)10, false, false, 1);
 
-    public static IPizzaBuilder Complex =
+    public static IPizzaBuilder Complex =>
         Build.Medium.Pan()
             .SetCheese(Light, Extra)
             .SetSauce(HoneyBBQ, Extra)
@@ -117,11 +117,11 @@ public static class TestPizza {
             .SetBake(WellDone)
             .SetCut(Square);
 
-    public static IPizzaBuilder LargePep =
+    public static IPizzaBuilder LargePep =>
         Build.Large.HandTossed()
             .AddTopping(Pepperoni);
 
-    public static IPizzaBuilder SmallThin =
+    public static IPizzaBuilder SmallThin =>
         Build.Small.Thin()
             .SetSauce(Marinara)
             .AddTopping(Pepperoni)
@@ -142,13 +142,13 @@ public static class TestPizza {
             .SetNoCheese()
             .WithOregano();
 
-    public static IPizzaBuilder SmallHandTossed =
+    public static IPizzaBuilder SmallHandTossed =>
         Build.Small.HandTossed()
             .SetBake(WellDone)
             .SetCheese()
             .WithGarlicCrust();
 
-    public static IPizzaBuilder XLPizza =
+    public static IPizzaBuilder XLPizza =>
         Build.XL.Brooklyn()
             .AddTopping(Mushrooms, amount: Light)
             .AddTopping(Pineapple, amount: Light)
