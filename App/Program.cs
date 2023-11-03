@@ -9,6 +9,8 @@ AppDomain.CurrentDomain.UnhandledException += (_, args) => {
     Environment.Exit(1);
 };
 
+var fastFlag = args.Contains("--fast");
+
 var pizzaController = new PizzaController(
     new PizzaRepository(),
     o => new DominosCart(
@@ -16,4 +18,9 @@ var pizzaController = new PizzaController(
         o),
     new RealConsoleUI());
 
-await pizzaController.FastPizza();
+if (fastFlag) {
+    await pizzaController.FastPizza();
+    return;
+}
+
+await pizzaController.ShowOptions();

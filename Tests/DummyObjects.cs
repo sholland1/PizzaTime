@@ -46,14 +46,15 @@ public class DummyPizzaRepository : IPizzaRepo {
 }
 
 public class DummyConsoleUI : IConsoleUI {
-    public List<string> PrintedMessages = new List<string>();
-    private readonly Queue<string> _readLines = new Queue<string>();
+    public List<string> PrintedMessages = new();
+    private readonly Queue<string> _readLines = new();
 
     public DummyConsoleUI(params string[] readLines) => Array.ForEach(readLines, _readLines.Enqueue);
 
     public void Print(string message) => PrintedMessages.Add(message);
     public void PrintLine(string message) => PrintedMessages.Add(message + "\n");
     public void PrintLine() => PrintedMessages.Add("\n");
+    public char? ReadKey() => _readLines.Dequeue().FirstOrDefault();
     public string? ReadLine() => _readLines.Dequeue();
 
     public override string ToString() => string.Join("", PrintedMessages);

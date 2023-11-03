@@ -79,5 +79,37 @@ public class PizzaController {
                 message => $"Order summary:\n{message}\nDone."));
     }
 
+    public async Task ShowOptions() {
+        _consoleUI.PrintLine("Welcome to the pizza ordering app!🍕");
+        await Helper();
+
+        async Task Helper() {
+            string[] options = {
+                "1. Order default",
+                "2. Start new order",
+                "3. Edit saved pizzas",
+                "4. Edit personal info",
+                "5. Track order",
+                "q. Exit"
+            };
+            _consoleUI.PrintLine(string.Join('\n', options));
+            var choice = _consoleUI.PromptKey("Choose an option: ");
+            // return _consoleUI.FuzzyChoice(options);
+
+            switch (choice) {
+                case '1': await FastPizza(); break;
+                // case '2': await NewOrder(); break;
+                // case '3': await EditSavedPizzas(); break;
+                // case '4': await EditPersonalInfo(); break;
+                // case '5': await EditPaymentInfo(); break;
+                case 'Q' or 'q': _consoleUI.PrintLine("Goodbye!"); return;
+                default:
+                    _consoleUI.PrintLine("Not a valid option. Try again.");
+                    await Helper();
+                    break;
+            }
+        }
+    }
+
     private static bool IsAffirmative(string? answer) => (answer?.ToLower() ?? "y") == "y";
 }
