@@ -25,6 +25,11 @@ public abstract record Validation<T> {
     public sealed record Failure(List<ValidationFailure> Value) : Validation<T>;
     public sealed record Success(T Value) : Validation<T>;
 
+    public T? ToNullable() => this switch {
+        Success s => s.Value,
+        _ => default
+    };
+
     public R Match<R>(Func<T, R> success, Func<List<ValidationFailure>, R> failure) => this switch {
         Success s => success(s.Value),
         Failure f => failure(f.Value),

@@ -9,17 +9,67 @@ public class PizzaController {
     public PizzaController(IPizzaRepo repo, Func<OrderInfo, ICart> startOrder, IConsoleUI consoleUI) =>
         (_repo, _startOrder, _consoleUI) = (repo, startOrder, consoleUI);
 
+    public PersonalInfo CreatePersonalInfo() {
+        _consoleUI.PrintLine("Please enter your personal information.");
+        var firstName = _consoleUI.Prompt("First name: ") ?? "";
+        var lastName = _consoleUI.Prompt("Last name: ") ?? "";
+        var email = _consoleUI.Prompt("Email: ") ?? "";
+        var phone = _consoleUI.Prompt("Phone: ") ?? "";
+
+        var personalInfo = new UnvalidatedPersonalInfo {
+            FirstName = firstName,
+            LastName = lastName,
+            Email = email,
+            Phone = phone
+        }.Parse();
+
+        return personalInfo.Match(pi => {
+            _repo.SavePersonalInfo(pi);
+            _consoleUI.PrintLine("Personal info saved.");
+            return pi;
+        }
+        , es => {
+            _consoleUI.PrintLine("Failed to parse personal info:");
+            foreach (var e in es) {
+                _consoleUI.PrintLine(e.ErrorMessage);
+            }
+            return CreatePersonalInfo();
+        });
+    }
+
+    public Payment CreatePaymentInfo() {
+        _consoleUI.PrintLine("Please enter your payment information.");
+        var cardNumber = _consoleUI.Prompt("Card number: ") ?? "";
+        var expiration = _consoleUI.Prompt("Expiration date (MM/YY): ") ?? "";
+        var cvv = _consoleUI.Prompt("CVV: ") ?? "";
+        var zip = _consoleUI.Prompt("Billing zip code: ") ?? "";
+
+        var payment = new UnvalidatedPayment(
+            new PaymentInfo.PayWithCard(
+                cardNumber, expiration, cvv, zip)).Parse();
+
+        return payment.Match(p => {
+            _repo.SavePayment(p);
+            _consoleUI.PrintLine("Payment info saved.");
+            return p;
+        }, es => {
+            _consoleUI.PrintLine("Failed to parse payment info:");
+            foreach (var e in es) {
+                _consoleUI.PrintLine(e.ErrorMessage);
+            }
+            return CreatePaymentInfo();
+        });
+    }
+
     public async Task FastPizza() {
         var userOrder = _repo.GetDefaultOrder()
-            ?? throw new InvalidOperationException("Implement create order.");
+            ?? throw new NotImplementedException("Implement create order.");
 
-        var personalInfo = _repo.GetPersonalInfo()
-            ?? throw new InvalidOperationException("Implement create personal info");
+        var personalInfo = _repo.GetPersonalInfo() ?? CreatePersonalInfo();
 
         var userPayment = userOrder.PaymentType == PaymentType.PayAtStore
-            ?  Payment.PayAtStoreInstance
-            : _repo.GetDefaultPayment()
-                ?? throw new InvalidOperationException("Implement create payment info");
+            ? Payment.PayAtStoreInstance
+            : _repo.GetDefaultPayment() ?? CreatePaymentInfo();
 
         var cart = _startOrder(userOrder.OrderInfo);
 

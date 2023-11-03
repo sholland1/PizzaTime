@@ -12,6 +12,7 @@ public static class PizzaSerializer {
             new CheeseJsonConverter(),
             new SauceJsonConverter(),
             new ToppingJsonConverter(),
+            new UPaymentJsonConverter(),
             new PaymentJsonConverter(),
             new ServiceMethodJsonConverter(),
             new OrderTimingJsonCoverter(),
@@ -172,7 +173,16 @@ public class ServiceMethodJsonConverter : JsonConverter<ServiceMethod> {
             location => writer.WriteStringValue($"Carryout - {location}"));
 }
 
-public class PaymentJsonConverter : JsonConverter<UnvalidatedPayment> {
+public class PaymentJsonConverter : JsonConverter<Payment> {
+    private readonly UPaymentJsonConverter _converter = new();
+    public override Payment? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+        _converter.Read(ref reader, typeToConvert, options)?.Parse().ToNullable();
+
+    public override void Write(Utf8JsonWriter writer, Payment value, JsonSerializerOptions options) =>
+        _converter.Write(writer, value, options);
+}
+
+public class UPaymentJsonConverter : JsonConverter<UnvalidatedPayment> {
     public override UnvalidatedPayment? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         if (reader.TokenType == JsonTokenType.String) {
             var value = reader.GetString();

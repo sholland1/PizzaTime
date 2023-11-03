@@ -7,6 +7,9 @@ public interface IPizzaRepo {
     Payment? GetDefaultPayment();
     Pizza? GetPizza(string name);
     Payment? GetPayment(string name);
+
+    void SavePersonalInfo(PersonalInfo personalInfo);
+    void SavePayment(Payment payment);
 }
 
 public class PizzaRepository : IPizzaRepo {
@@ -17,8 +20,10 @@ public class PizzaRepository : IPizzaRepo {
         DeserializeFromFile<UnvalidatedPayment>($"{name}.json")?.Validate();
 
     static T? DeserializeFromFile<T>(string filename) =>
-        JsonSerializer.Deserialize<T>(
-            File.OpenRead(filename), PizzaSerializer.Options);
+        File.Exists(filename)
+            ? JsonSerializer.Deserialize<T>(
+                File.OpenRead(filename), PizzaSerializer.Options)
+            : default;
 
     public PersonalInfo? GetPersonalInfo() =>
         DeserializeFromFile<UnvalidatedPersonalInfo>("personalInfo.json")?.Validate();
@@ -27,4 +32,19 @@ public class PizzaRepository : IPizzaRepo {
         DeserializeFromFile<UnvalidatedOrder>("defaultOrder.json")?.Validate();
 
     public Payment? GetDefaultPayment() => GetPayment("defaultPayment");
+
+    static void SerializeToFile<T>(string filename, T obj) {
+        using var fs = File.OpenWrite(filename);
+        JsonSerializer.Serialize(
+            fs, obj, PizzaSerializer.Options);
+    }
+
+    public void SavePersonalInfo(PersonalInfo personalInfo) =>
+        SerializeToFile("personalInfo.json", personalInfo);
+
+    public void SavePayment(Payment payment) {
+        if (payment.PaymentInfo is PaymentInfo.PayWithCard) {
+            SerializeToFile("defaultPayment.json", payment);
+        }
+    }
 }

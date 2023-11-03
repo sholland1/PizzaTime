@@ -43,6 +43,18 @@ public class DummyPizzaRepository : IPizzaRepo {
     }.Validate();
 
     public Payment? GetDefaultPayment() => Payments.First().Value.Validate();
+
+    public void SavePersonalInfo(PersonalInfo personalInfo) {
+        throw new NotImplementedException();
+    }
+
+    public void SavePayment(PaymentInfo.PayWithCard payment) {
+        throw new NotImplementedException();
+    }
+
+    public void SavePayment(Payment payment) {
+        throw new NotImplementedException();
+    }
 }
 
 public class DummyConsoleUI : IConsoleUI {
