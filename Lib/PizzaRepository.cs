@@ -19,11 +19,13 @@ public class PizzaRepository : IPizzaRepo {
     public Payment? GetPayment(string name) =>
         DeserializeFromFile<UnvalidatedPayment>($"{name}.json")?.Validate();
 
-    static T? DeserializeFromFile<T>(string filename) =>
-        File.Exists(filename)
-            ? JsonSerializer.Deserialize<T>(
-                File.OpenRead(filename), PizzaSerializer.Options)
-            : default;
+    static T? DeserializeFromFile<T>(string filename) {
+        if (!File.Exists(filename)) return default;
+
+        using var fs = File.OpenRead(filename);
+        return JsonSerializer.Deserialize<T>(
+            fs, PizzaSerializer.Options);
+    }
 
     public PersonalInfo? GetPersonalInfo() =>
         DeserializeFromFile<UnvalidatedPersonalInfo>("personalInfo.json")?.Validate();
@@ -34,7 +36,7 @@ public class PizzaRepository : IPizzaRepo {
     public Payment? GetDefaultPayment() => GetPayment("defaultPayment");
 
     static void SerializeToFile<T>(string filename, T obj) {
-        using var fs = File.OpenWrite(filename);
+        using var fs = File.Create(filename);
         JsonSerializer.Serialize(
             fs, obj, PizzaSerializer.Options);
     }
