@@ -70,6 +70,8 @@ public class DummyConsoleUI : IConsoleUI {
     public string? ReadLine() => _readLines.Dequeue();
 
     public override string ToString() => string.Join("", PrintedMessages);
+
+    public string? EditLine(string _) => ReadLine();
 }
 
 public class DummyPizzaCart : ICart {

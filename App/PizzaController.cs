@@ -16,6 +16,10 @@ public class PizzaController {
         var email = _consoleUI.Prompt("Email: ") ?? "";
         var phone = _consoleUI.Prompt("Phone: ") ?? "";
 
+        return ValidateAndSave(firstName, lastName, email, phone) ?? CreatePersonalInfo();
+    }
+
+    private PersonalInfo? ValidateAndSave(string firstName, string lastName, string email, string phone) {
         var personalInfo = new UnvalidatedPersonalInfo {
             FirstName = firstName,
             LastName = lastName,
@@ -23,17 +27,16 @@ public class PizzaController {
             Phone = phone
         }.Parse();
 
-        return personalInfo.Match(pi => {
+        return personalInfo.Match<PersonalInfo?>(pi => {
             _repo.SavePersonalInfo(pi);
             _consoleUI.PrintLine("Personal info saved.");
             return pi;
-        }
-        , es => {
+        }, es => {
             _consoleUI.PrintLine("Failed to parse personal info:");
             foreach (var e in es) {
                 _consoleUI.PrintLine(e.ErrorMessage);
             }
-            return CreatePersonalInfo();
+            return default;
         });
     }
 
@@ -150,7 +153,7 @@ public class PizzaController {
                 case '1': await FastPizza(); break;
                 // case '2': await NewOrder(); break;
                 // case '3': await EditSavedPizzas(); break;
-                // case '4': await EditPersonalInfo(); break;
+                case '4': _ = EditPersonalInfo(); await Helper(); break;
                 // case '5': await EditPaymentInfo(); break;
                 case 'Q' or 'q': _consoleUI.PrintLine("Goodbye!"); return;
                 default:
@@ -159,6 +162,21 @@ public class PizzaController {
                     break;
             }
         }
+    }
+
+    private PersonalInfo EditPersonalInfo() {
+        var currentInfo = _repo.GetPersonalInfo();
+        if (currentInfo is null) {
+            return CreatePersonalInfo();
+        }
+
+        _consoleUI.PrintLine("Edit your personal information:");
+        var firstName = _consoleUI.PromptForEdit("First Name: ", currentInfo.FirstName) ?? "";
+        var lastName = _consoleUI.PromptForEdit("Last Name: ", currentInfo.LastName) ?? "";
+        var email = _consoleUI.PromptForEdit("Email: ", currentInfo.Email) ?? "";
+        var phone = _consoleUI.PromptForEdit("Phone Number: ", currentInfo.Phone) ?? "";
+
+        return ValidateAndSave(firstName, lastName, email, phone) ?? EditPersonalInfo();
     }
 
     private static bool IsAffirmative(string? answer) => (answer?.ToLower() ?? "y") == "y";
