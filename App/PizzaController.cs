@@ -52,7 +52,7 @@ public class PizzaController {
                 cardNumber, expiration, cvv, zip)).Parse();
 
         return payment.Match(p => {
-            _repo.SavePayment(p);
+            _repo.SavePayment("default", p);
             _consoleUI.PrintLine("Payment info saved.");
             return p;
         }, es => {

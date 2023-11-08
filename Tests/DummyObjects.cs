@@ -28,12 +28,14 @@ public class DummyPizzaRepository : IPizzaRepo {
     public OrderInfo GetOrderInfo(string name) => OrderInfos[name].Validate();
     public Payment GetPayment(string name) => Payments[name].Validate();
 
-    public PersonalInfo? GetPersonalInfo() => new UnvalidatedPersonalInfo {
+    private PersonalInfo? _personalInfo = new UnvalidatedPersonalInfo {
         FirstName = "Test",
         LastName = "Testington",
         Email = "test@gmail.org",
         Phone = "000-123-1234"
     }.Validate();
+
+    public PersonalInfo? GetPersonalInfo() => _personalInfo;
 
     public NewOrder? GetDefaultOrder() => new UnvalidatedOrder {
         Pizzas = Pizzas.Values.Take(2).ToList(),
@@ -44,17 +46,13 @@ public class DummyPizzaRepository : IPizzaRepo {
 
     public Payment? GetDefaultPayment() => Payments.First().Value.Validate();
 
-    public void SavePersonalInfo(PersonalInfo personalInfo) {
-        throw new NotImplementedException();
-    }
+    public void SavePersonalInfo(PersonalInfo personalInfo) => _personalInfo = personalInfo;
 
-    public void SavePayment(PaymentInfo.PayWithCard payment) {
-        throw new NotImplementedException();
-    }
+    public void SavePizza(string name, Pizza pizza) => Pizzas[name] = pizza;
 
-    public void SavePayment(Payment payment) {
-        throw new NotImplementedException();
-    }
+    public IEnumerable<string> ListPizzas() => Pizzas.Keys;
+
+    public void SavePayment(string name, Payment payment) => Payments[name] = payment;
 }
 
 public class DummyConsoleUI : IConsoleUI {
