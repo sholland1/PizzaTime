@@ -28,16 +28,16 @@ public class PizzaController {
             Phone = phone
         }.Parse();
 
-        return personalInfo.Match<PersonalInfo?>(pi => {
-            _repo.SavePersonalInfo(pi);
-            _consoleUI.PrintLine("Personal info saved.");
-            return pi;
-        }, es => {
+        return personalInfo.Match<PersonalInfo?>(es => {
             _consoleUI.PrintLine("Failed to parse personal info:");
             foreach (var e in es) {
                 _consoleUI.PrintLine(e.ErrorMessage);
             }
             return default;
+        }, pi => {
+            _repo.SavePersonalInfo(pi);
+            _consoleUI.PrintLine("Personal info saved.");
+            return pi;
         });
     }
 
@@ -52,16 +52,16 @@ public class PizzaController {
             new PaymentInfo.PayWithCard(
                 cardNumber, expiration, cvv, zip)).Parse();
 
-        return payment.Match(p => {
-            _repo.SavePayment("default", p);
-            _consoleUI.PrintLine("Payment info saved.");
-            return p;
-        }, es => {
+        return payment.Match(es => {
             _consoleUI.PrintLine("Failed to parse payment info:");
             foreach (var e in es) {
                 _consoleUI.PrintLine(e.ErrorMessage);
             }
             return CreatePaymentInfo();
+        }, p => {
+            _repo.SavePayment("default", p);
+            _consoleUI.PrintLine("Payment info saved.");
+            return p;
         });
     }
 

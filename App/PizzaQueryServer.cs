@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 
 namespace Server;
-public record PizzaQueryServer(IPAddress IPAddress, int Port, PizzaRepository PizzaRepository) {
+public record PizzaQueryServer(IPAddress IPAddress, int Port, IPizzaRepo PizzaRepository) {
     public Task StartServer() => Task.Run(() => {
         TcpListener listener = new(IPAddress, Port);
         listener.Start();

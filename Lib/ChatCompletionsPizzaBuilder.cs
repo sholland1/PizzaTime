@@ -73,8 +73,8 @@ public class ChatCompletionsPizzaBuilder : IAIPizzaBuilder {
             if (deserialized is null) return Failure("Failed to deserialize pizza");
             var parseResult = deserialized.Parse();
             return parseResult.Match(
-                Success,
-                errors => Failure(errors.Select(x => x.ErrorMessage).ToList()));
+                errors => Failure(errors.Select(x => x.ErrorMessage).ToList()),
+                Success);
         }
         catch (JsonException ex) {
             return Failure(ex.Message);

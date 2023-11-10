@@ -30,14 +30,14 @@ public abstract record Validation<T> {
         _ => default
     };
 
-    public R Match<R>(Func<T, R> success, Func<List<ValidationFailure>, R> failure) => this switch {
-        Success s => success(s.Value),
+    public R Match<R>(Func<List<ValidationFailure>, R> failure, Func<T, R> success) => this switch {
         Failure f => failure(f.Value),
+        Success s => success(s.Value),
         _ => throw new UnreachableException($"Invalid Result! {this}")
     };
 
     public void Match(Action<T> success, Action<List<ValidationFailure>> failure) =>
         Match(
-            x => { success(x); return 0; },
-            x => { failure(x); return 1; });
+            x => { failure(x); return 1; },
+            x => { success(x); return 0; });
 }
