@@ -5,9 +5,10 @@ public class PizzaController {
     private readonly IPizzaRepo _repo;
     private readonly Func<OrderInfo, ICart> _startOrder;
     private readonly IConsoleUI _consoleUI;
+    private readonly IAIPizzaBuilder _aiPizzaBuilder;
 
-    public PizzaController(IPizzaRepo repo, Func<OrderInfo, ICart> startOrder, IConsoleUI consoleUI) =>
-        (_repo, _startOrder, _consoleUI) = (repo, startOrder, consoleUI);
+    public PizzaController(IPizzaRepo repo, Func<OrderInfo, ICart> startOrder, IConsoleUI consoleUI, IAIPizzaBuilder aiPizzaBuilder) =>
+        (_repo, _startOrder, _consoleUI, _aiPizzaBuilder) = (repo, startOrder, consoleUI, aiPizzaBuilder);
 
     public PersonalInfo CreatePersonalInfo() {
         _consoleUI.PrintLine("Please enter your personal information.");
@@ -140,7 +141,7 @@ public class PizzaController {
             string[] options = {
                 "1. Order default",
                 "2. Start new order",
-                "3. Edit saved pizzas",
+                "3. Edit saved pizza",
                 "4. Edit personal info",
                 "5. Track order",
                 "q. Exit"
@@ -152,7 +153,7 @@ public class PizzaController {
             switch (choice) {
                 case '1': await FastPizza(); break;
                 // case '2': await NewOrder(); break;
-                // case '3': await EditSavedPizzas(); break;
+                case '3': await EditSavedPizza(); await Helper(); break;
                 case '4': _ = EditPersonalInfo(); await Helper(); break;
                 // case '5': await EditPaymentInfo(); break;
                 case 'Q' or 'q': _consoleUI.PrintLine("Goodbye!"); return;
@@ -162,6 +163,46 @@ public class PizzaController {
                     break;
             }
         }
+    }
+
+    private async Task EditSavedPizza() {
+        var server = new {
+            IPAddress = System.Net.IPAddress.Parse("127.0.0.1"),
+            Port = 12345
+        };
+        Fzf.FzfOptions opts = new() {
+            Prompt = "Choose a pizza to edit: ",
+            Preview = $"echo -n {{}} | nc {server.IPAddress} {server.Port}"
+        };
+        var pizzaName = _repo.ListPizzas().ChooseWithFzf(opts);
+        if (pizzaName is null) {
+            _consoleUI.PrintLine("No pizza selected.");
+            return;
+        }
+        var pizza = _repo.GetPizza(pizzaName);
+        if (pizza is null) throw new Exception("Pizza not found.");
+
+        _consoleUI.PrintLine($"Editing {pizzaName}:");
+        _consoleUI.PrintLine(pizza.Summarize());
+        var input = _consoleUI.Prompt("> ") ?? "";
+        var result = await _aiPizzaBuilder.EditPizza(pizza, input);
+
+        result.Match(es => {
+            _consoleUI.PrintLine("Failed to edit pizza:");
+            foreach (var e in es) {
+                _consoleUI.PrintLine(e);
+            }
+        }, p => {
+            _consoleUI.PrintLine("Updated pizza:");
+            _consoleUI.PrintLine(p.Summarize());
+            var shouldSave = IsAffirmative(_consoleUI.Prompt("Save pizza? [Y/n]: "));
+            if (shouldSave) {
+                _repo.SavePizza(pizzaName, p);
+                _consoleUI.PrintLine("Pizza saved.");
+                return;
+            }
+            _consoleUI.PrintLine("Pizza not saved.");
+        });
     }
 
     private PersonalInfo EditPersonalInfo() {
