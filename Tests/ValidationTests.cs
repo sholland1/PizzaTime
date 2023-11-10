@@ -19,7 +19,7 @@ public class ValidationTests {
     [Fact]
     public void InvalidationWorks2() {
         var invalidProperties = new[] {
-            "Bake", "Cheese.Amount", "Crust", "Cut", "Sauce.Value.Amount", "Sauce.Value.SauceType",
+            "Bake", "Cheese.Amount", "Crust", "Crust", "Cut", "Sauce.Value.Amount", "Sauce.Value.SauceType",
             "Size", "Toppings[0].Amount", "Toppings[0].Location", "Toppings[0].ToppingType"
         };
 

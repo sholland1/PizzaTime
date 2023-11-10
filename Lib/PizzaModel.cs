@@ -79,7 +79,7 @@ public static class SizeHelpers {
         Size.Medium => new[] { Crust.HandTossed, Crust.Thin, Crust.HandmadePan },
         Size.Large => new[] { Crust.HandTossed, Crust.Thin, Crust.Brooklyn },
         Size.XL => new[] { Crust.Brooklyn },
-        _ => throw new UnreachableException($"Invalid Size! {size}")
+        _ => Array.Empty<Crust>()
     };
 }
 

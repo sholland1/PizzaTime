@@ -31,8 +31,8 @@ public class PizzaValidator : AbstractValidator<UnvalidatedPizza> {
         RuleFor(p => p.Cut).IsInEnum();
         RuleFor(p => p.Bake).IsInEnum();
 
-        //Size
-        RuleFor(p => p.Size).Must((p, s) => s.AllowedCrusts().Contains(p.Crust));
+        //Size and Crust
+        RuleFor(p => p.Crust).Must((p, c) => p.Size.AllowedCrusts().Contains(c));
 
         //Crust
         When(p => p.Crust == Crust.HandTossed,
