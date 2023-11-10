@@ -1,0 +1,17 @@
+Given a natural language description of a new pizza order or a change to an existing
+pizza, return a JSON object containing the pizza order in a structured format. Don't
+remove toppings unless instructed.
+
+Rules:
+= means normal amount
+- means light amount
+^ means extra amount
+
+simplify == to =
+simplify ^^ to ^
+simplify -- to -
+
+Allowed Toppings: {0}
+Allowed Sauces: {1}
+Allowed Crusts:
+{2}

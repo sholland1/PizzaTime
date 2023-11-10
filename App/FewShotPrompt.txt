@@ -1,9 +1,4 @@
-Given a JSON object describing a pizza order and a natural language string describing a modification to the order, return a JSON object containing the pizza order in a structured format.
-= means a normal amount
-- means light amount
-^ means extra amount
-
-Current: {}
+Current: null
 Input: large pepperoni pizza
 Result: {
   "Size": "Large",
@@ -20,7 +15,7 @@ Result: {
   "Quantity": 1
 }
 
-Current: {}
+Current: null
 Input: 2 medium cheese pizzas
 Result: {
   "Size": "Medium",
@@ -61,27 +56,27 @@ Result: {
   "Quantity": 2
 }
 
-Current: {}
+Current: null
 Input: 2 medium square cut well done pan pizzas with light cheese on the left extra cheese on the right with extra honey bbq sauce pepperoni extra bacon on the left light mushrooms on the right and spinach
 Result: {
-    "Size": "Medium",
-    "Crust": "HandmadePan",
-    "Cheese": "-^",
-    "Sauce": "^HoneyBBQ",
-    "Toppings": [
-      "A=Pepperoni",
-      "L^Bacon",
-      "R-Mushrooms",
-      "A=Spinach"
-    ],
-    "Bake": "WellDone",
-    "Cut": "Square",
-    "Oregano": false,
-    "GarlicCrust": false,
-    "Quantity": 2
-  }
+  "Size": "Medium",
+  "Crust": "HandmadePan",
+  "Cheese": "-^",
+  "Sauce": "^HoneyBBQ",
+  "Toppings": [
+    "A=Pepperoni",
+    "L^Bacon",
+    "R-Mushrooms",
+    "A=Spinach"
+  ],
+  "Bake": "WellDone",
+  "Cut": "Square",
+  "Oregano": false,
+  "GarlicCrust": false,
+  "Quantity": 2
+}
 
-Current: {}
+Current: null
 Input: a small hand tossed pizza well done with garlic crust
 Result: {
   "Size": "Small",
@@ -96,7 +91,7 @@ Result: {
   "Quantity": 1
 }
 
-Current: {}
+Current: null
 Input: 25 extra large brooklyn style pizzas uncut
 Result: {
   "Size": "XL",

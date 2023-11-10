@@ -1,0 +1,53 @@
+[
+  {
+    "User": "small hand tossed pizza well done with garlic crust",
+    "Assistant": {
+      "Size": "Small",
+      "Crust": "HandTossed",
+      "Cheese": "=",
+      "Sauce": "=Tomato",
+      "Toppings": [],
+      "Bake": "WellDone",
+      "Cut": "Pie",
+      "Oregano": false,
+      "GarlicCrust": true,
+      "Quantity": 1
+    }
+  },
+  {
+    "User": "make it large with extra cheese and light pepperoni on the left",
+    "Assistant": {
+      "Size": "Large",
+      "Crust": "HandTossed",
+      "Cheese": "^",
+      "Sauce": "=Tomato",
+      "Toppings": [
+        "L-Pepperoni"
+      ],
+      "Bake": "WellDone",
+      "Cut": "Pie",
+      "Oregano": false,
+      "GarlicCrust": true,
+      "Quantity": 1
+    }
+  },
+  {
+    "User": "add bacon and jalapenos, make the sauce alfredo, and cut it into squares",
+    "Assistant": {
+      "Size": "Large",
+      "Crust": "HandTossed",
+      "Cheese": "^",
+      "Sauce": "=Alfredo",
+      "Toppings": [
+        "L-Pepperoni",
+        "A=Bacon",
+        "A=JalapenoPeppers"
+      ],
+      "Bake": "WellDone",
+      "Cut": "Square",
+      "Oregano": false,
+      "GarlicCrust": true,
+      "Quantity": 1
+    }
+  }
+]

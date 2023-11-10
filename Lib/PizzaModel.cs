@@ -70,6 +70,19 @@ public class UnvalidatedPizza {
 
 public enum Size { Small, Medium, Large, XL }
 
+public static class SizeHelpers {
+    public static string AllowedCrustsString =>
+        string.Join("\n", Enum.GetValues<Size>().Select(s => $"{s}: {string.Join(" ", s.AllowedCrusts())}"));
+
+    public static Crust[] AllowedCrusts(this Size size) => size switch {
+        Size.Small => new[] { Crust.HandTossed, Crust.Thin, Crust.GlutenFree },
+        Size.Medium => new[] { Crust.HandTossed, Crust.Thin, Crust.HandmadePan },
+        Size.Large => new[] { Crust.HandTossed, Crust.Thin, Crust.Brooklyn },
+        Size.XL => new[] { Crust.Brooklyn },
+        _ => throw new UnreachableException($"Invalid Size! {size}")
+    };
+}
+
 public enum Crust { Brooklyn, HandTossed, Thin, HandmadePan, GlutenFree }
 
 public abstract record Cheese {
@@ -109,6 +122,11 @@ public record struct Sauce(SauceType SauceType, Amount Amount) {
 
 public enum SauceType { Tomato, Marinara, HoneyBBQ, GarlicParmesan, Alfredo, Ranch }
 
+public static class SauceTypeHelpers {
+    public static string AllSaucesString =>
+        string.Join(' ', Enum.GetValues<SauceType>());
+}
+
 public record struct Topping(ToppingType ToppingType, Location Location, Amount Amount);
 
 public class Toppings : List<Topping> {
@@ -130,6 +148,11 @@ public enum ToppingType {
     BlackOlives, Mushrooms, Pineapple, ShreddedProvoloneCheese,
     CheddarCheese, GreenPeppers, Spinach, //RoastedRedPeppers,
     FetaCheese, ShreddedParmesanAsiago
+}
+
+public static class ToppingTypeHelpers {
+    public static string AllToppingsString =>
+        string.Join(' ', Enum.GetValues<ToppingType>());
 }
 
 public enum Bake { Normal, WellDone }

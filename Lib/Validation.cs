@@ -1,3 +1,4 @@
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using static Hollandsoft.OrderPizza.BuilderHelpers;
@@ -31,18 +32,7 @@ public class PizzaValidator : AbstractValidator<UnvalidatedPizza> {
         RuleFor(p => p.Bake).IsInEnum();
 
         //Size
-        When(p => p.Size == Size.Small,
-            () => RuleFor(p => p.Crust)
-                .Must(c => c.In(Crust.HandTossed, Crust.Thin, Crust.GlutenFree)));
-        When(p => p.Size == Size.Medium,
-            () => RuleFor(p => p.Crust)
-                .Must(c => c.In(Crust.HandTossed, Crust.Thin, Crust.HandmadePan)));
-        When(p => p.Size == Size.Large,
-            () => RuleFor(p => p.Crust)
-                .Must(c => c.In(Crust.HandTossed, Crust.Thin, Crust.Brooklyn)));
-        When(p => p.Size == Size.XL,
-            () => RuleFor(p => p.Crust)
-                .Must(c => c == Crust.Brooklyn));
+        RuleFor(p => p.Size).Must((p, s) => s.AllowedCrusts().Contains(p.Crust));
 
         //Crust
         When(p => p.Crust == Crust.HandTossed,
