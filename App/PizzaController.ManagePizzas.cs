@@ -8,7 +8,7 @@ public partial class PizzaController {
         var result = await _aiPizzaBuilder.CreatePizza(input);
 
         return await result.Match(async es => {
-            _terminalUI.PrintLine("Failed to edit pizza:");
+            _terminalUI.PrintLine("Failed to create pizza:");
             foreach (var e in es) {
                 _terminalUI.PrintLine(e);
             }
