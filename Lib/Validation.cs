@@ -227,7 +227,7 @@ internal class PaymentValidator : AbstractValidator<UnvalidatedPayment> {
 internal class PersonalInfoValidator : AbstractValidator<UnvalidatedPersonalInfo> {
     public PersonalInfoValidator() {
         RuleFor(p => p.Email).EmailAddress();
-        RuleFor(p => p.Phone).Matches(@"\d{3}-\d{3}-\d{4}");
+        RuleFor(p => p.Phone).Matches(@"^\d{3}-\d{3}-\d{4}$");
     }
 }
 
