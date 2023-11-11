@@ -1,7 +1,7 @@
 using Hollandsoft.OrderPizza;
 
 namespace Controllers;
-public class PizzaController {
+public partial class PizzaController {
     private readonly IPizzaRepo _repo;
     private readonly Func<OrderInfo, ICart> _startOrder;
     private readonly ITerminalUI _terminalUI;
@@ -10,76 +10,6 @@ public class PizzaController {
 
     public PizzaController(IPizzaRepo repo, Func<OrderInfo, ICart> startOrder, ITerminalUI terminalUI, IUserChooser chooser, IAIPizzaBuilder aiPizzaBuilder) =>
         (_repo, _startOrder, _terminalUI, _chooser, _aiPizzaBuilder) = (repo, startOrder, terminalUI, chooser, aiPizzaBuilder);
-
-    public PersonalInfo CreatePersonalInfo() {
-        _terminalUI.PrintLine("Please enter your personal information.");
-        var firstName = _terminalUI.Prompt("First name: ") ?? "";
-        var lastName = _terminalUI.Prompt("Last name: ") ?? "";
-        var email = _terminalUI.Prompt("Email: ") ?? "";
-        var phone = _terminalUI.Prompt("Phone: ") ?? "";
-
-        return ValidatePersonalAndSave(firstName, lastName, email, phone) ?? CreatePersonalInfo();
-    }
-
-    private PersonalInfo? ValidatePersonalAndSave(string firstName, string lastName, string email, string phone) {
-        var personalInfo = new UnvalidatedPersonalInfo {
-            FirstName = firstName,
-            LastName = lastName,
-            Email = email,
-            Phone = phone
-        }.Parse();
-
-        return personalInfo.Match<PersonalInfo?>(es => {
-            _terminalUI.PrintLine("Failed to parse personal info:");
-            _terminalUI.PrintLine(string.Join(Environment.NewLine, es.Select(e => e.ErrorMessage)));
-            return default;
-        }, pi => {
-            _repo.SavePersonalInfo(pi);
-            _terminalUI.PrintLine("Personal info saved.");
-            return pi;
-        });
-    }
-
-    public Payment CreatePaymentInfo() {
-        _terminalUI.PrintLine("Please enter your payment information.");
-        var cardNumber = _terminalUI.Prompt("Card number: ") ?? "";
-        var expiration = _terminalUI.Prompt("Expiration date (MM/YY): ") ?? "";
-        var cvv = _terminalUI.Prompt("CVV: ") ?? "";
-        var zip = _terminalUI.Prompt("Billing zip code: ") ?? "";
-
-        return ValidatePaymentAndSave(cardNumber, expiration, cvv, zip) ?? CreatePaymentInfo();
-    }
-
-    private Payment? ValidatePaymentAndSave(string cardNumber, string expiration, string cvv, string zip) {
-        var payment = new UnvalidatedPayment(
-            new PaymentInfo.PayWithCard(
-                cardNumber, expiration, cvv, zip)).Parse();
-
-        return payment.Match<Payment?>(es => {
-            _terminalUI.PrintLine("Failed to parse payment info:");
-            _terminalUI.PrintLine(string.Join(Environment.NewLine, es.Select(e => e.ErrorMessage)));
-            return default;
-        }, p => {
-            _repo.SavePayment("default", p);
-            _terminalUI.PrintLine("Payment info saved.");
-            return p;
-        });
-    }
-
-    public Payment EditPaymentInfos() {
-        var payWithCard = (PaymentInfo.PayWithCard?)_repo.GetDefaultPayment()?.PaymentInfo;
-        if (payWithCard is null) {
-            return CreatePaymentInfo();
-        }
-
-        _terminalUI.PrintLine("Edit your payment information:");
-        var cardNumber = _terminalUI.PromptForEdit("Card number: ", payWithCard.CardNumber) ?? "";
-        var expiration = _terminalUI.PromptForEdit("Expiration date (MM/YY): ", payWithCard.Expiration) ?? "";
-        var cvv = _terminalUI.PromptForEdit("CVV: ", payWithCard.SecurityCode) ?? "";
-        var zip = _terminalUI.PromptForEdit("Billing zip code: ", payWithCard.BillingZip) ?? "";
-
-        return ValidatePaymentAndSave(cardNumber, expiration, cvv, zip) ?? EditPaymentInfos();
-    }
 
     public async Task FastPizza() {
         var userOrder = _repo.GetDefaultOrder()
@@ -157,9 +87,9 @@ public class PizzaController {
             string[] options = {
                 "1. Order default",
                 "2. Start new order",
-                "3. Edit pizzas",
-                "4. Edit personal info",
-                "5. Edit payment infos",
+                "3. Manage pizzas",
+                "4. Manage personal info",
+                "5. Manage payments",
                 "6. Track order",
                 "q. Exit"
             };
@@ -169,9 +99,9 @@ public class PizzaController {
             switch (choice) {
                 case '1': await FastPizza(); break;
                 // case '2': await NewOrder(); break;
-                case '3': _ = await EditPizzas(); await Helper(); break;
-                case '4': _ = EditPersonalInfo(); await Helper(); break;
-                case '5': _ = EditPaymentInfos(); await Helper(); break;
+                case '3': _ = await ManagePizzas(); await Helper(); break;
+                case '4': _ = ManagePersonalInfo(); await Helper(); break;
+                case '5': _ = ManagePayments(); await Helper(); break;
                 // case '6': await TrackOrder(); await Helper(); break;
                 case 'Q' or 'q': _terminalUI.PrintLine("Goodbye!"); return;
                 default:
@@ -180,95 +110,6 @@ public class PizzaController {
                     break;
             }
         }
-    }
-
-    public async Task<Pizza?> CreatePizza() {
-        _terminalUI.PrintLine("Describe your new pizza:");
-        var input = _terminalUI.Prompt("> ") ?? "";
-        var result = await _aiPizzaBuilder.CreatePizza(input);
-
-        return await result.Match(async es => {
-            _terminalUI.PrintLine("Failed to edit pizza:");
-            foreach (var e in es) {
-                _terminalUI.PrintLine(e);
-            }
-            var choice = _terminalUI.Prompt("Try again? [Y/n]: ");
-            if (IsAffirmative(choice)) {
-                return await CreatePizza();
-            };
-            return default;
-        }, p => {
-            _terminalUI.PrintLine("New pizza:");
-            _terminalUI.PrintLine(p.Summarize());
-            var pizzaName = _terminalUI.Prompt("Pizza name: ") ?? "";
-            var shouldSave = IsAffirmative(_terminalUI.Prompt($"Save pizza ({pizzaName})? [Y/n]: "));
-            if (shouldSave) {
-                _repo.SavePizza(pizzaName, p);
-                _terminalUI.PrintLine("Pizza saved.");
-                return p;
-            }
-            _terminalUI.PrintLine("Pizza not saved.");
-            return default;
-        });
-    }
-
-    public async Task<Pizza?> EditPizzas() {
-        var newPizzaOption = "--create new--";
-        var pizzaName = _chooser.GetUserChoice(
-            "Choose a pizza to edit: ", _repo.ListPizzas().Prepend(newPizzaOption), "pizza");
-        if (pizzaName is null) {
-            _terminalUI.PrintLine("No pizza selected.");
-            return default;
-        }
-
-        if (pizzaName == newPizzaOption) {
-            return await CreatePizza();
-        }
-
-        var pizza = _repo.GetPizza(pizzaName) ?? throw new Exception("Pizza not found.");
-
-        _terminalUI.PrintLine($"Editing {pizzaName}:");
-        _terminalUI.PrintLine(pizza.Summarize());
-        var input = _terminalUI.Prompt("> ") ?? "";
-        var result = await _aiPizzaBuilder.EditPizza(pizza, input);
-
-        return await result.Match(async es => {
-            _terminalUI.PrintLine("Failed to edit pizza:");
-            foreach (var e in es) {
-                _terminalUI.PrintLine(e);
-            }
-            var choice = _terminalUI.Prompt("Try again? [Y/n]: ");
-            if (IsAffirmative(choice)) {
-                return await EditPizzas();
-            };
-            return default;
-        }, p => {
-            _terminalUI.PrintLine("Updated pizza:");
-            _terminalUI.PrintLine(p.Summarize());
-            var shouldSave = IsAffirmative(_terminalUI.Prompt($"Save pizza ({pizzaName})? [Y/n]: "));
-            if (shouldSave) {
-                _repo.SavePizza(pizzaName, p);
-                _terminalUI.PrintLine("Pizza saved.");
-                return p;
-            }
-            _terminalUI.PrintLine("Pizza not saved.");
-            return default;
-        });
-    }
-
-    public PersonalInfo EditPersonalInfo() {
-        var currentInfo = _repo.GetPersonalInfo();
-        if (currentInfo is null) {
-            return CreatePersonalInfo();
-        }
-
-        _terminalUI.PrintLine("Edit your personal information:");
-        var firstName = _terminalUI.PromptForEdit("First Name: ", currentInfo.FirstName) ?? "";
-        var lastName = _terminalUI.PromptForEdit("Last Name: ", currentInfo.LastName) ?? "";
-        var email = _terminalUI.PromptForEdit("Email: ", currentInfo.Email) ?? "";
-        var phone = _terminalUI.PromptForEdit("Phone Number: ", currentInfo.Phone) ?? "";
-
-        return ValidatePersonalAndSave(firstName, lastName, email, phone) ?? EditPersonalInfo();
     }
 
     private static bool IsAffirmative(string? answer) => (answer?.ToLower() ?? "y") == "y";
