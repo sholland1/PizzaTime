@@ -1,13 +1,14 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
 namespace Hollandsoft.OrderPizza;
 public class DominosApi : IOrderApi {
     private readonly ILogger<DominosApi> _log;
-    public DominosApi(ILogger<DominosApi> log) => _log = log;
+    private readonly ISerializer _serializer;
+
+    public DominosApi(ILogger<DominosApi> log, ISerializer serializer) => (_log, _serializer) = (log, serializer);
 
     public async Task<ValidateResponse> ValidateOrder(ValidateRequest request) =>
         await PostAsync<ValidateRequest, ValidateResponse>(
@@ -22,7 +23,7 @@ public class DominosApi : IOrderApi {
             "/power/place-order", request);
 
     private async Task<TResponse> PostAsync<TRequest, TResponse>(string url, TRequest request) {
-        var requestJson = JsonSerializer.Serialize(request);
+        var requestJson = _serializer.Serialize(request);
         _log.LogDebug("{url}\nRequest:\n{requestJson}", url, requestJson);
 
         using HttpClient client = new() {
@@ -36,7 +37,7 @@ public class DominosApi : IOrderApi {
 
         var content = await response.Content.ReadAsStringAsync();
         _log.LogDebug(content);
-        return JsonSerializer.Deserialize<TResponse>(content)!;
+        return _serializer.Deserialize<TResponse>(content)!;
     }
 }
 

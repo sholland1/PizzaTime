@@ -85,9 +85,8 @@ public static class TestPizza {
     }
 
     public static IEnumerable<InvalidData> InvalidPizzas() =>
-        JsonSerializer.Deserialize<IEnumerable<InvalidData>>(
-            File.ReadAllText(Path.Combine(DataDirectory, "InvalidPizzas.json")),
-            PizzaSerializer.Options)!;
+        MyJsonSerializer.Instance.Deserialize<IEnumerable<InvalidData>>(
+            File.ReadAllText(Path.Combine(DataDirectory, "InvalidPizzas.json")))!;
 
     // public static void WritePizzaFile(int pizza, bool json = true, bool summary = true) {
     //     var p = ValidPizzas().ElementAt(pizza);

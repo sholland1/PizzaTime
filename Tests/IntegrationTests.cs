@@ -15,7 +15,7 @@ public class IntegrationTests {
     [Fact(Skip = "integration test")]
     public async Task RealRoundTripOrder() {
         var storeID = Configuration["StoreID"]!;
-        DominosApi api = new(new DummyLogger<DominosApi>());
+        DominosApi api = new(new DummyLogger<DominosApi>(), MyJsonSerializer.Instance);
 
          UnvalidatedOrderInfo orderInfo = new() {
             StoreId = storeID,

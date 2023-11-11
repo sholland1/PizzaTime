@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace Hollandsoft.OrderPizza;
 public interface IPizzaRepo {
     PersonalInfo? GetPersonalInfo();
@@ -16,18 +14,20 @@ public interface IPizzaRepo {
 }
 
 public class PizzaRepository : IPizzaRepo {
+    private readonly ISerializer _serializer;
+    public PizzaRepository(ISerializer serializer) => _serializer = serializer;
+
     public Pizza? GetPizza(string name) =>
         DeserializeFromFile<UnvalidatedPizza>(name + "Pizza")?.Validate();
 
     public Payment? GetPayment(string name) =>
         DeserializeFromFile<UnvalidatedPayment>(name)?.Validate();
 
-    static T? DeserializeFromFile<T>(string filename) {
+    T? DeserializeFromFile<T>(string filename) {
         if (!File.Exists(filename + ".json")) return default;
 
         using var fs = File.OpenRead(filename + ".json");
-        return JsonSerializer.Deserialize<T>(
-            fs, PizzaSerializer.Options);
+        return _serializer.Deserialize<T>(fs);
     }
 
     public PersonalInfo? GetPersonalInfo() =>
@@ -38,10 +38,9 @@ public class PizzaRepository : IPizzaRepo {
 
     public Payment? GetDefaultPayment() => GetPayment("defaultPayment");
 
-    static void SerializeToFile<T>(string filename, T obj) {
+    void SerializeToFile<T>(string filename, T obj) {
         using var fs = File.Create(filename + ".json");
-        JsonSerializer.Serialize(
-            fs, obj, PizzaSerializer.Options);
+        _serializer.Serialize(fs, obj);
     }
 
     public void SavePersonalInfo(PersonalInfo personalInfo) =>

@@ -41,6 +41,7 @@ static ServiceProvider BuilderServiceProvider() {
     services.AddOpenAIService();
 
     services.AddLogging()
+        .AddSingleton<ISerializer>(MyJsonSerializer.Instance)
         .AddSingleton<IOrderApi, DominosApi>()
         .AddSingleton<IPizzaRepo, PizzaRepository>()
         .AddSingleton<Func<OrderInfo, ICart>>(services =>

@@ -18,9 +18,11 @@ public class AIPizzaBuilderConfig {
 public class CompletionsPizzaBuilder : IAIPizzaBuilder {
     private readonly ICompletionService _service;
     private readonly string _promptPreamble;
+    private readonly ISerializer _serializer;
 
-    public CompletionsPizzaBuilder(IOpenAIService service, AIPizzaBuilderConfig config) {
+    public CompletionsPizzaBuilder(IOpenAIService service, ISerializer serializer, AIPizzaBuilderConfig config) {
         _service = service.Completions;
+        _serializer = serializer;
 
         var systemMessage = File.ReadAllText(config.SystemMessageFile);
         var fewShot = File.ReadAllText(config.FewShotFile);
@@ -35,7 +37,7 @@ public class CompletionsPizzaBuilder : IAIPizzaBuilder {
     public async Task<AIPizzaResult> CreatePizza(string userCreateMessage) => await EditPizza(null, userCreateMessage);
 
     public async Task<AIPizzaResult> EditPizza(Pizza? pizza, string userEditMessage) {
-        var serialized = JsonSerializer.Serialize(pizza, PizzaSerializer.Options);
+        var serialized = _serializer.Serialize(pizza);
         var prompt = _promptPreamble + $"\n\nCurrent: {serialized}\nInput: {userEditMessage}\nOutput: ";
 
         var completionResult = await _service.CreateCompletion(new() {
@@ -52,7 +54,7 @@ public class CompletionsPizzaBuilder : IAIPizzaBuilder {
         if (result is null) return Failure("No result from OpenAI");
         File.WriteAllText("AIPizza.json", result);
         try {
-            var deserialized = JsonSerializer.Deserialize<UnvalidatedPizza>(result, PizzaSerializer.Options);
+            var deserialized = _serializer.Deserialize<UnvalidatedPizza>(result);
             if (deserialized is null) return Failure("Failed to deserialize pizza");
             var parseResult = deserialized.Parse();
             return parseResult.Match(

@@ -1,10 +1,11 @@
-using System.Text.Json;
 using FluentValidation.Results;
 using Hollandsoft.OrderPizza;
 using TestData;
 
 namespace Tests;
 public class ValidationTests {
+    private readonly ISerializer _serializer = MyJsonSerializer.Instance;
+
     [Theory]
     [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
     public void ValidationWorks(UnvalidatedPizza p) => p.Validate();
@@ -36,7 +37,7 @@ public class ValidationTests {
     [MemberData(nameof(TestOrder.GenerateInvalidOrders), MemberType = typeof(TestOrder))]
     public void OrderInfoInvalidationWorks(TestOrder.InvalidData o) {
         var json = File.ReadAllText(Path.Combine(TestOrder.DataDirectory, o.JsonFile));
-        var invalidOrder = JsonSerializer.Deserialize<UnvalidatedOrderInfo>(json, PizzaSerializer.Options)!;
+        var invalidOrder = _serializer.Deserialize<UnvalidatedOrderInfo>(json)!;
         invalidOrder.Parse().Match(
             vo => Assert.Fail("Shouldn't be valid."),
             es => AssertSameInvalidProps(o.InvalidProperties, es));
@@ -59,7 +60,7 @@ public class ValidationTests {
     [MemberData(nameof(TestPayment.GenerateInvalidPayments), MemberType = typeof(TestPayment))]
     public void PaymentInfoInvalidationWorks(TestPayment.InvalidData p) {
         var json = File.ReadAllText(Path.Combine(TestPayment.DataDirectory, p.JsonFile));
-        var invalidPayment = JsonSerializer.Deserialize<UnvalidatedPayment>(json, PizzaSerializer.Options)!;
+        var invalidPayment = _serializer.Deserialize<UnvalidatedPayment>(json)!;
         invalidPayment.Parse().Match(
             vp => Assert.Fail("Shouldn't be valid."),
             es => AssertSameInvalidProps(p.InvalidProperties, es));
