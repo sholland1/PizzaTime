@@ -117,7 +117,7 @@ public enum Amount { Light, Normal, Extra }
 public enum Location { All, Left, Right }
 
 public record struct Sauce(SauceType SauceType, Amount Amount) {
-    public readonly bool IsStandard => SauceType == SauceType.Tomato && Amount == Amount.Normal;
+    public readonly bool IsStandard => SauceType == SauceType.Tomato;
 }
 
 public enum SauceType { Tomato, Marinara, HoneyBBQ, GarlicParmesan, Alfredo, Ranch }

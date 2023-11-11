@@ -67,7 +67,8 @@ public static class SummaryUtils {
 
     private static string Display(this Sauce? s) {
         var typeDisp = s == null ? "no" : $"{s.Value.SauceType}";
-        var amtDisp = s == null || s.Value.IsStandard ? "" : $"{s.Value.Amount} ";
+        var amtDisp = s == null || s.Value.IsStandard || s.Value.Amount == Amount.Normal
+            ? "" : $"{s.Value.Amount} ";
         return amtDisp + typeDisp + " sauce";
     }
 
