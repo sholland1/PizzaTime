@@ -67,6 +67,6 @@ static ServiceProvider BuilderServiceProvider() {
 }
 
 class CommandLineOptions {
-    [Option("fast", Required = false, HelpText = "Order the default pizza with user confirmation only.")]
+    [Option(Required = false, HelpText = "Order the default pizza with user confirmation only.")]
     public bool Fast { get; set; }
 }
