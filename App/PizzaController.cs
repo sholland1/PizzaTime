@@ -66,7 +66,7 @@ public class PizzaController {
         });
     }
 
-    public Payment EditPaymentInfo() {
+    public Payment EditPaymentInfos() {
         var payWithCard = (PaymentInfo.PayWithCard?)_repo.GetDefaultPayment()?.PaymentInfo;
         if (payWithCard is null) {
             return CreatePaymentInfo();
@@ -78,7 +78,7 @@ public class PizzaController {
         var cvv = _terminalUI.PromptForEdit("CVV: ", payWithCard.SecurityCode) ?? "";
         var zip = _terminalUI.PromptForEdit("Billing zip code: ", payWithCard.BillingZip) ?? "";
 
-        return ValidatePaymentAndSave(cardNumber, expiration, cvv, zip) ?? EditPaymentInfo();
+        return ValidatePaymentAndSave(cardNumber, expiration, cvv, zip) ?? EditPaymentInfos();
     }
 
     public async Task FastPizza() {
@@ -157,9 +157,9 @@ public class PizzaController {
             string[] options = {
                 "1. Order default",
                 "2. Start new order",
-                "3. Edit saved pizza",
+                "3. Edit pizzas",
                 "4. Edit personal info",
-                "5. Edit payment info",
+                "5. Edit payment infos",
                 "6. Track order",
                 "q. Exit"
             };
@@ -170,9 +170,9 @@ public class PizzaController {
             switch (choice) {
                 case '1': await FastPizza(); break;
                 // case '2': await NewOrder(); break;
-                case '3': await EditSavedPizza(); await Helper(); break;
+                case '3': await EditPizzas(); await Helper(); break;
                 case '4': _ = EditPersonalInfo(); await Helper(); break;
-                case '5': _ = EditPaymentInfo(); await Helper(); break;
+                case '5': _ = EditPaymentInfos(); await Helper(); break;
                 // case '6': await TrackOrder(); await Helper(); break;
                 case 'Q' or 'q': _terminalUI.PrintLine("Goodbye!"); return;
                 default:
@@ -183,14 +183,45 @@ public class PizzaController {
         }
     }
 
-    public async Task EditSavedPizza() {
-        var pizzaName = _chooser.GetUserChoice("Choose a pizza to edit: ", _repo.ListPizzas(), "pizza");
+    public async Task CreatePizza() {
+        _terminalUI.PrintLine("Describe your new pizza:");
+        var input = _terminalUI.Prompt("> ") ?? "";
+        var result = await _aiPizzaBuilder.CreatePizza(input);
+
+        result.Match(es => {
+            _terminalUI.PrintLine("Failed to edit pizza:");
+            foreach (var e in es) {
+                _terminalUI.PrintLine(e);
+            }
+        }, p => {
+            _terminalUI.PrintLine("New pizza:");
+            _terminalUI.PrintLine(p.Summarize());
+            var pizzaName = _terminalUI.Prompt("Pizza name: ") ?? "";
+            var shouldSave = IsAffirmative(_terminalUI.Prompt($"Save pizza ({pizzaName})? [Y/n]: "));
+            if (shouldSave) {
+                _repo.SavePizza(pizzaName, p);
+                _terminalUI.PrintLine("Pizza saved.");
+                return;
+            }
+            _terminalUI.PrintLine("Pizza not saved.");
+        });
+    }
+
+    public async Task EditPizzas() {
+        var newPizzaOption = "--create new--";
+        var pizzaName = _chooser.GetUserChoice(
+            "Choose a pizza to edit: ", _repo.ListPizzas().Prepend(newPizzaOption), "pizza");
         if (pizzaName is null) {
             _terminalUI.PrintLine("No pizza selected.");
             return;
         }
-        var pizza = _repo.GetPizza(pizzaName);
-        if (pizza is null) throw new Exception("Pizza not found.");
+
+        if (pizzaName == newPizzaOption) {
+            await CreatePizza();
+            return;
+        }
+
+        var pizza = _repo.GetPizza(pizzaName) ?? throw new Exception("Pizza not found.");
 
         _terminalUI.PrintLine($"Editing {pizzaName}:");
         _terminalUI.PrintLine(pizza.Summarize());
@@ -205,7 +236,7 @@ public class PizzaController {
         }, p => {
             _terminalUI.PrintLine("Updated pizza:");
             _terminalUI.PrintLine(p.Summarize());
-            var shouldSave = IsAffirmative(_terminalUI.Prompt("Save pizza? [Y/n]: "));
+            var shouldSave = IsAffirmative(_terminalUI.Prompt($"Save pizza ({pizzaName})? [Y/n]: "));
             if (shouldSave) {
                 _repo.SavePizza(pizzaName, p);
                 _terminalUI.PrintLine("Pizza saved.");

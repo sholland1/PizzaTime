@@ -1,5 +1,4 @@
 using Hollandsoft.OrderPizza;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -26,6 +25,7 @@ public record PizzaQueryServer(HttpOptions HttpOptions, IPizzaRepo PizzaReposito
     });
 
     private string HandleRequest(string request) => request.Split(":") switch {
+        [ string type, "--create new--" ] => $"Select this option to create a new {type}.",
         [ "pizza", string pizzaName ] => PizzaRepository.GetPizza(pizzaName)?.Summarize() ?? "Pizza not found.",
         [ "payment", string paymentName ] => PizzaRepository.GetPayment(paymentName)?.Summarize() ?? "Payment not found.",
         _ => "Invalid request"
