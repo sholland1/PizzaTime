@@ -1,5 +1,5 @@
-﻿using System.Net;
-using CommandLine;
+﻿using System.CommandLine;
+using System.Net;
 using Controllers;
 using Hollandsoft.OrderPizza;
 using Microsoft.Extensions.Configuration;
@@ -17,18 +17,17 @@ AppDomain.CurrentDomain.UnhandledException += (_, args) => {
     Environment.Exit(1);
 };
 
-var controller = provider.GetRequiredService<PizzaController>();
+await BuildCommand().InvokeAsync(args);
 
-await Parser.Default.ParseArguments<CommandLineOptions>(args)
-    .WithParsedAsync(async o => {
-
-    if (o.Fast) {
+async Task PizzaMain(bool fast) {
+    var controller = provider.GetRequiredService<PizzaController>();
+    if (fast) {
         await controller.FastPizza();
         return;
     }
     _ = provider.GetRequiredService<PizzaQueryServer>().StartServer();
     await controller.ShowOptions();
-});
+}
 
 static ServiceProvider BuilderServiceProvider() {
     var configuration = new ConfigurationBuilder()
@@ -66,7 +65,12 @@ static ServiceProvider BuilderServiceProvider() {
     return services.BuildServiceProvider();
 }
 
-class CommandLineOptions {
-    [Option(Required = false, HelpText = "Order the default pizza with user confirmation only.")]
-    public bool Fast { get; set; }
+RootCommand BuildCommand() {
+    Option<bool> fastOption = new(
+        new[] { "--fast" },
+        "Order the default pizza with user confirmation only");
+
+    RootCommand rootCommand = new("Order a pizza") { fastOption };
+    rootCommand.SetHandler(PizzaMain, fastOption);
+    return rootCommand;
 }
