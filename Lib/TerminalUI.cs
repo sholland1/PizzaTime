@@ -8,11 +8,7 @@ public interface ITerminalUI {
 
     string? EditLine(string lineToEdit);
 
-    public string? Prompt(string prompt) {
-        Print(prompt);
-        var result = ReadLine()?.Trim();
-        return string.IsNullOrEmpty(result) ? null : result;
-    }
+    public string? Prompt(string prompt) => PromptForEdit(prompt, "");
 
     public char? PromptKey(string prompt) {
         Print(prompt);
@@ -23,7 +19,7 @@ public interface ITerminalUI {
 
     public string? PromptForEdit(string prompt, string lineToEdit) {
         Print(prompt);
-        var result = EditLine(lineToEdit);
+        var result = EditLine(lineToEdit)?.Trim();
         return string.IsNullOrEmpty(result) ? null : result;
     }
 }
@@ -34,7 +30,7 @@ public class RealTerminalUI : ITerminalUI {
     public void PrintLine() => Console.WriteLine();
 
     public char? ReadKey() => Console.ReadKey().KeyChar;
-    public string? ReadLine() => Console.ReadLine();
+    public string? ReadLine() => EditLine("");
 
     public string EditLine(string lineToEdit) {
         var offset = Console.CursorLeft;
