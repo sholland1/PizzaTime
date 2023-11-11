@@ -15,9 +15,9 @@ public interface IPizzaRepo {
     void DeletePizza(string name);
 }
 
-public class PizzaRepository : IPizzaRepo {
+public class JsonFilePizzaRepository : IPizzaRepo {
     private readonly ISerializer _serializer;
-    public PizzaRepository(ISerializer serializer) => _serializer = serializer;
+    public JsonFilePizzaRepository(ISerializer serializer) => _serializer = serializer;
 
     public Pizza? GetPizza(string name) =>
         DeserializeFromFile<UnvalidatedPizza>(name + "Pizza")?.Validate();
