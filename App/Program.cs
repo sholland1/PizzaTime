@@ -37,6 +37,9 @@ static ServiceProvider BuilderServiceProvider() {
 
     ServiceCollection services = new();
     services.AddSingleton<IConfiguration>(configuration);
+    services.AddSingleton(new HttpOptions(
+        IPAddress.Parse(configuration.GetValue<string>("PizzaQueryServer:Host")!),
+        configuration.GetValue<int>("PizzaQueryServer:Port")));
 
     services.AddOpenAIService();
 
@@ -55,13 +58,10 @@ static ServiceProvider BuilderServiceProvider() {
         .AddSingleton<IAIPizzaBuilder, ChatCompletionsPizzaBuilder>()
 
         .AddSingleton<ITerminalUI, RealTerminalUI>()
+        .AddSingleton<IUserChooser, FzfChooser>()
         .AddSingleton<PizzaController>();
 
-    services.AddSingleton<PizzaQueryServer>(services =>
-        new(
-            IPAddress.Parse(configuration.GetValue<string>("PizzaQueryServer:Host")!),
-            configuration.GetValue<int>("PizzaQueryServer:Port"),
-            services.GetRequiredService<IPizzaRepo>()));
+    services.AddSingleton<PizzaQueryServer>();
 
     return services.BuildServiceProvider();
 }

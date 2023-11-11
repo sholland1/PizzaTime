@@ -5,10 +5,11 @@ public class PizzaController {
     private readonly IPizzaRepo _repo;
     private readonly Func<OrderInfo, ICart> _startOrder;
     private readonly ITerminalUI _terminalUI;
+    private readonly IUserChooser _chooser;
     private readonly IAIPizzaBuilder _aiPizzaBuilder;
 
-    public PizzaController(IPizzaRepo repo, Func<OrderInfo, ICart> startOrder, ITerminalUI terminalUI, IAIPizzaBuilder aiPizzaBuilder) =>
-        (_repo, _startOrder, _terminalUI, _aiPizzaBuilder) = (repo, startOrder, terminalUI, aiPizzaBuilder);
+    public PizzaController(IPizzaRepo repo, Func<OrderInfo, ICart> startOrder, ITerminalUI terminalUI, IUserChooser chooser, IAIPizzaBuilder aiPizzaBuilder) =>
+        (_repo, _startOrder, _terminalUI, _chooser, _aiPizzaBuilder) = (repo, startOrder, terminalUI, chooser, aiPizzaBuilder);
 
     public PersonalInfo CreatePersonalInfo() {
         _terminalUI.PrintLine("Please enter your personal information.");
@@ -183,15 +184,7 @@ public class PizzaController {
     }
 
     public async Task EditSavedPizza() {
-        var server = new {
-            IPAddress = System.Net.IPAddress.Parse("127.0.0.1"),
-            Port = 12345
-        };
-        Fzf.FzfOptions opts = new() {
-            Prompt = "Choose a pizza to edit: ",
-            Preview = $"echo -n {{}} | nc {server.IPAddress} {server.Port}"
-        };
-        var pizzaName = _repo.ListPizzas().ChooseWithFzf(opts);
+        var pizzaName = _chooser.GetUserChoice("Choose a pizza to edit: ", _repo.ListPizzas(), "pizza");
         if (pizzaName is null) {
             _terminalUI.PrintLine("No pizza selected.");
             return;

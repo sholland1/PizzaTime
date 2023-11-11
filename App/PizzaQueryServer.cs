@@ -4,9 +4,9 @@ using System.Net.Sockets;
 using System.Text;
 
 namespace Server;
-public record PizzaQueryServer(IPAddress IPAddress, int Port, IPizzaRepo PizzaRepository) {
+public record PizzaQueryServer(HttpOptions HttpOptions, IPizzaRepo PizzaRepository) {
     public Task StartServer() => Task.Run(() => {
-        TcpListener listener = new(IPAddress, Port);
+        TcpListener listener = new(HttpOptions.IPAddress, HttpOptions.Port);
         listener.Start();
 
         while (true) {
@@ -25,6 +25,9 @@ public record PizzaQueryServer(IPAddress IPAddress, int Port, IPizzaRepo PizzaRe
         }
     });
 
-    private string HandleRequest(string request) =>
-        PizzaRepository.GetPizza(request)?.Summarize() ?? "Pizza not found.";
+    private string HandleRequest(string request) => request.Split(":") switch {
+        [ "pizza", string pizzaName ] => PizzaRepository.GetPizza(pizzaName)?.Summarize() ?? "Pizza not found.",
+        [ "payment", string paymentName ] => PizzaRepository.GetPayment(paymentName)?.Summarize() ?? "Payment not found.",
+        _ => "Invalid request"
+    };
 }

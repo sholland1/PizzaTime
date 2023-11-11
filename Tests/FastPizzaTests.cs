@@ -12,7 +12,7 @@ public class FastPizzaTests {
         DummyTerminalUI terminalUI = new(userChoice);
         DummyPizzaRepository repo = new();
         DummyPizzaCart cart = new();
-        PizzaController controller = new(repo, _ => cart, terminalUI, default!);
+        PizzaController controller = new(repo, _ => cart, terminalUI, default!, default!);
 
         await controller.FastPizza();
 
@@ -57,7 +57,7 @@ public class FastPizzaTests {
         DummyTerminalUI terminalUI = new("n");
         DummyPizzaRepository repo = new();
         DummyPizzaCart cart = new();
-        PizzaController controller = new(repo, _ => cart, terminalUI, default!);
+        PizzaController controller = new(repo, _ => cart, terminalUI, default!, default!);
 
         await controller.FastPizza();
 
