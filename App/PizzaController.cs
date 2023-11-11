@@ -17,10 +17,10 @@ public class PizzaController {
         var email = _terminalUI.Prompt("Email: ") ?? "";
         var phone = _terminalUI.Prompt("Phone: ") ?? "";
 
-        return ValidateAndSave(firstName, lastName, email, phone) ?? CreatePersonalInfo();
+        return ValidatePersonalAndSave(firstName, lastName, email, phone) ?? CreatePersonalInfo();
     }
 
-    private PersonalInfo? ValidateAndSave(string firstName, string lastName, string email, string phone) {
+    private PersonalInfo? ValidatePersonalAndSave(string firstName, string lastName, string email, string phone) {
         var personalInfo = new UnvalidatedPersonalInfo {
             FirstName = firstName,
             LastName = lastName,
@@ -30,9 +30,7 @@ public class PizzaController {
 
         return personalInfo.Match<PersonalInfo?>(es => {
             _terminalUI.PrintLine("Failed to parse personal info:");
-            foreach (var e in es) {
-                _terminalUI.PrintLine(e.ErrorMessage);
-            }
+            _terminalUI.PrintLine(string.Join(Environment.NewLine, es.Select(e => e.ErrorMessage)));
             return default;
         }, pi => {
             _repo.SavePersonalInfo(pi);
@@ -48,21 +46,38 @@ public class PizzaController {
         var cvv = _terminalUI.Prompt("CVV: ") ?? "";
         var zip = _terminalUI.Prompt("Billing zip code: ") ?? "";
 
+        return ValidatePaymentAndSave(cardNumber, expiration, cvv, zip) ?? CreatePaymentInfo();
+    }
+
+    private Payment? ValidatePaymentAndSave(string cardNumber, string expiration, string cvv, string zip) {
         var payment = new UnvalidatedPayment(
             new PaymentInfo.PayWithCard(
                 cardNumber, expiration, cvv, zip)).Parse();
 
-        return payment.Match(es => {
+        return payment.Match<Payment?>(es => {
             _terminalUI.PrintLine("Failed to parse payment info:");
-            foreach (var e in es) {
-                _terminalUI.PrintLine(e.ErrorMessage);
-            }
-            return CreatePaymentInfo();
+            _terminalUI.PrintLine(string.Join(Environment.NewLine, es.Select(e => e.ErrorMessage)));
+            return default;
         }, p => {
             _repo.SavePayment("default", p);
             _terminalUI.PrintLine("Payment info saved.");
             return p;
         });
+    }
+
+    public Payment EditPaymentInfo() {
+        var payWithCard = (PaymentInfo.PayWithCard?)_repo.GetDefaultPayment()?.PaymentInfo;
+        if (payWithCard is null) {
+            return CreatePaymentInfo();
+        }
+
+        _terminalUI.PrintLine("Edit your payment information:");
+        var cardNumber = _terminalUI.PromptForEdit("Card number: ", payWithCard.CardNumber) ?? "";
+        var expiration = _terminalUI.PromptForEdit("Expiration date (MM/YY): ", payWithCard.Expiration) ?? "";
+        var cvv = _terminalUI.PromptForEdit("CVV: ", payWithCard.SecurityCode) ?? "";
+        var zip = _terminalUI.PromptForEdit("Billing zip code: ", payWithCard.BillingZip) ?? "";
+
+        return ValidatePaymentAndSave(cardNumber, expiration, cvv, zip) ?? EditPaymentInfo();
     }
 
     public async Task FastPizza() {
@@ -143,10 +158,11 @@ public class PizzaController {
                 "2. Start new order",
                 "3. Edit saved pizza",
                 "4. Edit personal info",
-                "5. Track order",
+                "5. Edit payment info",
+                "6. Track order",
                 "q. Exit"
             };
-            _terminalUI.PrintLine(string.Join('\n', options));
+            _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
             var choice = _terminalUI.PromptKey("Choose an option: ");
             // return _terminalUI.FuzzyChoice(options);
 
@@ -155,7 +171,8 @@ public class PizzaController {
                 // case '2': await NewOrder(); break;
                 case '3': await EditSavedPizza(); await Helper(); break;
                 case '4': _ = EditPersonalInfo(); await Helper(); break;
-                // case '5': await EditPaymentInfo(); break;
+                case '5': _ = EditPaymentInfo(); await Helper(); break;
+                // case '6': await TrackOrder(); await Helper(); break;
                 case 'Q' or 'q': _terminalUI.PrintLine("Goodbye!"); return;
                 default:
                     _terminalUI.PrintLine("Not a valid option. Try again.");
@@ -165,7 +182,7 @@ public class PizzaController {
         }
     }
 
-    private async Task EditSavedPizza() {
+    public async Task EditSavedPizza() {
         var server = new {
             IPAddress = System.Net.IPAddress.Parse("127.0.0.1"),
             Port = 12345
@@ -205,7 +222,7 @@ public class PizzaController {
         });
     }
 
-    private PersonalInfo EditPersonalInfo() {
+    public PersonalInfo EditPersonalInfo() {
         var currentInfo = _repo.GetPersonalInfo();
         if (currentInfo is null) {
             return CreatePersonalInfo();
@@ -217,7 +234,7 @@ public class PizzaController {
         var email = _terminalUI.PromptForEdit("Email: ", currentInfo.Email) ?? "";
         var phone = _terminalUI.PromptForEdit("Phone Number: ", currentInfo.Phone) ?? "";
 
-        return ValidateAndSave(firstName, lastName, email, phone) ?? EditPersonalInfo();
+        return ValidatePersonalAndSave(firstName, lastName, email, phone) ?? EditPersonalInfo();
     }
 
     private static bool IsAffirmative(string? answer) => (answer?.ToLower() ?? "y") == "y";

@@ -3,7 +3,7 @@ using System.Diagnostics;
 namespace Hollandsoft.OrderPizza;
 public static class SummaryUtils {
     public static string Summarize(this UnvalidatedOrderInfo o) =>
-        string.Join('\n', new[] {
+        string.Join(Environment.NewLine, new[] {
             $"Order for {o.Timing.Match(() => "now", dt => $"later at {dt}")}",
             $"{o.ServiceMethod.Match(
                     address => $"Delivery from Store #{o.StoreId} to\n{address.Summarize()}",
@@ -11,7 +11,7 @@ public static class SummaryUtils {
         });
 
     public static string Summarize(this Address a) =>
-        string.Join('\n', new[] {
+        string.Join(Environment.NewLine, new[] {
             a.Name ?? "",
             a.StreetAddress,
             a.Apt.HasValue ? $"Apt. {a.Apt}" : "",
@@ -32,7 +32,7 @@ public static class SummaryUtils {
         """;
 
     public static string Summarize(this UnvalidatedPizza p) =>
-        string.Join('\n', new[] {
+        string.Join(Environment.NewLine, new[] {
             $"{p.Size} {p.Crust} Pizza x{p.Quantity}",
             p.Cheese.IsStandard ? "" : $"  with {p.Cheese.Display()}",
             p.Sauce != null && p.Sauce.Value.IsStandard ? "" : $"  with {p.Sauce.Display()}",
