@@ -54,7 +54,7 @@ static ServiceProvider BuilderServiceProvider() {
         })
         .AddSingleton<IAIPizzaBuilder, ChatCompletionsPizzaBuilder>()
 
-        .AddSingleton<IConsoleUI, RealConsoleUI>()
+        .AddSingleton<ITerminalUI, RealTerminalUI>()
         .AddSingleton<PizzaController>();
 
     services.AddSingleton<PizzaQueryServer>(services =>

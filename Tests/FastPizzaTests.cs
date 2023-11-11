@@ -9,10 +9,10 @@ public class FastPizzaTests {
     [InlineData("y")]
     [InlineData("Y")]
     public async Task HappyPathTest(string userChoice) {
-        DummyConsoleUI consoleUI = new(userChoice);
+        DummyTerminalUI terminalUI = new(userChoice);
         DummyPizzaRepository repo = new();
         DummyPizzaCart cart = new();
-        PizzaController controller = new(repo, _ => cart, consoleUI, default!);
+        PizzaController controller = new(repo, _ => cart, terminalUI, default!);
 
         await controller.FastPizza();
 
@@ -47,17 +47,17 @@ public class FastPizzaTests {
             Done.
 
             """;
-        var actual = consoleUI.ToString();
+        var actual = terminalUI.ToString();
         Assert.Equal(expected, actual);
         Assert.Equal(4, cart.Calls.Count);
     }
 
     [Fact]
     public async Task CancelOrderTest() {
-        DummyConsoleUI consoleUI = new("n");
+        DummyTerminalUI terminalUI = new("n");
         DummyPizzaRepository repo = new();
         DummyPizzaCart cart = new();
-        PizzaController controller = new(repo, _ => cart, consoleUI, default!);
+        PizzaController controller = new(repo, _ => cart, terminalUI, default!);
 
         await controller.FastPizza();
 
@@ -86,7 +86,7 @@ public class FastPizzaTests {
             Order cancelled.
 
             """;
-        var actual = consoleUI.ToString();
+        var actual = terminalUI.ToString();
         Assert.Equal(expected, actual);
         Assert.Equal(3, cart.Calls.Count);
     }

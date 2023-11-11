@@ -55,11 +55,11 @@ public class DummyPizzaRepository : IPizzaRepo {
     public void SavePayment(string name, Payment payment) => Payments[name] = payment;
 }
 
-public class DummyConsoleUI : IConsoleUI {
+public class DummyTerminalUI : ITerminalUI {
     public List<string> PrintedMessages = new();
     private readonly Queue<string> _readLines = new();
 
-    public DummyConsoleUI(params string[] readLines) => Array.ForEach(readLines, _readLines.Enqueue);
+    public DummyTerminalUI(params string[] readLines) => Array.ForEach(readLines, _readLines.Enqueue);
 
     public void Print(string message) => PrintedMessages.Add(message);
     public void PrintLine(string message) => PrintedMessages.Add(message + "\n");

@@ -1,5 +1,5 @@
 namespace Hollandsoft.OrderPizza;
-public interface IConsoleUI {
+public interface ITerminalUI {
     void Print(string message);
     void PrintLine(string message);
     void PrintLine();
@@ -28,7 +28,7 @@ public interface IConsoleUI {
     }
 }
 
-public class RealConsoleUI : IConsoleUI {
+public class RealTerminalUI : ITerminalUI {
     public void Print(string message) => Console.Write(message);
     public void PrintLine(string message) => Console.WriteLine(message);
     public void PrintLine() => Console.WriteLine();
