@@ -17,6 +17,27 @@ public abstract record AIPizzaResult {
             _ => throw new NotImplementedException()
         };
 
+    public async Task<T> Match<T>(Func<List<string>, T> failure, Func<Pizza, Task<T>> success) =>
+        this switch {
+            Failure f => failure(f.Messages),
+            Success s => await success(s.Value),
+            _ => throw new NotImplementedException()
+        };
+
+    public async Task<T> Match<T>(Func<List<string>, Task<T>> failure, Func<Pizza, T> success) =>
+        this switch {
+            Failure f => await failure(f.Messages),
+            Success s => success(s.Value),
+            _ => throw new NotImplementedException()
+        };
+
+    public async Task<T> Match<T>(Func<List<string>, Task<T>> failure, Func<Pizza, Task<T>> success) =>
+        this switch {
+            Failure f => await failure(f.Messages),
+            Success s => await success(s.Value),
+            _ => throw new NotImplementedException()
+        };
+
     public void Match(Action<List<string>> failure, Action<Pizza> success) {
         switch (this) {
             case Failure f:

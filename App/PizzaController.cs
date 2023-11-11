@@ -165,12 +165,11 @@ public class PizzaController {
             };
             _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
             var choice = _terminalUI.PromptKey("Choose an option: ");
-            // return _terminalUI.FuzzyChoice(options);
 
             switch (choice) {
                 case '1': await FastPizza(); break;
                 // case '2': await NewOrder(); break;
-                case '3': await EditPizzas(); await Helper(); break;
+                case '3': _ = await EditPizzas(); await Helper(); break;
                 case '4': _ = EditPersonalInfo(); await Helper(); break;
                 case '5': _ = EditPaymentInfos(); await Helper(); break;
                 // case '6': await TrackOrder(); await Helper(); break;
@@ -183,16 +182,21 @@ public class PizzaController {
         }
     }
 
-    public async Task CreatePizza() {
+    public async Task<Pizza?> CreatePizza() {
         _terminalUI.PrintLine("Describe your new pizza:");
         var input = _terminalUI.Prompt("> ") ?? "";
         var result = await _aiPizzaBuilder.CreatePizza(input);
 
-        result.Match(es => {
+        return await result.Match(async es => {
             _terminalUI.PrintLine("Failed to edit pizza:");
             foreach (var e in es) {
                 _terminalUI.PrintLine(e);
             }
+            var choice = _terminalUI.Prompt("Try again? [Y/n]: ");
+            if (IsAffirmative(choice)) {
+                return await CreatePizza();
+            };
+            return default;
         }, p => {
             _terminalUI.PrintLine("New pizza:");
             _terminalUI.PrintLine(p.Summarize());
@@ -201,24 +205,24 @@ public class PizzaController {
             if (shouldSave) {
                 _repo.SavePizza(pizzaName, p);
                 _terminalUI.PrintLine("Pizza saved.");
-                return;
+                return p;
             }
             _terminalUI.PrintLine("Pizza not saved.");
+            return default;
         });
     }
 
-    public async Task EditPizzas() {
+    public async Task<Pizza?> EditPizzas() {
         var newPizzaOption = "--create new--";
         var pizzaName = _chooser.GetUserChoice(
             "Choose a pizza to edit: ", _repo.ListPizzas().Prepend(newPizzaOption), "pizza");
         if (pizzaName is null) {
             _terminalUI.PrintLine("No pizza selected.");
-            return;
+            return default;
         }
 
         if (pizzaName == newPizzaOption) {
-            await CreatePizza();
-            return;
+            return await CreatePizza();
         }
 
         var pizza = _repo.GetPizza(pizzaName) ?? throw new Exception("Pizza not found.");
@@ -228,11 +232,16 @@ public class PizzaController {
         var input = _terminalUI.Prompt("> ") ?? "";
         var result = await _aiPizzaBuilder.EditPizza(pizza, input);
 
-        result.Match(es => {
+        return await result.Match(async es => {
             _terminalUI.PrintLine("Failed to edit pizza:");
             foreach (var e in es) {
                 _terminalUI.PrintLine(e);
             }
+            var choice = _terminalUI.Prompt("Try again? [Y/n]: ");
+            if (IsAffirmative(choice)) {
+                return await EditPizzas();
+            };
+            return default;
         }, p => {
             _terminalUI.PrintLine("Updated pizza:");
             _terminalUI.PrintLine(p.Summarize());
@@ -240,9 +249,10 @@ public class PizzaController {
             if (shouldSave) {
                 _repo.SavePizza(pizzaName, p);
                 _terminalUI.PrintLine("Pizza saved.");
-                return;
+                return p;
             }
             _terminalUI.PrintLine("Pizza not saved.");
+            return default;
         });
     }
 

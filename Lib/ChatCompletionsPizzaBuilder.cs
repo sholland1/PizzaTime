@@ -57,7 +57,7 @@ public class ChatCompletionsPizzaBuilder : IAIPizzaBuilder {
         }
         var result = completionResult.Choices.FirstOrDefault()?.Message?.Content?.Trim();
         if (result is null) return Failure("No result from OpenAI");
-        File.WriteAllText("AIPizza.json", result);
+        File.WriteAllText("AIPizzaDebug.json", result);
         try {
             var deserialized = _serializer.Deserialize<UnvalidatedPizza>(result);
             if (deserialized is null) return Failure("Failed to deserialize pizza");
