@@ -11,6 +11,10 @@ simplify == to =
 simplify ^^ to ^
 simplify -- to -
 
+A means both sides of the pizza or the whole pizza
+L means left side
+R means right side
+
 Allowed Toppings: {0}
 Allowed Sauces: {1}
 Allowed Crusts:
