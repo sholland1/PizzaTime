@@ -6,7 +6,7 @@ namespace Hollandsoft.OrderPizza;
 using static AIPizzaResultHelpers;
 
 public interface IAIPizzaBuilder {
-    Task<AIPizzaResult> NewPizza(string input);
+    Task<AIPizzaResult> CreatePizza(string input);
     Task<AIPizzaResult> EditPizza(Pizza? pizza, string input);
 }
 
@@ -32,11 +32,11 @@ public class CompletionsPizzaBuilder : IAIPizzaBuilder {
             + "\n+++\n" + fewShot;
     }
 
-    public async Task<AIPizzaResult> NewPizza(string input) => await EditPizza(null, input);
+    public async Task<AIPizzaResult> CreatePizza(string userCreateMessage) => await EditPizza(null, userCreateMessage);
 
-    public async Task<AIPizzaResult> EditPizza(Pizza? pizza, string input) {
+    public async Task<AIPizzaResult> EditPizza(Pizza? pizza, string userEditMessage) {
         var serialized = JsonSerializer.Serialize(pizza, PizzaSerializer.Options);
-        var prompt = _promptPreamble + $"\n\nCurrent: {serialized}\nInput: {input}\nOutput: ";
+        var prompt = _promptPreamble + $"\n\nCurrent: {serialized}\nInput: {userEditMessage}\nOutput: ";
 
         var completionResult = await _service.CreateCompletion(new() {
             Prompt = prompt,

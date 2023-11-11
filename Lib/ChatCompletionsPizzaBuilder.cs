@@ -49,13 +49,13 @@ public class ChatCompletionsPizzaBuilder : IAIPizzaBuilder {
         ChatMessage.FromAssistant(
             JsonSerializer.Serialize(pizza, PizzaSerializer.Options));
 
-    public async Task<AIPizzaResult> NewPizza(string input) => await EditPizza(null, input);
+    public async Task<AIPizzaResult> CreatePizza(string userCreateMessage) => await EditPizza(null, userCreateMessage);
 
-    public async Task<AIPizzaResult> EditPizza(Pizza? pizza, string input) {
+    public async Task<AIPizzaResult> EditPizza(Pizza? pizza, string userEditMessage) {
         var completionResult = await _service.CreateCompletion(new() {
             Messages = _systemMessages
                 .Append(Assistant(pizza))
-                .Append(User(input))
+                .Append(User(userEditMessage))
                 .ToList(),
             Model = Models.Gpt_3_5_Turbo,
             MaxTokens = 300,
