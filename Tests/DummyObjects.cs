@@ -53,6 +53,8 @@ public class DummyPizzaRepository : IPizzaRepo {
     public IEnumerable<string> ListPizzas() => Pizzas.Keys;
 
     public void SavePayment(string name, Payment payment) => Payments[name] = payment;
+
+    public void DeletePizza(string name) => Pizzas.Remove(name);
 }
 
 public class DummyTerminalUI : ITerminalUI {

@@ -11,6 +11,8 @@ public interface IPizzaRepo {
     void SavePizza(string name, Pizza pizza);
 
     IEnumerable<string> ListPizzas();
+
+    void DeletePizza(string name);
 }
 
 public class PizzaRepository : IPizzaRepo {
@@ -58,4 +60,6 @@ public class PizzaRepository : IPizzaRepo {
     public IEnumerable<string> ListPizzas() =>
         Directory.EnumerateFiles(".", "*Pizza.json")
             .Select(f => Path.GetFileNameWithoutExtension(f.Replace("Pizza", "")));
+
+    public void DeletePizza(string name) => File.Delete(name + "Pizza.json");
 }

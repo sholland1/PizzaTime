@@ -32,17 +32,34 @@ public partial class PizzaController {
         });
     }
 
-    public async Task<Pizza?> ManagePizzas() {
-        var newPizzaOption = "--create new--";
+    public async Task ManagePizzas() {
+        string[] options = new[] {
+            "1. Create new pizza",
+            "2. Edit existing pizza",
+            "3. Delete existing pizza",
+            "q. Return"
+        };
+        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = _terminalUI.PromptKey("Choose an option: ");
+
+        switch (choice) {
+            case '1': _ = await CreatePizza(); await ManagePizzas(); break;
+            case '2': _ = await EditPizza(); await ManagePizzas(); break;
+            case '3': DeletePizza(); await ManagePizzas(); break;
+            case 'Q' or 'q': return;
+            default:
+                _terminalUI.PrintLine("Not a valid option. Try again.");
+                await ManagePizzas();
+                break;
+        }
+    }
+
+    private async Task<Pizza?> EditPizza() {
         var pizzaName = _chooser.GetUserChoice(
-            "Choose a pizza to edit: ", _repo.ListPizzas().Prepend(newPizzaOption), "pizza");
+            "Choose a pizza to edit: ", _repo.ListPizzas(), "pizza");
         if (pizzaName is null) {
             _terminalUI.PrintLine("No pizza selected.");
             return default;
-        }
-
-        if (pizzaName == newPizzaOption) {
-            return await CreatePizza();
         }
 
         var pizza = _repo.GetPizza(pizzaName) ?? throw new Exception("Pizza not found.");
@@ -59,7 +76,7 @@ public partial class PizzaController {
             }
             var choice = _terminalUI.Prompt("Try again? [Y/n]: ");
             if (IsAffirmative(choice)) {
-                return await ManagePizzas();
+                return await EditPizza();
             };
             return default;
         }, p => {
@@ -74,5 +91,25 @@ public partial class PizzaController {
             _terminalUI.PrintLine("Pizza not saved.");
             return default;
         });
+    }
+
+    private void DeletePizza() {
+        var pizzaName = _chooser.GetUserChoice(
+            "Choose a pizza to delete: ", _repo.ListPizzas(), "pizza");
+        if (pizzaName is null) {
+            _terminalUI.PrintLine("No pizza selected.");
+            return;
+        }
+
+        var pizza = _repo.GetPizza(pizzaName) ?? throw new Exception("Pizza not found.");
+        _terminalUI.PrintLine($"Deleting {pizzaName}:");
+        _terminalUI.PrintLine(pizza.Summarize());
+        var shouldDelete = IsAffirmative(_terminalUI.Prompt($"Delete pizza ({pizzaName})? [Y/n]: "));
+        if (shouldDelete) {
+            _repo.DeletePizza(pizzaName);
+            _terminalUI.PrintLine("Pizza deleted.");
+            return;
+        }
+        _terminalUI.PrintLine("Pizza not deleted.");
     }
 }
