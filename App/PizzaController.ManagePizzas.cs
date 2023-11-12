@@ -9,14 +9,9 @@ public partial class PizzaController {
 
         return await result.Match(async es => {
             _terminalUI.PrintLine("Failed to create pizza:");
-            foreach (var e in es) {
-                _terminalUI.PrintLine(e);
-            }
+            _terminalUI.PrintLine(string.Join(Environment.NewLine, es));
             var choice = _terminalUI.Prompt("Try again? [Y/n]: ");
-            if (IsAffirmative(choice)) {
-                return await CreatePizza();
-            };
-            return default;
+            return IsAffirmative(choice) ? await CreatePizza() : default;
         }, p => {
             _terminalUI.PrintLine("New pizza:");
             _terminalUI.PrintLine(p.Summarize());
@@ -64,21 +59,16 @@ public partial class PizzaController {
 
         var pizza = _repo.GetPizza(pizzaName) ?? throw new Exception("Pizza not found.");
 
-        _terminalUI.PrintLine($"Editing {pizzaName}:");
+        _terminalUI.PrintLine($"Editing '{pizzaName}' pizza:");
         _terminalUI.PrintLine(pizza.Summarize());
         var input = _terminalUI.Prompt("> ") ?? "";
         var result = await _aiPizzaBuilder.EditPizza(pizza, input);
 
         return await result.Match(async es => {
             _terminalUI.PrintLine("Failed to edit pizza:");
-            foreach (var e in es) {
-                _terminalUI.PrintLine(e);
-            }
+            _terminalUI.PrintLine(string.Join(Environment.NewLine, es));
             var choice = _terminalUI.Prompt("Try again? [Y/n]: ");
-            if (IsAffirmative(choice)) {
-                return await EditPizza();
-            };
-            return default;
+            return IsAffirmative(choice) ? await EditPizza() : default;
         }, p => {
             _terminalUI.PrintLine("Updated pizza:");
             _terminalUI.PrintLine(p.Summarize());
@@ -102,7 +92,7 @@ public partial class PizzaController {
         }
 
         var pizza = _repo.GetPizza(pizzaName) ?? throw new Exception("Pizza not found.");
-        _terminalUI.PrintLine($"Deleting {pizzaName}:");
+        _terminalUI.PrintLine($"Deleting '{pizzaName}' pizza:");
         _terminalUI.PrintLine(pizza.Summarize());
         var shouldDelete = IsAffirmative(_terminalUI.Prompt($"Delete pizza ({pizzaName})? [Y/n]: "));
         if (shouldDelete) {
