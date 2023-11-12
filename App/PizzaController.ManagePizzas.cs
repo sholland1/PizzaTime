@@ -27,7 +27,30 @@ public partial class PizzaController {
         });
     }
 
-    public async Task ManagePizzas() {
+    public async Task CreatePizzasMenu() {
+        string[] options = new[] {
+            "1. Create new pizza",
+            "q. Return"
+        };
+        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = _terminalUI.PromptKey("Choose an option: ");
+
+        switch (choice) {
+            case '1': _ = await CreatePizza(); await ManagePizzasMenu(); break;
+            case 'Q' or 'q': return;
+            default:
+                _terminalUI.PrintLine("Not a valid option. Try again.");
+                await CreatePizzasMenu();
+                break;
+        }
+    }
+
+    public async Task ManagePizzasMenu() {
+        if (!_repo.ListPizzas().Any()) {
+            await CreatePizzasMenu();
+            return;
+        }
+
         string[] options = new[] {
             "1. Create new pizza",
             "2. Edit existing pizza",
@@ -38,13 +61,13 @@ public partial class PizzaController {
         var choice = _terminalUI.PromptKey("Choose an option: ");
 
         switch (choice) {
-            case '1': _ = await CreatePizza(); await ManagePizzas(); break;
-            case '2': _ = await EditPizza(); await ManagePizzas(); break;
-            case '3': DeletePizza(); await ManagePizzas(); break;
+            case '1': _ = await CreatePizza(); await ManagePizzasMenu(); break;
+            case '2': _ = await EditPizza(); await ManagePizzasMenu(); break;
+            case '3': DeletePizza(); await ManagePizzasMenu(); break;
             case 'Q' or 'q': return;
             default:
                 _terminalUI.PrintLine("Not a valid option. Try again.");
-                await ManagePizzas();
+                await ManagePizzasMenu();
                 break;
         }
     }

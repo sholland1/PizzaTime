@@ -109,9 +109,9 @@ public partial class PizzaController {
             switch (choice) {
                 case '1': await FastPizza(); break;
                 // case '2': await NewOrder(); break;
-                case '3': await ManagePizzas(); await Helper(); break;
+                case '3': await ManagePizzasMenu(); await Helper(); break;
                 case '4': _ = ManagePersonalInfo(); await Helper(); break;
-                case '5': _ = ManagePayments(); await Helper(); break;
+                case '5': _ = ManagePaymentsMenu(); await Helper(); break;
                 // case '6': await TrackOrder(); await Helper(); break;
                 case 'Q' or 'q': _terminalUI.PrintLine("Goodbye!"); return;
                 default:

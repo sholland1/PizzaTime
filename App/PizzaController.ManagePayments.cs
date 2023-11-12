@@ -33,7 +33,30 @@ public partial class PizzaController {
         });
     }
 
-    public async Task ManagePayments() {
+    public async Task CreatePaymentsMenu() {
+        string[] options = new[] {
+            "1. Create new payment info",
+            "q. Return"
+        };
+        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = _terminalUI.PromptKey("Choose an option: ");
+
+        switch (choice) {
+            case '1': _ = CreatePayment(); await ManagePaymentsMenu(); break;
+            case 'Q' or 'q': return;
+            default:
+                _terminalUI.PrintLine("Not a valid option. Try again.");
+                await CreatePaymentsMenu();
+                break;
+        }
+    }
+
+    public async Task ManagePaymentsMenu() {
+        if (!_repo.ListPayments().Any()) {
+            await CreatePaymentsMenu();
+            return;
+        }
+
         string[] options = new[] {
             "1. Create new payment info",
             "2. Edit existing payment info",
@@ -44,13 +67,13 @@ public partial class PizzaController {
         var choice = _terminalUI.PromptKey("Choose an option: ");
 
         switch (choice) {
-            case '1': _ = CreatePayment(); await ManagePayments(); break;
-            case '2': _ = EditPayment(); await ManagePayments(); break;
-            case '3': DeletePayment(); await ManagePayments(); break;
+            case '1': _ = CreatePayment(); await ManagePaymentsMenu(); break;
+            case '2': _ = EditPayment(); await ManagePaymentsMenu(); break;
+            case '3': DeletePayment(); await ManagePaymentsMenu(); break;
             case 'Q' or 'q': return;
             default:
                 _terminalUI.PrintLine("Not a valid option. Try again.");
-                await ManagePayments();
+                await ManagePaymentsMenu();
                 break;
         }
     }
