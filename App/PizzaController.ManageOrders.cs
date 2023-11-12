@@ -27,22 +27,20 @@ public partial class PizzaController {
         }
 
         string[] options = new[] {
-            "1. Place order",
-            "2. Set default order",
-            "3. Create new order",
-            "4. Edit existing order",
-            "5. Delete existing order",
+            "1. Set default order",
+            "2. Create new order",
+            "3. Edit existing order",
+            "4. Delete existing order",
             "q. Return"
         };
         _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
         var choice = _terminalUI.PromptKey("Choose an option: ");
 
         switch (choice) {
-            case '1': await PlaceOrder(); await ManageOrdersMenu(); break;
-            case '2': SetDefaultOrder(); await ManageOrdersMenu(); break;
-            case '3': _ = CreateOrder(); await ManageOrdersMenu(); break;
-            case '4': _ = EditOrder(); await ManageOrdersMenu(); break;
-            case '5': DeleteOrder(); await ManageOrdersMenu(); break;
+            case '1': SetDefaultOrder(); await ManageOrdersMenu(); break;
+            case '2': _ = CreateOrder(); await ManageOrdersMenu(); break;
+            case '3': _ = EditOrder(); await ManageOrdersMenu(); break;
+            case '4': DeleteOrder(); await ManageOrdersMenu(); break;
             case 'Q' or 'q': return;
             default:
                 _terminalUI.PrintLine("Not a valid option. Try again.");
@@ -69,26 +67,6 @@ public partial class PizzaController {
 
     private ActualOrder? CreateOrder() {
         throw new NotImplementedException();
-    }
-
-    private async Task PlaceOrder() {
-        var orderName = _chooser.GetUserChoice(
-            "Choose an order to place: ", _repo.ListOrders(), "order");
-        if (orderName is null) {
-            _terminalUI.PrintLine("No order selected.");
-            return;
-        }
-
-        var order = _repo.GetOrder(orderName) ?? throw new Exception("Order not found.");
-
-        var personalInfo = _repo.GetPersonalInfo();
-        if (personalInfo is null) {
-            _terminalUI.PrintLine("No personal information found.");
-            return;
-        }
-
-        _terminalUI.PrintLine($"Placing '{orderName}' order:");
-        await OrderPizza(order, _repo.GetPersonalInfo()!);
     }
 
     private void DeleteOrder() {

@@ -86,36 +86,53 @@ public partial class PizzaController {
                 message => $"Order summary:\n{message}\nDone."));
     }
 
-    public async Task ShowOptions() {
+    private async Task PlaceOrder() {
+        var orderName = _chooser.GetUserChoice(
+            "Choose an order to place: ", _repo.ListOrders(), "order");
+        if (orderName is null) {
+            _terminalUI.PrintLine("No order selected.");
+            return;
+        }
+
+        var order = _repo.GetOrder(orderName) ?? throw new Exception("Order not found.");
+
+        var personalInfo = _repo.GetPersonalInfo();
+        if (personalInfo is null) {
+            _terminalUI.PrintLine("No personal information found.");
+            return;
+        }
+
+        _terminalUI.PrintLine($"Placing '{orderName}' order:");
+        await OrderPizza(order, _repo.GetPersonalInfo()!);
+    }
+
+    public async Task MainMenu() {
         _terminalUI.PrintLine("Welcome to the pizza ordering app!🍕");
-        await Helper();
 
-        async Task Helper() {
-            string[] options = {
-                "1. Order default",
-                "2. Manage orders",
-                "3. Manage pizzas",
-                "4. Manage personal info",
-                "5. Manage payments",
-                "6. Track order",
-                "q. Exit"
-            };
-            _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
-            var choice = _terminalUI.PromptKey("Choose an option: ");
+        string[] options = {
+            "1. Place order",
+            "2. Manage orders",
+            "3. Manage pizzas",
+            "4. Manage personal info",
+            "5. Manage payments",
+            "6. Track order",
+            "q. Exit"
+        };
+        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = _terminalUI.PromptKey("Choose an option: ");
 
-            switch (choice) {
-                case '1': await FastPizza(); break;
-                case '2': await ManageOrdersMenu(); await Helper(); break;
-                case '3': await ManagePizzasMenu(); await Helper(); break;
-                case '4': _ = ManagePersonalInfo(); await Helper(); break;
-                case '5': _ = ManagePaymentsMenu(); await Helper(); break;
-                // case '6': await TrackOrder(); await Helper(); break;
-                case 'Q' or 'q': _terminalUI.PrintLine("Goodbye!"); return;
-                default:
-                    _terminalUI.PrintLine("Not a valid option. Try again.");
-                    await Helper();
-                    break;
-            }
+        switch (choice) {
+            case '1': await PlaceOrder(); await MainMenu(); break;
+            case '2': await ManageOrdersMenu(); await MainMenu(); break;
+            case '3': await ManagePizzasMenu(); await MainMenu(); break;
+            case '4': _ = ManagePersonalInfo(); await MainMenu(); break;
+            case '5': _ = ManagePaymentsMenu(); await MainMenu(); break;
+            // case '6': await TrackOrder(); await MainMenu(); break;
+            case 'Q' or 'q': _terminalUI.PrintLine("Goodbye!"); return;
+            default:
+                _terminalUI.PrintLine("Not a valid option. Try again.");
+                await MainMenu();
+                break;
         }
     }
 
