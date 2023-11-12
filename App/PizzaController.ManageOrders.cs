@@ -71,8 +71,24 @@ public partial class PizzaController {
         throw new NotImplementedException();
     }
 
-    private Task PlaceOrder() {
-        throw new NotImplementedException();
+    private async Task PlaceOrder() {
+        var orderName = _chooser.GetUserChoice(
+            "Choose an order to place: ", _repo.ListOrders(), "order");
+        if (orderName is null) {
+            _terminalUI.PrintLine("No order selected.");
+            return;
+        }
+
+        var order = _repo.GetOrder(orderName) ?? throw new Exception("Order not found.");
+
+        var personalInfo = _repo.GetPersonalInfo();
+        if (personalInfo is null) {
+            _terminalUI.PrintLine("No personal information found.");
+            return;
+        }
+
+        _terminalUI.PrintLine($"Placing '{orderName}' order:");
+        await OrderPizza(order, _repo.GetPersonalInfo()!);
     }
 
     private void DeleteOrder() {

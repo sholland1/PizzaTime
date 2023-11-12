@@ -12,21 +12,22 @@ public partial class PizzaController {
         (_repo, _startOrder, _terminalUI, _chooser, _aiPizzaBuilder) = (repo, startOrder, terminalUI, chooser, aiPizzaBuilder);
 
     public async Task FastPizza() {
-        var userOrder = _repo.GetDefaultOrder()
-            ?? throw new NotImplementedException("Implement create order.");
-
+        var userOrder = _repo.GetDefaultOrder();
         if (userOrder is null) {
             _terminalUI.PrintLine("No default order found.");
             return;
         }
 
-        var personalInfo = _repo.GetPersonalInfo() ?? CreatePersonalInfo();
-
+        var personalInfo = _repo.GetPersonalInfo();
         if (personalInfo is null) {
             _terminalUI.PrintLine("No personal information found.");
             return;
         }
 
+        await OrderPizza(userOrder, personalInfo);
+    }
+
+    public async Task OrderPizza(ActualOrder userOrder, PersonalInfo personalInfo) {
         var cart = _startOrder(userOrder.OrderInfo);
 
         bool firstTime = true;
