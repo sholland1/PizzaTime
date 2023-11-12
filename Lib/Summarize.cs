@@ -19,6 +19,15 @@ public static class SummaryUtils {
         }.Where(s => s != "")
         .Select(s => $"  {s}"));
 
+    public static string Summarize(this ActualOrder o) => $"""
+        Pizzas:
+        {string.Join("\n\n", o.Pizzas.Select(p => p.Summarize()))}
+        Coupons: {string.Join(", ", o.Coupons.Select(c => c.Code))}
+        Order Info:
+        {o.OrderInfo.Summarize()}
+        Payment Info:
+        {o.Payment.Summarize()}
+        """;
     public static string Summarize(this UnvalidatedPersonalInfo p) => $"""
         Name: {p.FirstName} {p.LastName}
         Email: {p.Email}

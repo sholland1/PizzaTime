@@ -37,14 +37,12 @@ public class DummyPizzaRepository : IPizzaRepo {
 
     public PersonalInfo? GetPersonalInfo() => _personalInfo;
 
-    public NewOrder? GetDefaultOrder() => new UnvalidatedOrder {
-        Pizzas = Pizzas.Values.Take(2).ToList(),
-        Coupons = new() { new("1234") },
-        OrderInfo = OrderInfos.First().Value,
-        PaymentType = PaymentType.PayWithCard
-    }.Validate();
-
-    public Payment? GetDefaultPayment() => Payments.First().Value.Validate();
+    public ActualOrder? GetDefaultOrder() => new UnvalidatedActualOrder {
+            Pizzas = Pizzas.Values.Take(2).Select(p => p.Validate()).ToList(),
+            Coupons = new() { new("1234") },
+            OrderInfo = OrderInfos.First().Value.Validate(),
+            Payment = Payments.First().Value.Validate()
+        }.Validate();
 
     public void SavePersonalInfo(PersonalInfo personalInfo) => _personalInfo = personalInfo;
     public void SavePizza(string name, Pizza pizza) => Pizzas[name] = pizza;
@@ -56,6 +54,24 @@ public class DummyPizzaRepository : IPizzaRepo {
     public void DeletePizza(string name) => Pizzas.Remove(name);
     public void DeletePayment(string paymentName) => Payments.Remove(paymentName);
 
+    public ActualOrder? GetOrder(string name) {
+        throw new NotImplementedException();
+    }
+
+    public void SaveOrder(string name, SavedOrder order) {
+        throw new NotImplementedException();
+    }
+
+    public IEnumerable<string> ListOrders() {
+        throw new NotImplementedException();
+    }
+
+    public void DeleteOrder(string name) {
+        throw new NotImplementedException();
+    }
+
+    private string? _defaultOrderName = "";
+    public void SetDefaultOrder(string name) => _defaultOrderName = name;
 }
 
 public class DummyTerminalUI : ITerminalUI {

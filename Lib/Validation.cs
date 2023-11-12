@@ -150,6 +150,20 @@ public static class ValidationHelpers {
             ? new Validation<PersonalInfo>.Success(new(personalInfo))
             : new Validation<PersonalInfo>.Failure(result.Errors);
     }
+
+    public static ActualOrder Validate(this UnvalidatedActualOrder order) {
+        ActualOrderValidator validator = new();
+        validator.ValidateAndThrow(order);
+        return new(order);
+    }
+
+    public static Validation<ActualOrder> Parse(this UnvalidatedActualOrder order) {
+        ActualOrderValidator validator = new();
+        var result = validator.Validate(order);
+        return result.IsValid
+            ? new Validation<ActualOrder>.Success(new(order))
+            : new Validation<ActualOrder>.Failure(result.Errors);
+    }
 }
 
 public class PersonalInfo : UnvalidatedPersonalInfo {
@@ -178,6 +192,15 @@ public class NewOrder : UnvalidatedOrder {
 
 public class Pizza : UnvalidatedPizza {
     internal Pizza(UnvalidatedPizza pizza) : base(pizza) { }
+    public Pizza WithQuantity(int quantity) => new(this) { Quantity = Math.Max(1, quantity) };
+}
+
+internal class ActualOrderValidator : AbstractValidator<UnvalidatedActualOrder> {
+    public ActualOrderValidator() {
+        RuleFor(o => o.Pizzas).NotEmpty();
+        When(o => o.OrderInfo.ServiceMethod is ServiceMethod.Delivery,
+            () => RuleFor(o => o.Payment).Must(p => p.PaymentInfo is PaymentInfo.PayWithCard));
+    }
 }
 
 internal class OrderValidator : AbstractValidator<UnvalidatedOrder> {

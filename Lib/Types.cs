@@ -135,6 +135,40 @@ public class UnvalidatedPersonalInfo {
 
 public enum PaymentType { PayAtStore, PayWithCard }
 
+public class ActualOrder {
+    internal ActualOrder(UnvalidatedActualOrder order) {
+        Pizzas = order.Pizzas;
+        Coupons = order.Coupons;
+        OrderInfo = order.OrderInfo;
+        Payment = order.Payment;
+    }
+
+    public List<Pizza> Pizzas { get; } = new();
+    public List<Coupon> Coupons { get; }
+    public OrderInfo OrderInfo { get; }
+    public Payment Payment { get; }
+}
+
+public class UnvalidatedActualOrder {
+    public List<Pizza> Pizzas { get; init; } = new();
+    public required List<Coupon> Coupons { get; init; }
+    public required OrderInfo OrderInfo { get; init; }
+    public required Payment Payment { get; init; }
+}
+
+public class SavedOrder {
+    public List<SavedPizza> Pizzas { get; init; } = new();
+    public required List<Coupon> Coupons { get; init; }
+    public required UnvalidatedOrderInfo OrderInfo { get; init; }
+    public required PaymentType PaymentType { get; init; }
+    public string? PaymentInfoName { get; init; } = null;
+}
+
+public class SavedPizza {
+    public string Name { get; set; } = default!;
+    public int Quantity { get; set; }
+}
+
 public class UnvalidatedOrder {
     public List<UnvalidatedPizza> Pizzas { get; init; } = new();
     public required List<Coupon> Coupons { get; init; }

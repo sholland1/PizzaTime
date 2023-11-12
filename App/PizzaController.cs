@@ -15,19 +15,15 @@ public partial class PizzaController {
         var userOrder = _repo.GetDefaultOrder()
             ?? throw new NotImplementedException("Implement create order.");
 
+        if (userOrder is null) {
+            _terminalUI.PrintLine("No default order found.");
+            return;
+        }
+
         var personalInfo = _repo.GetPersonalInfo() ?? CreatePersonalInfo();
 
         if (personalInfo is null) {
             _terminalUI.PrintLine("No personal information found.");
-            return;
-        }
-
-        var userPayment = userOrder.PaymentType == PaymentType.PayAtStore
-            ? Payment.PayAtStoreInstance
-            : _repo.GetDefaultPayment() ?? CreatePayment();
-
-        if (userPayment is null) {
-            _terminalUI.PrintLine("No payment information found.");
             return;
         }
 
@@ -67,7 +63,7 @@ public partial class PizzaController {
                 Estimated Wait: {summary.WaitTime}
                 Price: ${summary.TotalPrice}
 
-                {userPayment.Summarize()}
+                {userOrder.Payment.Summarize()}
 
                 """));
         if (priceResult.IsFailure) return;
@@ -82,7 +78,7 @@ public partial class PizzaController {
 
         _terminalUI.PrintLine("Ordering pizza...");
 
-        var orderResult = await cart.PlaceOrder(personalInfo, userPayment);
+        var orderResult = await cart.PlaceOrder(personalInfo, userOrder.Payment);
         _terminalUI.PrintLine(
             orderResult.Match(
                 message => $"Failed to place order: {message}",
@@ -96,7 +92,7 @@ public partial class PizzaController {
         async Task Helper() {
             string[] options = {
                 "1. Order default",
-                "2. Start new order",
+                "2. Manage orders",
                 "3. Manage pizzas",
                 "4. Manage personal info",
                 "5. Manage payments",
@@ -108,7 +104,7 @@ public partial class PizzaController {
 
             switch (choice) {
                 case '1': await FastPizza(); break;
-                // case '2': await NewOrder(); break;
+                case '2': await ManageOrdersMenu(); await Helper(); break;
                 case '3': await ManagePizzasMenu(); await Helper(); break;
                 case '4': _ = ManagePersonalInfo(); await Helper(); break;
                 case '5': _ = ManagePaymentsMenu(); await Helper(); break;

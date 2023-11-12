@@ -27,6 +27,7 @@ public record PizzaQueryServer(HttpOptions HttpOptions, IPizzaRepo PizzaReposito
     private string HandleRequest(string request) => request.Split(":") switch {
         [ "pizza", string pizzaName ] => PizzaRepository.GetPizza(pizzaName)?.Summarize() ?? "Pizza not found.",
         [ "payment", string paymentName ] => PizzaRepository.GetPayment(paymentName)?.Summarize() ?? "Payment not found.",
+        [ "order", string orderName ] => PizzaRepository.GetOrder(orderName)?.Summarize() ?? "Order not found.",
         _ => "Invalid request"
     };
 }
