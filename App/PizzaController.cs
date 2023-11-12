@@ -17,6 +17,11 @@ public partial class PizzaController {
 
         var personalInfo = _repo.GetPersonalInfo() ?? CreatePersonalInfo();
 
+        if (personalInfo is null) {
+            _terminalUI.PrintLine("No personal information found.");
+            return;
+        }
+
         var userPayment = userOrder.PaymentType == PaymentType.PayAtStore
             ? Payment.PayAtStoreInstance
             : _repo.GetDefaultPayment() ?? CreatePayment();
