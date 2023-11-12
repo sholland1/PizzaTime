@@ -81,17 +81,6 @@ public static class ValidationHelpers {
         return new(pizza);
     }
 
-    public static NewOrder Validate(this UnvalidatedOrder order) {
-        OrderValidator validator = new();
-        validator.ValidateAndThrow(order);
-        return ConvertToValidOrder(order);
-    }
-
-    private static NewOrder ConvertToValidOrder(UnvalidatedOrder order) {
-        var validatedPizzas = order.Pizzas.Select(p => new Pizza(p)).ToList();
-        return new(validatedPizzas, order.Coupons, new(order.OrderInfo), order.PaymentType);
-    }
-
     public static OrderInfo Validate(this UnvalidatedOrderInfo orderInfo) {
         OrderInfoValidator validator = new();
         validator.ValidateAndThrow(orderInfo);
@@ -116,15 +105,6 @@ public static class ValidationHelpers {
         return result.IsValid
             ? new Validation<Pizza>.Success(new(pizza))
             : new Validation<Pizza>.Failure(result.Errors);
-    }
-
-    public static Validation<NewOrder> Parse(this UnvalidatedOrder order) {
-        OrderValidator validator = new();
-        var result = validator.Validate(order);
-
-        return result.IsValid
-            ? new Validation<NewOrder>.Success(ConvertToValidOrder(order))
-            : new Validation<NewOrder>.Failure(result.Errors);
     }
 
     public static Validation<OrderInfo> Parse(this UnvalidatedOrderInfo orderInfo) {
@@ -176,20 +156,6 @@ public class OrderInfo : UnvalidatedOrderInfo {
     internal OrderInfo(UnvalidatedOrderInfo orderInfo) : base(orderInfo) { }
 }
 
-public class NewOrder : UnvalidatedOrder {
-    [SetsRequiredMembers]
-    internal NewOrder(List<Pizza> pizzas, List<Coupon> coupons, OrderInfo orderInfo, PaymentType paymentType) {
-        base.Pizzas = pizzas.OfType<UnvalidatedPizza>().ToList();
-        base.OrderInfo = orderInfo;
-        Coupons = coupons;
-        PaymentType = paymentType;
-        Pizzas = pizzas;
-        OrderInfo = orderInfo;
-    }
-    public new List<Pizza> Pizzas { get; }
-    public new OrderInfo OrderInfo { get; }
-}
-
 public class Pizza : UnvalidatedPizza {
     internal Pizza(UnvalidatedPizza pizza) : base(pizza) { }
     public Pizza WithQuantity(int quantity) => new(this) { Quantity = Math.Max(1, quantity) };
@@ -198,20 +164,9 @@ public class Pizza : UnvalidatedPizza {
 internal class ActualOrderValidator : AbstractValidator<UnvalidatedActualOrder> {
     public ActualOrderValidator() {
         RuleFor(o => o.Pizzas).NotEmpty();
-        When(o => o.OrderInfo.ServiceMethod is ServiceMethod.Delivery,
-            () => RuleFor(o => o.Payment).Must(p => p.PaymentInfo is PaymentInfo.PayWithCard));
-    }
-}
-
-internal class OrderValidator : AbstractValidator<UnvalidatedOrder> {
-    public OrderValidator() {
-        RuleFor(o => o.Pizzas).NotEmpty();
-        RuleForEach(o => o.Pizzas).SetValidator(new PizzaValidator());
-        RuleFor(o => o.OrderInfo).SetValidator(new OrderInfoValidator());
-        RuleFor(o => o.PaymentType).IsInEnum();
         //TODO: don't know if this is true (shouldn't be PayAtStore though)
         When(o => o.OrderInfo.ServiceMethod is ServiceMethod.Delivery,
-            () => RuleFor(o => o.PaymentType).Equal(PaymentType.PayWithCard));
+            () => RuleFor(o => o.Payment).Must(p => p.PaymentInfo is PaymentInfo.PayWithCard));
     }
 }
 

@@ -169,46 +169,6 @@ public class SavedPizza {
     public int Quantity { get; set; }
 }
 
-public class UnvalidatedOrder {
-    public List<UnvalidatedPizza> Pizzas { get; init; } = new();
-    public required List<Coupon> Coupons { get; init; }
-    public UnvalidatedOrderInfo OrderInfo { get; init; } = default!;
-    public required PaymentType PaymentType { get; init; }
-
-    public UnvalidatedOrder() { }
-
-    [SetsRequiredMembers]
-    public UnvalidatedOrder(List<UnvalidatedPizza> pizzas, List<Coupon> coupons, UnvalidatedOrderInfo orderInfo, PaymentType paymentType) {
-        Pizzas = pizzas;
-        Coupons = coupons;
-        OrderInfo = orderInfo;
-        PaymentType = paymentType;
-    }
-
-    [SetsRequiredMembers]
-    public UnvalidatedOrder(UnvalidatedOrder o) :
-        this(o.Pizzas, o.Coupons, o.OrderInfo, o.PaymentType) { }
-
-    public static bool operator ==(UnvalidatedOrder? a, UnvalidatedOrder? b) => Equals(a, b);
-    public static bool operator !=(UnvalidatedOrder? a, UnvalidatedOrder? b) => !Equals(a, b);
-
-    public override bool Equals(object? obj) =>
-        obj is UnvalidatedOrder p
-        && Pizzas.SequenceEqual(p.Pizzas)
-        && Coupons.SequenceEqual(p.Coupons)
-        && OrderInfo == p.OrderInfo
-        && PaymentType == p.PaymentType;
-
-    public override int GetHashCode() {
-        HashCode hash = new();
-        hash.Add(Pizzas);
-        hash.Add(Coupons);
-        hash.Add(OrderInfo);
-        hash.Add(PaymentType);
-        return hash.ToHashCode();
-    }
-}
-
 public record UnvalidatedPayment(PaymentInfo PaymentInfo) {
     public T Match<T>(Func<T> store, Func<PayWithCard, T> card) => PaymentInfo switch {
         PayAtStore => store(),
