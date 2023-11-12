@@ -84,7 +84,7 @@ public partial class PizzaController {
         }
 
         var order = _repo.GetOrder(orderName) ?? throw new Exception("Order not found.");
-        _terminalUI.PrintLine($"Order '{orderName}' deleted.");
+        _terminalUI.PrintLine($"Deleting '{orderName}' order:");
         _terminalUI.PrintLine(order.Summarize());
         var shouldDelete = IsAffirmative(_terminalUI.Prompt($"Delete order ({orderName}) [Y/n]: "));
         if (shouldDelete) {
