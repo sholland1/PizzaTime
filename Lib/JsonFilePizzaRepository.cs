@@ -22,10 +22,10 @@ public class JsonFilePizzaRepository : IPizzaRepo {
     public JsonFilePizzaRepository(ISerializer serializer) => _serializer = serializer;
 
     public Pizza? GetPizza(string name) =>
-        DeserializeFromFile<UnvalidatedPizza>(name + "Pizza")?.Validate();
+        DeserializeFromFile<UnvalidatedPizza>(name + ".pizza")?.Validate();
 
     public Payment? GetPayment(string name) =>
-        DeserializeFromFile<UnvalidatedPayment>(name + "Payment")?.Validate();
+        DeserializeFromFile<UnvalidatedPayment>(name + ".payment")?.Validate();
 
     T? DeserializeFromFile<T>(string filename) {
         if (!File.Exists(filename + ".json")) return default;
@@ -38,7 +38,7 @@ public class JsonFilePizzaRepository : IPizzaRepo {
         DeserializeFromFile<UnvalidatedPersonalInfo>("personalInfo")?.Validate();
 
     public NewOrder? GetDefaultOrder() =>
-        DeserializeFromFile<UnvalidatedOrder>("defaultOrder")?.Validate();
+        DeserializeFromFile<UnvalidatedOrder>("default.order")?.Validate();
 
     public Payment? GetDefaultPayment() => GetPayment("default");
 
@@ -52,21 +52,21 @@ public class JsonFilePizzaRepository : IPizzaRepo {
 
     public void SavePayment(string name, Payment payment) {
         if (payment.PaymentInfo is PaymentInfo.PayWithCard) {
-            SerializeToFile(name + "Payment", payment);
+            SerializeToFile(name + ".payment", payment);
         }
     }
 
     public void SavePizza(string name, Pizza pizza) =>
-        SerializeToFile(name + "Pizza", pizza);
+        SerializeToFile(name + ".pizza", pizza);
 
     public IEnumerable<string> ListPizzas() =>
-        Directory.EnumerateFiles(".", "*Pizza.json")
-            .Select(f => Path.GetFileNameWithoutExtension(f.Replace("Pizza", "")));
+        Directory.EnumerateFiles(".", "*.pizza.json")
+            .Select(f => Path.GetFileNameWithoutExtension(f.Replace(".pizza", "")));
 
     public IEnumerable<string> ListPayments() =>
-        Directory.EnumerateFiles(".", "*Payment.json")
-            .Select(f => Path.GetFileNameWithoutExtension(f.Replace("Payment", "")));
+        Directory.EnumerateFiles(".", "*.payment.json")
+            .Select(f => Path.GetFileNameWithoutExtension(f.Replace(".payment", "")));
 
-    public void DeletePizza(string name) => File.Delete(name + "Pizza.json");
-    public void DeletePayment(string paymentName) => File.Delete(paymentName + "Payment.json");
+    public void DeletePizza(string name) => File.Delete(name + ".pizza.json");
+    public void DeletePayment(string paymentName) => File.Delete(paymentName + ".payment.json");
 }
