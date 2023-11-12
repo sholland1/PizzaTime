@@ -35,6 +35,7 @@ public partial class PizzaController {
             Phone = phone
         }.Parse();
 
+        _terminalUI.Clear();
         return personalInfo.Match<PersonalInfo?>(es => {
             _terminalUI.PrintLine("Failed to parse personal info:");
             _terminalUI.PrintLine(string.Join(Environment.NewLine, es.Select(e => e.ErrorMessage)));

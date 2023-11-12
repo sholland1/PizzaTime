@@ -10,13 +10,16 @@ public partial class PizzaController {
         return await result.Match(async es => {
             _terminalUI.PrintLine("Failed to create pizza:");
             _terminalUI.PrintLine(string.Join(Environment.NewLine, es));
-            var choice = _terminalUI.Prompt("Try again? [Y/n]: ");
-            return IsAffirmative(choice) ? await CreatePizza() : default;
+            var choice = IsAffirmative(_terminalUI.Prompt("Try again? [Y/n]: "));
+            _terminalUI.Clear();
+            return choice ? await CreatePizza() : default;
         }, p => {
             _terminalUI.PrintLine("New pizza:");
             _terminalUI.PrintLine(p.Summarize());
             var pizzaName = _terminalUI.Prompt("Pizza name: ") ?? "";
             var shouldSave = IsAffirmative(_terminalUI.Prompt($"Save pizza ({pizzaName})? [Y/n]: "));
+            _terminalUI.Clear();
+
             if (shouldSave) {
                 _repo.SavePizza(pizzaName, p);
                 _terminalUI.PrintLine("Pizza saved.");
@@ -28,12 +31,15 @@ public partial class PizzaController {
     }
 
     public async Task CreatePizzasMenu() {
+        _terminalUI.PrintLine("--Manage Pizzas--");
+
         string[] options = new[] {
             "1. Create new pizza",
             "q. Return"
         };
         _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
         var choice = _terminalUI.PromptKey("Choose an option: ");
+        _terminalUI.Clear();
 
         switch (choice) {
             case '1': _ = await CreatePizza(); await ManagePizzasMenu(); break;
@@ -51,6 +57,8 @@ public partial class PizzaController {
             return;
         }
 
+        _terminalUI.PrintLine("--Manage Pizzas--");
+
         string[] options = new[] {
             "1. Create new pizza",
             "2. Edit existing pizza",
@@ -59,6 +67,7 @@ public partial class PizzaController {
         };
         _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
         var choice = _terminalUI.PromptKey("Choose an option: ");
+        _terminalUI.Clear();
 
         switch (choice) {
             case '1': _ = await CreatePizza(); await ManagePizzasMenu(); break;
@@ -76,6 +85,7 @@ public partial class PizzaController {
         var pizzaName = _chooser.GetUserChoice(
             "Choose a pizza to edit: ", _repo.ListPizzas(), "pizza");
         if (pizzaName is null) {
+            _terminalUI.Clear();
             _terminalUI.PrintLine("No pizza selected.");
             return default;
         }
@@ -90,12 +100,15 @@ public partial class PizzaController {
         return await result.Match(async es => {
             _terminalUI.PrintLine("Failed to edit pizza:");
             _terminalUI.PrintLine(string.Join(Environment.NewLine, es));
-            var choice = _terminalUI.Prompt("Try again? [Y/n]: ");
-            return IsAffirmative(choice) ? await EditPizza() : default;
+            var choice = IsAffirmative(_terminalUI.Prompt("Try again? [Y/n]: "));
+            _terminalUI.Clear();
+            return choice ? await EditPizza() : default;
         }, p => {
             _terminalUI.PrintLine("Updated pizza:");
             _terminalUI.PrintLine(p.Summarize());
             var shouldSave = IsAffirmative(_terminalUI.Prompt($"Save pizza ({pizzaName})? [Y/n]: "));
+            _terminalUI.Clear();
+
             if (shouldSave) {
                 _repo.SavePizza(pizzaName, p);
                 _terminalUI.PrintLine("Pizza saved.");
@@ -110,6 +123,7 @@ public partial class PizzaController {
         var pizzaName = _chooser.GetUserChoice(
             "Choose a pizza to delete: ", _repo.ListPizzas(), "pizza");
         if (pizzaName is null) {
+            _terminalUI.Clear();
             _terminalUI.PrintLine("No pizza selected.");
             return;
         }
@@ -118,6 +132,8 @@ public partial class PizzaController {
         _terminalUI.PrintLine($"Deleting '{pizzaName}' pizza:");
         _terminalUI.PrintLine(pizza.Summarize());
         var shouldDelete = IsAffirmative(_terminalUI.Prompt($"Delete pizza ({pizzaName})? [Y/n]: "));
+        _terminalUI.Clear();
+
         if (shouldDelete) {
             _repo.DeletePizza(pizzaName);
             _terminalUI.PrintLine("Pizza deleted.");

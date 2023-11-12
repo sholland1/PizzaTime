@@ -16,13 +16,15 @@ public partial class PizzaController {
         return payment.Match(es => {
             _terminalUI.PrintLine("Failed to parse payment info:");
             _terminalUI.PrintLine(string.Join(Environment.NewLine, es.Select(e => e.ErrorMessage)));
-            var choice = _terminalUI.Prompt("Try again? [Y/n]: ");
-            return IsAffirmative(choice) ? CreatePayment() : default;
+            var choice = IsAffirmative(_terminalUI.Prompt("Try again? [Y/n]: "));
+            return choice ? CreatePayment() : default;
         }, p => {
             _terminalUI.PrintLine("New payment information:");
             _terminalUI.PrintLine(p.Summarize());
             var paymentName = _terminalUI.Prompt("Payment name: ") ?? "";
             var shouldSave = IsAffirmative(_terminalUI.Prompt($"Save payment information ({paymentName})? [Y/n]: "));
+            _terminalUI.Clear();
+
             if (shouldSave) {
                 _repo.SavePayment(paymentName, p);
                 _terminalUI.PrintLine("Payment saved.");
@@ -34,12 +36,16 @@ public partial class PizzaController {
     }
 
     public async Task CreatePaymentsMenu() {
+        _terminalUI.PrintLine("--Manage Payments--");
+
         string[] options = new[] {
             "1. Create new payment info",
             "q. Return"
         };
+
         _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
         var choice = _terminalUI.PromptKey("Choose an option: ");
+        _terminalUI.Clear();
 
         switch (choice) {
             case '1': _ = CreatePayment(); await ManagePaymentsMenu(); break;
@@ -57,6 +63,8 @@ public partial class PizzaController {
             return;
         }
 
+        _terminalUI.PrintLine("--Manage Payments--");
+
         string[] options = new[] {
             "1. Create new payment info",
             "2. Edit existing payment info",
@@ -65,6 +73,7 @@ public partial class PizzaController {
         };
         _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
         var choice = _terminalUI.PromptKey("Choose an option: ");
+        _terminalUI.Clear();
 
         switch (choice) {
             case '1': _ = CreatePayment(); await ManagePaymentsMenu(); break;
@@ -82,6 +91,7 @@ public partial class PizzaController {
         var paymentName = _chooser.GetUserChoice(
             "Choose a payment to edit: ", _repo.ListPayments(), "payment");
         if (paymentName is null) {
+            _terminalUI.Clear();
             _terminalUI.PrintLine("No payment selected.");
             return default;
         }
@@ -102,12 +112,15 @@ public partial class PizzaController {
         return payment.Match(es => {
             _terminalUI.PrintLine("Failed to parse payment info:");
             _terminalUI.PrintLine(string.Join(Environment.NewLine, es.Select(e => e.ErrorMessage)));
-            var choice = _terminalUI.Prompt("Try again? [Y/n]: ");
-            return IsAffirmative(choice) ? EditPayment() : default;
+            var choice = IsAffirmative(_terminalUI.Prompt("Try again? [Y/n]: "));
+            _terminalUI.Clear();
+            return choice ? EditPayment() : default;
         }, p => {
             _terminalUI.PrintLine("Updated payment:");
             _terminalUI.PrintLine(p.Summarize());
             var shouldSave = IsAffirmative(_terminalUI.Prompt($"Save payment information ({paymentName})? [Y/n]: "));
+            _terminalUI.Clear();
+
             if (shouldSave) {
                 _repo.SavePayment(paymentName, p);
                 _terminalUI.PrintLine("Payment saved.");
@@ -122,6 +135,7 @@ public partial class PizzaController {
         var paymentName = _chooser.GetUserChoice(
             "Choose a payment to delete: ", _repo.ListPayments(), "payment");
         if (paymentName is null) {
+            _terminalUI.Clear();
             _terminalUI.PrintLine("No payment selected.");
             return;
         }
@@ -130,6 +144,8 @@ public partial class PizzaController {
         _terminalUI.PrintLine($"Deleting '{paymentName}' payment information:");
         _terminalUI.PrintLine(payment.Summarize());
         var shouldDelete = IsAffirmative(_terminalUI.Prompt($"Delete payment ({paymentName})? [Y/n]: "));
+        _terminalUI.Clear();
+
         if (shouldDelete) {
             _repo.DeletePayment(paymentName);
             _terminalUI.PrintLine("Payment deleted.");

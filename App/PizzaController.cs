@@ -14,12 +14,14 @@ public partial class PizzaController {
     public async Task PlaceDefaultOrder() {
         var userOrder = _repo.GetDefaultOrder();
         if (userOrder is null) {
+            _terminalUI.Clear();
             _terminalUI.PrintLine("No default order found.");
             return;
         }
 
         var personalInfo = _repo.GetPersonalInfo();
         if (personalInfo is null) {
+            _terminalUI.Clear();
             _terminalUI.PrintLine("No personal information found.");
             return;
         }
@@ -30,12 +32,14 @@ public partial class PizzaController {
     public async Task PlaceOrder(string orderName) {
         var order = _repo.GetOrder(orderName);
         if (order is null) {
+            _terminalUI.Clear();
             _terminalUI.PrintLine("Order not found.");
             return;
         }
 
         var personalInfo = _repo.GetPersonalInfo();
         if (personalInfo is null) {
+            _terminalUI.Clear();
             _terminalUI.PrintLine("No personal information found.");
             return;
         }
@@ -106,6 +110,7 @@ public partial class PizzaController {
         var orderName = _chooser.GetUserChoice(
             "Choose an order to place: ", _repo.ListOrders(), "order");
         if (orderName is null) {
+            _terminalUI.Clear();
             _terminalUI.PrintLine("No order selected.");
             return;
         }
@@ -114,12 +119,18 @@ public partial class PizzaController {
 
         var personalInfo = _repo.GetPersonalInfo();
         if (personalInfo is null) {
+            _terminalUI.Clear();
             _terminalUI.PrintLine("No personal information found.");
             return;
         }
 
         _terminalUI.PrintLine($"Placing '{orderName}' order:");
         await OrderPizza(order, _repo.GetPersonalInfo()!);
+    }
+
+    public async Task OpenProgram() {
+        _terminalUI.Clear();
+        await MainMenu();
     }
 
     public async Task MainMenu() {
@@ -129,8 +140,8 @@ public partial class PizzaController {
             "1. Place order",
             "2. Manage orders",
             "3. Manage pizzas",
-            "4. Manage personal info",
-            "5. Manage payments",
+            "4. Manage payments",
+            "5. Edit personal info",
             "6. Track order",
             "q. Exit"
         };
@@ -138,14 +149,15 @@ public partial class PizzaController {
         var choice = _terminalUI.PromptKey("Choose an option: ");
 
         switch (choice) {
-            case '1': await PlaceOrder(); await MainMenu(); break;
-            case '2': await ManageOrdersMenu(); await MainMenu(); break;
-            case '3': await ManagePizzasMenu(); await MainMenu(); break;
-            case '4': _ = ManagePersonalInfo(); await MainMenu(); break;
-            case '5': _ = ManagePaymentsMenu(); await MainMenu(); break;
-            // case '6': await TrackOrder(); await MainMenu(); break;
+            case '1': _terminalUI.Clear(); await PlaceOrder(); await MainMenu(); break;
+            case '2': _terminalUI.Clear(); await ManageOrdersMenu(); await MainMenu(); break;
+            case '3': _terminalUI.Clear(); await ManagePizzasMenu(); await MainMenu(); break;
+            case '4': _terminalUI.Clear(); _ = ManagePaymentsMenu(); await MainMenu(); break;
+            case '5': _terminalUI.Clear(); _ = ManagePersonalInfo(); await MainMenu(); break;
+            // case '6': _terminalUI.Clear(); await TrackOrder(); await MainMenu(); break;
             case 'Q' or 'q': _terminalUI.PrintLine("Goodbye!"); return;
             default:
+                _terminalUI.Clear();
                 _terminalUI.PrintLine("Not a valid option. Try again.");
                 await MainMenu();
                 break;

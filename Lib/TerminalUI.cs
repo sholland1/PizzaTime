@@ -8,6 +8,8 @@ public interface ITerminalUI {
 
     string? EditLine(string lineToEdit);
 
+    void Clear();
+
     public string? Prompt(string prompt) => PromptForEdit(prompt, "");
 
     public char? PromptKey(string prompt) {
@@ -108,4 +110,6 @@ public class RealTerminalUI : ITerminalUI {
         bool AtBeginning() => Console.CursorLeft <= offset;
         bool AtEnd() => Console.CursorLeft >= chars.Count + offset;
     }
+
+    public void Clear() => Console.Clear();
 }

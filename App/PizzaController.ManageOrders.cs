@@ -3,12 +3,16 @@ using Hollandsoft.OrderPizza;
 namespace Controllers;
 public partial class PizzaController {
     public async Task CreateOrdersMenu() {
+        _terminalUI.PrintLine("--Manage Orders--");
+
         string[] options = new[] {
             "1. Create new order",
             "q. Return"
         };
+
         _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
         var choice = _terminalUI.PromptKey("Choose an option: ");
+        _terminalUI.Clear();
 
         switch (choice) {
             case '1': _ = CreateOrder(); await ManageOrdersMenu(); break;
@@ -26,6 +30,8 @@ public partial class PizzaController {
             return;
         }
 
+        _terminalUI.PrintLine("--Manage Orders--");
+
         string[] options = new[] {
             "1. Set default order",
             "2. Create new order",
@@ -35,6 +41,7 @@ public partial class PizzaController {
         };
         _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
         var choice = _terminalUI.PromptKey("Choose an option: ");
+        _terminalUI.Clear();
 
         switch (choice) {
             case '1': SetDefaultOrder(); await ManageOrdersMenu(); break;
@@ -52,6 +59,7 @@ public partial class PizzaController {
     private void SetDefaultOrder() {
         var orderName = _chooser.GetUserChoice(
             "Choose an order to set as default: ", _repo.ListOrders(), "order");
+        _terminalUI.Clear();
         if (orderName is null) {
             _terminalUI.PrintLine("No order selected.");
             return;
@@ -73,6 +81,7 @@ public partial class PizzaController {
         var orderName = _chooser.GetUserChoice(
             "Choose an order to delete: ", _repo.ListOrders(), "order");
         if (orderName is null) {
+            _terminalUI.Clear();
             _terminalUI.PrintLine("No order selected.");
             return;
         }
@@ -81,6 +90,8 @@ public partial class PizzaController {
         _terminalUI.PrintLine($"Deleting '{orderName}' order:");
         _terminalUI.PrintLine(order.Summarize());
         var shouldDelete = IsAffirmative(_terminalUI.Prompt($"Delete order ({orderName}) [Y/n]: "));
+        _terminalUI.Clear();
+
         if (shouldDelete) {
             _repo.DeleteOrder(orderName);
             _terminalUI.PrintLine("Order deleted.");

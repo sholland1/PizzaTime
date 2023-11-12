@@ -37,7 +37,7 @@ async Task PizzaMain(bool defaultOrder, string? orderName) {
     }
 
     _ = provider.GetRequiredService<PizzaQueryServer>().StartServer();
-    await controller.MainMenu();
+    await controller.OpenProgram();
 }
 
 static ServiceProvider BuilderServiceProvider() {
