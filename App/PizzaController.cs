@@ -11,7 +11,7 @@ public partial class PizzaController {
     public PizzaController(IPizzaRepo repo, Func<OrderInfo, ICart> startOrder, ITerminalUI terminalUI, IUserChooser chooser, IAIPizzaBuilder aiPizzaBuilder) =>
         (_repo, _startOrder, _terminalUI, _chooser, _aiPizzaBuilder) = (repo, startOrder, terminalUI, chooser, aiPizzaBuilder);
 
-    public async Task FastPizza() {
+    public async Task PlaceDefaultOrder() {
         var userOrder = _repo.GetDefaultOrder();
         if (userOrder is null) {
             _terminalUI.PrintLine("No default order found.");
@@ -25,6 +25,22 @@ public partial class PizzaController {
         }
 
         await OrderPizza(userOrder, personalInfo);
+    }
+
+    public async Task PlaceOrder(string orderName) {
+        var order = _repo.GetOrder(orderName);
+        if (order is null) {
+            _terminalUI.PrintLine("Order not found.");
+            return;
+        }
+
+        var personalInfo = _repo.GetPersonalInfo();
+        if (personalInfo is null) {
+            _terminalUI.PrintLine("No personal information found.");
+            return;
+        }
+
+        await OrderPizza(order, personalInfo);
     }
 
     public async Task OrderPizza(ActualOrder userOrder, PersonalInfo personalInfo) {

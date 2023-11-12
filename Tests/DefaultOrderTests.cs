@@ -3,7 +3,7 @@ using Hollandsoft.OrderPizza;
 using TestData;
 
 namespace Tests;
-public class FastPizzaTests {
+public class DefaultOrderTests {
     [Theory]
     [InlineData("")]
     [InlineData("y")]
@@ -14,7 +14,7 @@ public class FastPizzaTests {
         DummyPizzaCart cart = new();
         PizzaController controller = new(repo, _ => cart, terminalUI, default!, default!);
 
-        await controller.FastPizza();
+        await controller.PlaceDefaultOrder();
 
         object results(int i) => cart.Calls[i].Result;
 
@@ -59,7 +59,7 @@ public class FastPizzaTests {
         DummyPizzaCart cart = new();
         PizzaController controller = new(repo, _ => cart, terminalUI, default!, default!);
 
-        await controller.FastPizza();
+        await controller.PlaceDefaultOrder();
 
         var pizzaResults = cart.Calls.Take(2).Select(x => x.Result).OfType<CartResult<AddPizzaSuccess>>().Select(x => x.SuccessValue).ToList();
         var summaryResult = ((CartResult<SummarySuccess>)cart.Calls[2].Result).SuccessValue;

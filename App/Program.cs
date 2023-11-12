@@ -19,12 +19,23 @@ AppDomain.CurrentDomain.UnhandledException += (_, args) => {
 
 await BuildCommand().InvokeAsync(args);
 
-async Task PizzaMain(bool fast) {
-    var controller = provider.GetRequiredService<PizzaController>();
-    if (fast) {
-        await controller.FastPizza();
+async Task PizzaMain(bool defaultOrder, string? orderName) {
+    if (defaultOrder && orderName is not null) {
+        Console.WriteLine("Cannot specify both --defaultOrder and --order");
         return;
     }
+
+    var controller = provider.GetRequiredService<PizzaController>();
+    if (defaultOrder) {
+        await controller.PlaceDefaultOrder();
+        return;
+    }
+
+    if (orderName is not null) {
+        await controller.PlaceOrder(orderName);
+        return;
+    }
+
     _ = provider.GetRequiredService<PizzaQueryServer>().StartServer();
     await controller.MainMenu();
 }
@@ -67,11 +78,15 @@ static ServiceProvider BuilderServiceProvider() {
 }
 
 RootCommand BuildCommand() {
-    Option<bool> fastOption = new(
-        new[] { "--fast" },
-        "Order the default pizza with user confirmation only");
+    Option<bool> defaultOrderOption = new(
+        new[] { "--defaultOrder" },
+        "Place the default order with user confirmation only");
 
-    RootCommand rootCommand = new("Order a pizza") { fastOption };
-    rootCommand.SetHandler(PizzaMain, fastOption);
+    Option<string> orderOption = new(
+        new[] { "--order" },
+        "Place the order with the specified name with user confirmation only");
+
+    RootCommand rootCommand = new("Order a pizza") { defaultOrderOption, orderOption };
+    rootCommand.SetHandler(PizzaMain, defaultOrderOption, orderOption);
     return rootCommand;
 }
