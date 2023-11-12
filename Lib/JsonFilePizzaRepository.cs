@@ -11,8 +11,10 @@ public interface IPizzaRepo {
     void SavePizza(string name, Pizza pizza);
 
     IEnumerable<string> ListPizzas();
+    IEnumerable<string> ListPayments();
 
     void DeletePizza(string name);
+    void DeletePayment(string paymentName);
 }
 
 public class JsonFilePizzaRepository : IPizzaRepo {
@@ -23,7 +25,7 @@ public class JsonFilePizzaRepository : IPizzaRepo {
         DeserializeFromFile<UnvalidatedPizza>(name + "Pizza")?.Validate();
 
     public Payment? GetPayment(string name) =>
-        DeserializeFromFile<UnvalidatedPayment>(name)?.Validate();
+        DeserializeFromFile<UnvalidatedPayment>(name + "Payment")?.Validate();
 
     T? DeserializeFromFile<T>(string filename) {
         if (!File.Exists(filename + ".json")) return default;
@@ -38,7 +40,7 @@ public class JsonFilePizzaRepository : IPizzaRepo {
     public NewOrder? GetDefaultOrder() =>
         DeserializeFromFile<UnvalidatedOrder>("defaultOrder")?.Validate();
 
-    public Payment? GetDefaultPayment() => GetPayment("defaultPayment");
+    public Payment? GetDefaultPayment() => GetPayment("default");
 
     void SerializeToFile<T>(string filename, T obj) {
         using var fs = File.Create(filename + ".json");
@@ -61,5 +63,10 @@ public class JsonFilePizzaRepository : IPizzaRepo {
         Directory.EnumerateFiles(".", "*Pizza.json")
             .Select(f => Path.GetFileNameWithoutExtension(f.Replace("Pizza", "")));
 
+    public IEnumerable<string> ListPayments() =>
+        Directory.EnumerateFiles(".", "*Payment.json")
+            .Select(f => Path.GetFileNameWithoutExtension(f.Replace("Payment", "")));
+
     public void DeletePizza(string name) => File.Delete(name + "Pizza.json");
+    public void DeletePayment(string paymentName) => File.Delete(paymentName + "Payment.json");
 }

@@ -19,7 +19,12 @@ public partial class PizzaController {
 
         var userPayment = userOrder.PaymentType == PaymentType.PayAtStore
             ? Payment.PayAtStoreInstance
-            : _repo.GetDefaultPayment() ?? CreatePaymentInfo();
+            : _repo.GetDefaultPayment() ?? CreatePayment();
+
+        if (userPayment is null) {
+            _terminalUI.PrintLine("No payment information found.");
+            return;
+        }
 
         var cart = _startOrder(userOrder.OrderInfo);
 

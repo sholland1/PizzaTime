@@ -47,14 +47,15 @@ public class DummyPizzaRepository : IPizzaRepo {
     public Payment? GetDefaultPayment() => Payments.First().Value.Validate();
 
     public void SavePersonalInfo(PersonalInfo personalInfo) => _personalInfo = personalInfo;
-
     public void SavePizza(string name, Pizza pizza) => Pizzas[name] = pizza;
-
-    public IEnumerable<string> ListPizzas() => Pizzas.Keys;
-
     public void SavePayment(string name, Payment payment) => Payments[name] = payment;
 
+    public IEnumerable<string> ListPizzas() => Pizzas.Keys;
+    public IEnumerable<string> ListPayments() => Payments.Keys;
+
     public void DeletePizza(string name) => Pizzas.Remove(name);
+    public void DeletePayment(string paymentName) => Payments.Remove(paymentName);
+
 }
 
 public class DummyTerminalUI : ITerminalUI {
