@@ -29,6 +29,7 @@ public record PizzaQueryServer(HttpOptions HttpOptions, IPizzaRepo PizzaReposito
         [ "payment", string paymentName ] => PizzaRepository.GetPayment(paymentName)?.Summarize() ?? "Payment not found.",
         [ "order", string orderName ] => PizzaRepository.GetOrder(orderName)?.Summarize() ?? "Order not found.",
         [ "store", string storeId ] => StoreApi.GetStore(storeId)?.Summarize() ?? "Store not found.",
+        [ "coupon", string couponId ] => StoreApi.GetCoupon(couponId)?.Summarize() ?? "Coupon not found.",
         _ => "Invalid request"
     };
 }

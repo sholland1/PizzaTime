@@ -88,8 +88,7 @@ public partial class PizzaController {
             return;
         }
 
-        //TODO: Add coupons
-        var coupons = await GetCoupons();
+        var coupons = await GetCoupons(storeId);
 
         var savedPizzas = GetPizzas();
         if (!savedPizzas.Any()) {
@@ -121,7 +120,7 @@ public partial class PizzaController {
 
         SavedOrder order = new() {
             Pizzas = savedPizzas,
-            Coupons = coupons,
+            Coupons = coupons.Select(c => new Coupon(c)).ToList(),
             OrderInfo = new UnvalidatedOrderInfo {
                 StoreId = storeId,
                 ServiceMethod = serviceMethod,
@@ -170,10 +169,10 @@ public partial class PizzaController {
         }
     }
 
-    private async Task<List<Coupon>> GetCoupons() {
-        // return _chooser.GetUserChoices(
-        //     "Choose coupons to add to order: ", await _storeApi.ListCoupons(), "coupon");
-        return new() { new("0000") };
+    private async Task<List<string>> GetCoupons(string storeId) {
+        MenuRequest request = new(storeId);
+        return _chooser.GetUserChoices(
+            "Choose coupons to add to order: ", await _storeApi.ListCoupons(request), "coupon");
     }
 
     private async Task<string?> GetStoreId(ServiceMethod serviceMethod) {
