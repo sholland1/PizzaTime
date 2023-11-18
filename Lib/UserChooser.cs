@@ -12,16 +12,16 @@ public class FzfChooser : IUserChooser {
     public FzfChooser(HttpOptions httpOptions) => _httpOptions = httpOptions;
 
     public string? GetUserChoice(string prompt, IEnumerable<string> choices, string? itemType = null) =>
-        choices.ChooseWithFzf(new Fzf.FzfOptions {
-            Prompt = prompt,
-            Preview = GetPreviewCommand(itemType)
-        });
+        choices.ChooseWithFzf(GetOptions(prompt, itemType));
 
     public List<string> GetUserChoices(string prompt, IEnumerable<string> choices, string? itemType = null) =>
-        choices.ChooseWithFzf(new Fzf.FzfMultiOptions {
-            Prompt = prompt,
-            Preview = GetPreviewCommand(itemType)
-        });
+        choices.ChooseMultiWithFzf(GetOptions(prompt, itemType));
+
+    private Fzf.FzfOptions GetOptions(string prompt, string? itemType) => new() {
+        Prompt = prompt,
+        Preview = GetPreviewCommand(itemType),
+        PreviewWindow = "wrap"
+    };
 
     private string? GetPreviewCommand(string? itemType) => itemType is null ? null
         : $"echo -n '{itemType}:{{}}' | nc {_httpOptions.IPAddress} {_httpOptions.Port}";
