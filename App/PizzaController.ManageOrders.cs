@@ -45,8 +45,8 @@ public partial class PizzaController {
 
         switch (choice) {
             case '1': SetDefaultOrder(); await ManageOrdersMenu(); break;
-            case '2': _ = CreateOrder(); await ManageOrdersMenu(); break;
-            case '3': _ = EditOrder(); await ManageOrdersMenu(); break;
+            case '2': await CreateOrder(); await ManageOrdersMenu(); break;
+            case '3': await EditOrder(); await ManageOrdersMenu(); break;
             case '4': DeleteOrder(); await ManageOrdersMenu(); break;
             case 'Q' or 'q': return;
             default:
@@ -69,12 +69,177 @@ public partial class PizzaController {
         _terminalUI.PrintLine($"Default order set to '{orderName}'.");
     }
 
-    private ActualOrder? EditOrder() {
+    private Task EditOrder() {
         throw new NotImplementedException();
     }
 
-    private ActualOrder? CreateOrder() {
-        throw new NotImplementedException();
+    private async Task CreateOrder() {
+        var savedPizzas = GetPizzas();
+        if (!savedPizzas.Any()) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No pizzas selected.");
+            return;
+        }
+
+        //TODO: Add coupons
+        var coupons = await GetCoupons();
+
+        //TODO: Choose store
+        var storeId = await GetStoreId();
+        if (storeId is null) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No store selected.");
+            return;
+        }
+
+        var serviceMethod = GetServiceMethod();
+        if (serviceMethod is null) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No service method selected.");
+            return;
+        }
+
+        //TODO: Now/Later
+        var timing = OrderTiming.Now.Instance;
+
+        var paymentType = GetPaymentType();
+        if (paymentType is null) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No payment type selected.");
+            return;
+        }
+
+        string? paymentInfoName = null;
+        if (paymentType == PaymentType.PayWithCard) {
+            paymentInfoName = _chooser.GetUserChoice(
+                "Choose a payment info to use: ", _repo.ListPayments(), "payment");
+            if (paymentInfoName is null) {
+                _terminalUI.Clear();
+                _terminalUI.PrintLine("No payment info selected.");
+                return;
+            }
+        }
+
+        SavedOrder order = new() {
+            Pizzas = savedPizzas,
+            Coupons = coupons,
+            OrderInfo = new UnvalidatedOrderInfo {
+                StoreId = $"{storeId}",
+                ServiceMethod = serviceMethod,
+                Timing = timing
+            }.Validate(),
+            PaymentType = paymentType.Value,
+            PaymentInfoName = paymentInfoName
+        };
+
+        var orderName = _terminalUI.Prompt("Order name: ") ?? "";
+        _terminalUI.PrintLine($"Creating '{orderName}' order:");
+
+        _repo.SaveOrder(orderName, order);
+
+        _terminalUI.Clear();
+        _terminalUI.PrintLine("Order saved.");
+    }
+
+    private List<SavedPizza> GetPizzas() {
+        var pizzaNames = _chooser.GetUserChoices(
+            "Choose pizzas to add to order: ", _repo.ListPizzas(), "pizza");
+        if (!pizzaNames.Any()) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No pizzas selected.");
+            return new();
+        }
+
+        //TODO: Add quantities
+        var quantities = GetQuantities(pizzaNames).ToList();
+        if (quantities.Any(q => q is < 1 or > 25)) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("Invalid quantity.");
+            return new();
+        }
+        return pizzaNames.Zip(quantities, (p, q) => new SavedPizza(p, q)).ToList();
+
+        IEnumerable<int> GetQuantities(List<string> pizzaNames) {
+            foreach (var pizzaName in pizzaNames) {
+                var pizza = _repo.GetPizza(pizzaName)
+                    ?? throw new InvalidOperationException("Pizza not found.");
+
+                _terminalUI.PrintLine(pizza.Summarize());
+                var input = _terminalUI.Prompt($"Quantity for {pizzaName} pizza: ") ?? "0";
+                var quantity = int.TryParse(input, out int result) ? result : 0;
+                yield return quantity;
+            }
+        }
+    }
+
+    private async Task<List<Coupon>> GetCoupons() {
+        // return _chooser.GetUserChoices(
+        //     "Choose coupons to add to order: ", await _api.ListCoupons(), "coupon");
+        return new() { new("0000") };
+    }
+
+    private async Task<int?> GetStoreId() {
+        // return _chooser.GetUserChoice(
+        //     "Choose a store: ", await _api.ListNearbyStores(), "store");
+        return 0;
+    }
+
+    private ServiceMethod GetServiceMethod() {
+        var options = new[] {
+            "1. Delivery",
+            "2. Carryout"
+        };
+
+        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = _terminalUI.PromptKey("Choose a service method: ");
+        switch (choice) {
+            case '1': return new ServiceMethod.Delivery(GetAddress());
+            case '2': return new ServiceMethod.Carryout(GetPickupLocation());
+            default:
+                _terminalUI.Clear();
+                _terminalUI.PrintLine("Not a valid option. Try again.");
+                return GetServiceMethod();
+        }
+
+        PickupLocation GetPickupLocation() {
+            var options = new[] {
+                "1. In store",
+                "2. Drive thru",
+                "3. Carside"
+            };
+
+            _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
+            var choice = _terminalUI.PromptKey("Choose a pickup location: ");
+            switch (choice) {
+                case '1': return PickupLocation.InStore;
+                case '2': return PickupLocation.DriveThru;
+                case '3': return PickupLocation.Carside;
+                default:
+                    _terminalUI.Clear();
+                    _terminalUI.PrintLine("Not a valid option. Try again.");
+                    return GetPickupLocation();
+            }
+        }
+
+        Address GetAddress() => throw new NotImplementedException();
+    }
+
+    private PaymentType? GetPaymentType() {
+        var options = new[] {
+            "1. Pay at store",
+            "2. Pay with card"
+        };
+
+        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = _terminalUI.PromptKey("Choose a payment type: ");
+        switch (choice) {
+            case '1': return PaymentType.PayAtStore;
+            case '2': return PaymentType.PayWithCard;
+            default:
+                _terminalUI.Clear();
+                _terminalUI.PrintLine("Not a valid option. Try again.");
+                return null;
+        }
     }
 
     private void DeleteOrder() {
