@@ -10,8 +10,8 @@ public static class TestOrder {
     public static IEnumerable<InvalidData2> BadEnumOrders() {
         yield return new(new("1", new ServiceMethod.Delivery(
             new((AddressType)10, "My House", "1234 Main St", null, "12345", "ACity", "NY")),
-            new OrderTiming.Now()), new[] { "ServiceMethod.Address.AddressType" });
-        yield return new(new("1", new ServiceMethod.Carryout((PickupLocation)10), new OrderTiming.Now()),
+            OrderTiming.Now.Instance), new[] { "ServiceMethod.Address.AddressType" });
+        yield return new(new("1", new ServiceMethod.Carryout((PickupLocation)10), OrderTiming.Now.Instance),
             new[] { "ServiceMethod.Location" });
     }
 
@@ -30,10 +30,10 @@ public static class TestOrder {
 
     public static IEnumerable<ValidData> ValidOrders() {
         yield return new(
-            new("1", new ServiceMethod.Carryout(PickupLocation.InStore), new OrderTiming.Now()),
+            new("1", new ServiceMethod.Carryout(PickupLocation.InStore), OrderTiming.Now.Instance),
             "defaultOrderInfo.json", "CarryoutNowSummary.txt");
         yield return new(
-            new("2", new ServiceMethod.Delivery(new(AddressType.House, "My House", "1234 Main St", null, "12345", "ACity", "NY")), new OrderTiming.Now()),
+            new("2", new ServiceMethod.Delivery(new(AddressType.House, "My House", "1234 Main St", null, "12345", "ACity", "NY")), OrderTiming.Now.Instance),
             "DeliveryNow.json", "DeliveryNowSummary.txt");
         yield return new(
             new("3", new ServiceMethod.Delivery(new(AddressType.Business, "The Business", "1234 Main St", 123, "12345", "ACity", "NY")), new OrderTiming.Later(new(2021, 10, 30, 21, 30, 0))),

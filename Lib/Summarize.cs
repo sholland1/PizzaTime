@@ -42,7 +42,7 @@ public static class SummaryUtils {
 
     public static string Summarize(this UnvalidatedPizza p) =>
         string.Join(Environment.NewLine, new[] {
-            $"{p.Size} {p.Crust} Pizza x{p.Quantity}",
+            $"{p.Size} {p.Crust} Pizza" + (p.Quantity > 1 ? $"s x{p.Quantity}" : ""),
             p.Cheese.IsStandard ? "" : $"  with {p.Cheese.Display()}",
             p.Sauce != null && p.Sauce.Value.IsStandard ? "" : $"  with {p.Sauce.Display()}",
             p.Bake == Bake.Normal ? "" : $"  well done",

@@ -89,7 +89,11 @@ public abstract record OrderTiming {
         }
     }
 
-    public sealed record Now : OrderTiming;
+    public sealed record Now : OrderTiming {
+        private Now() { }
+        public static Now Instance { get; } = new();
+    }
+
     public sealed record Later(DateTime DateTime) : OrderTiming;
 }
 
@@ -164,10 +168,7 @@ public class SavedOrder {
     public string? PaymentInfoName { get; init; } = null;
 }
 
-public class SavedPizza {
-    public string Name { get; set; } = default!;
-    public int Quantity { get; set; }
-}
+public record SavedPizza(string Name, int Quantity);
 
 public record UnvalidatedPayment(PaymentInfo PaymentInfo) {
     public T Match<T>(Func<T> store, Func<PayWithCard, T> card) => PaymentInfo switch {
@@ -187,12 +188,13 @@ public record UnvalidatedPayment(PaymentInfo PaymentInfo) {
 
 public record Payment : UnvalidatedPayment {
     internal Payment(PaymentInfo PaymentInfo) : base(PaymentInfo) { }
-    public static Payment PayAtStoreInstance => new(PaymentInfo.PayAtStoreInstance);
+    public static Payment PayAtStoreInstance => new(PayAtStore.Instance);
 }
 
 public abstract record PaymentInfo {
     public sealed record PayAtStore : PaymentInfo {
-        internal PayAtStore() { }
+        private PayAtStore() { }
+        public static PaymentInfo Instance => new PayAtStore();
     }
 
     public sealed record PayWithCard(
@@ -200,8 +202,6 @@ public abstract record PaymentInfo {
         string SecurityCode, string BillingZip) : PaymentInfo {
         public string Type => GetCardType(CardNumber);
     }
-
-    public static PaymentInfo PayAtStoreInstance => new PayAtStore();
 
     //https://cache.dominos.com/olo/6_118_2/assets/build/js/site/base-site.js
     protected static string GetCardType(string s) {

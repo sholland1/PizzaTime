@@ -1,9 +1,9 @@
-Large HandTossed Pizza x1
+Large HandTossed Pizza
   pie cut
 Toppings:
  Pepperoni
 *
-Medium HandmadePan Pizza x2
+Medium HandmadePan Pizzas x2
   with (Light|Extra) cheese
   with Extra HoneyBBQ sauce
   well done
@@ -14,7 +14,7 @@ Toppings:
  Light Mushrooms on the Right
  Spinach
 *
-Small Thin Pizza x1
+Small Thin Pizza
   with no cheese
   with Marinara sauce
   square cut
@@ -36,13 +36,13 @@ Toppings:
  Extra BlackOlives on the Right
  ShreddedProvoloneCheese on the Right
 *
-Small HandTossed Pizza x1
+Small HandTossed Pizza
   well done
   pie cut
   with garlic crust
 No Toppings
 *
-XL Brooklyn Pizza x25
+XL Brooklyn Pizzas x25
   with Light cheese
   uncut
 Toppings:

@@ -20,7 +20,7 @@ public class IntegrationTests {
          UnvalidatedOrderInfo orderInfo = new() {
             StoreId = storeID,
             ServiceMethod = new ServiceMethod.Carryout(PickupLocation.DriveThru),
-            Timing = new OrderTiming.Now()
+            Timing = OrderTiming.Now.Instance
         };
         TestDominosCart cart = new(api, orderInfo.Validate());
 

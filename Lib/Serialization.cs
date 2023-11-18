@@ -90,7 +90,7 @@ public class OrderTimingJsonCoverter : JsonConverter<OrderTiming> {
     public override OrderTiming? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString()!;
         return value == "Now"
-            ? new OrderTiming.Now()
+            ? OrderTiming.Now.Instance
             : new OrderTiming.Later(DateTime.Parse(value));
 
         throw new NotSupportedException($"Invalid OrderTiming! Value: {value}");
