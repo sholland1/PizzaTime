@@ -7,9 +7,10 @@ public partial class PizzaController {
     private readonly ITerminalUI _terminalUI;
     private readonly IUserChooser _chooser;
     private readonly IAIPizzaBuilder _aiPizzaBuilder;
+    private readonly IStoreApi _storeApi;
 
-    public PizzaController(IPizzaRepo repo, Func<OrderInfo, ICart> startOrder, ITerminalUI terminalUI, IUserChooser chooser, IAIPizzaBuilder aiPizzaBuilder) =>
-        (_repo, _startOrder, _terminalUI, _chooser, _aiPizzaBuilder) = (repo, startOrder, terminalUI, chooser, aiPizzaBuilder);
+    public PizzaController(IPizzaRepo repo, Func<OrderInfo, ICart> startOrder, ITerminalUI terminalUI, IUserChooser chooser, IAIPizzaBuilder aiPizzaBuilder, IStoreApi storeApi) =>
+        (_repo, _startOrder, _terminalUI, _chooser, _aiPizzaBuilder, _storeApi) = (repo, startOrder, terminalUI, chooser, aiPizzaBuilder, storeApi);
 
     public async Task PlaceDefaultOrder() {
         var userOrder = _repo.GetDefaultOrder();

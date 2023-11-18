@@ -2,6 +2,7 @@ using System.Diagnostics;
 
 namespace Hollandsoft.OrderPizza;
 public static class SummaryUtils {
+    //TODO: maybe rethink this summary
     public static string Summarize(this UnvalidatedOrderInfo o) =>
         string.Join(Environment.NewLine, new[] {
             $"Order for {o.Timing.Match(() => "now", dt => $"later at {dt}")}",

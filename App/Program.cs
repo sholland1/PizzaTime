@@ -56,7 +56,8 @@ static ServiceProvider BuilderServiceProvider() {
 
     services.AddLogging()
         .AddSingleton<ISerializer>(MyJsonSerializer.Instance)
-        .AddSingleton<IOrderApi, DominosApi>()
+        .AddSingleton<IOrderApi, DominosOrderApi>()
+        .AddSingleton<IStoreApi, DominosStoreApi>()
         .AddSingleton<IPizzaRepo, JsonFilePizzaRepository>()
         .AddSingleton<Func<OrderInfo, ICart>>(services =>
         o => new DominosCart(

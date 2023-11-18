@@ -74,28 +74,27 @@ public partial class PizzaController {
     }
 
     private async Task CreateOrder() {
-        var savedPizzas = GetPizzas();
-        if (!savedPizzas.Any()) {
+        var serviceMethod = GetServiceMethod();
+        if (serviceMethod is null) {
             _terminalUI.Clear();
-            _terminalUI.PrintLine("No pizzas selected.");
+            _terminalUI.PrintLine("No service method selected.");
             return;
         }
 
-        //TODO: Add coupons
-        var coupons = await GetCoupons();
-
-        //TODO: Choose store
-        var storeId = await GetStoreId();
+        var storeId = await GetStoreId(serviceMethod);
         if (storeId is null) {
             _terminalUI.Clear();
             _terminalUI.PrintLine("No store selected.");
             return;
         }
 
-        var serviceMethod = GetServiceMethod();
-        if (serviceMethod is null) {
+        //TODO: Add coupons
+        var coupons = await GetCoupons();
+
+        var savedPizzas = GetPizzas();
+        if (!savedPizzas.Any()) {
             _terminalUI.Clear();
-            _terminalUI.PrintLine("No service method selected.");
+            _terminalUI.PrintLine("No pizzas selected.");
             return;
         }
 
@@ -124,7 +123,7 @@ public partial class PizzaController {
             Pizzas = savedPizzas,
             Coupons = coupons,
             OrderInfo = new UnvalidatedOrderInfo {
-                StoreId = $"{storeId}",
+                StoreId = storeId,
                 ServiceMethod = serviceMethod,
                 Timing = timing
             }.Validate(),
@@ -150,7 +149,6 @@ public partial class PizzaController {
             return new();
         }
 
-        //TODO: Add quantities
         var quantities = GetQuantities(pizzaNames).ToList();
         if (quantities.Any(q => q is < 1 or > 25)) {
             _terminalUI.Clear();
@@ -174,14 +172,18 @@ public partial class PizzaController {
 
     private async Task<List<Coupon>> GetCoupons() {
         // return _chooser.GetUserChoices(
-        //     "Choose coupons to add to order: ", await _api.ListCoupons(), "coupon");
+        //     "Choose coupons to add to order: ", await _storeApi.ListCoupons(), "coupon");
         return new() { new("0000") };
     }
 
-    private async Task<int?> GetStoreId() {
-        // return _chooser.GetUserChoice(
-        //     "Choose a store: ", await _api.ListNearbyStores(), "store");
-        return 0;
+    private async Task<string?> GetStoreId(ServiceMethod serviceMethod) {
+        var zipCode = _terminalUI.Prompt("Zip code: ");
+        StoreRequest request = new() {
+            ServiceMethod = serviceMethod,
+            ZipCode = zipCode
+        };
+        return _chooser.GetUserChoice(
+            "Choose a store: ", await _storeApi.ListStores(request), "store");
     }
 
     private ServiceMethod GetServiceMethod() {

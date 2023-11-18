@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 
 namespace Server;
-public record PizzaQueryServer(HttpOptions HttpOptions, IPizzaRepo PizzaRepository) {
+public record PizzaQueryServer(HttpOptions HttpOptions, IPizzaRepo PizzaRepository, IStoreApi StoreApi) {
     public Task StartServer() => Task.Run(() => {
         TcpListener listener = new(HttpOptions.IPAddress, HttpOptions.Port);
         listener.Start();
@@ -28,6 +28,7 @@ public record PizzaQueryServer(HttpOptions HttpOptions, IPizzaRepo PizzaReposito
         [ "pizza", string pizzaName ] => PizzaRepository.GetPizza(pizzaName)?.Summarize() ?? "Pizza not found.",
         [ "payment", string paymentName ] => PizzaRepository.GetPayment(paymentName)?.Summarize() ?? "Payment not found.",
         [ "order", string orderName ] => PizzaRepository.GetOrder(orderName)?.Summarize() ?? "Order not found.",
+        [ "store", string storeId ] => StoreApi.GetStore(storeId)?.Summarize() ?? "Store not found.",
         _ => "Invalid request"
     };
 }

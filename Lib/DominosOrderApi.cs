@@ -4,11 +4,13 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace Hollandsoft.OrderPizza;
-public class DominosApi : IOrderApi {
-    private readonly ILogger<DominosApi> _log;
+public class DominosOrderApi : IOrderApi {
+    const string _baseUrl = "https://order.dominos.com";
+    private readonly ILogger<DominosOrderApi> _log;
     private readonly ISerializer _serializer;
 
-    public DominosApi(ILogger<DominosApi> log, ISerializer serializer) => (_log, _serializer) = (log, serializer);
+    //TODO: Use HttpClientFactory
+    public DominosOrderApi(ILogger<DominosOrderApi> log, ISerializer serializer) => (_log, _serializer) = (log, serializer);
 
     public async Task<ValidateResponse> ValidateOrder(ValidateRequest request) =>
         await PostAsync<ValidateRequest, ValidateResponse>(
@@ -22,14 +24,14 @@ public class DominosApi : IOrderApi {
         await PostAsync<PlaceRequest, PlaceResponse>(
             "/power/place-order", request);
 
-    private async Task<TResponse> PostAsync<TRequest, TResponse>(string url, TRequest request) {
+    private async Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest request) {
         var requestJson = _serializer.Serialize(request);
-        _log.LogDebug("{url}\nRequest:\n{requestJson}", url, requestJson);
+        _log.LogDebug("{url}\nRequest:\n{requestJson}", requestUri, requestJson);
 
         using HttpClient client = new() {
-            BaseAddress = new("https://order.dominos.com"),
+            BaseAddress = new(_baseUrl),
         };
-        var response = await client.PostAsync(url,
+        var response = await client.PostAsync(requestUri,
             new StringContent(requestJson, Encoding.UTF8, "application/json"));
         var statusCode = response.StatusCode;
         _log.LogDebug("Response: {statusCode}", statusCode);
