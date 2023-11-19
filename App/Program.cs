@@ -10,37 +10,38 @@ using NLog.Extensions.Logging;
 using OpenAI.Extensions;
 using Server;
 
-var provider = BuilderServiceProvider();
+using var provider = BuilderServiceProvider();
 
-AppDomain.CurrentDomain.UnhandledException += (_, args) => {
-    var ex = (Exception)args.ExceptionObject;
-    provider.GetRequiredService<ILogger<Program>>()
-        .LogCritical(ex, "Unhandled exception");
-    LogManager.Shutdown();
-    Environment.Exit(1);
-};
+return await BuildCommand().InvokeAsync(args);
 
-await BuildCommand().InvokeAsync(args);
-
-async Task PizzaMain(bool defaultOrder, string? orderName) {
+async Task<int> PizzaMain(bool defaultOrder, string? orderName) {
     if (defaultOrder && orderName is not null) {
         Console.WriteLine("Cannot specify both --defaultOrder and --order");
-        return;
+        return 2;
     }
 
-    var controller = provider.GetRequiredService<PizzaController>();
-    if (defaultOrder) {
-        await controller.PlaceDefaultOrder();
-        return;
-    }
+    try {
+        var controller = provider.GetRequiredService<PizzaController>();
+        if (defaultOrder) {
+            await controller.PlaceDefaultOrder();
+            return 0;
+        }
 
-    if (orderName is not null) {
-        await controller.PlaceOrder(orderName);
-        return;
-    }
+        if (orderName is not null) {
+            await controller.PlaceOrder(orderName);
+            return 0;
+        }
 
-    _ = provider.GetRequiredService<PizzaQueryServer>().StartServer();
-    await controller.OpenProgram();
+        _ = provider.GetRequiredService<PizzaQueryServer>().StartServer();
+        await controller.OpenProgram();
+        return 0;
+    }
+    catch (Exception ex) {
+        var logger = provider.GetRequiredService<ILogger<Program>>();
+        logger.LogCritical(ex, "Unhandled exception");
+        LogManager.Shutdown();
+        return 1;
+    }
 }
 
 static ServiceProvider BuilderServiceProvider() {
@@ -57,11 +58,10 @@ static ServiceProvider BuilderServiceProvider() {
 
     services.AddOpenAIService();
 
-    services.AddLogging(loggingBuilder => {
-        loggingBuilder.ClearProviders();
-        loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
-        loggingBuilder.AddNLog(configuration);
-    })
+    services.AddLogging(loggingBuilder =>
+        loggingBuilder
+            .ClearProviders()
+            .AddNLog(configuration))
         .AddSingleton<ISerializer>(MyJsonSerializer.Instance)
         .AddSingleton<IOrderApi, DominosOrderApi>()
         .AddSingleton<IStoreApi, DominosStoreApi>()

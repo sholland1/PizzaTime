@@ -27,7 +27,7 @@ public class DominosStoreApi : IStoreApi {
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
-        _log.LogDebug(content);
+        _log.LogTrace(content);
         var storeResponse = _serializer.Deserialize<StoreResponse>(content)!;
 
         _stores = storeResponse.Stores.ToDictionary(s => s.StoreID);
@@ -51,7 +51,7 @@ public class DominosStoreApi : IStoreApi {
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
-        _log.LogDebug(content);
+        _log.LogTrace(content);
         var menuResponse = _serializer.Deserialize<JsonObject>(content)!;
 
         _coupons = menuResponse["Coupons"]!.AsObject()

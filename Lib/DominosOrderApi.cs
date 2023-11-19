@@ -38,7 +38,7 @@ public class DominosOrderApi : IOrderApi {
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
-        _log.LogDebug(content);
+        _log.LogTrace(content);
         return _serializer.Deserialize<TResponse>(content)!;
     }
 }
