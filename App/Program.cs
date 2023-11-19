@@ -5,6 +5,8 @@ using Hollandsoft.OrderPizza;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NLog;
+using NLog.Extensions.Logging;
 using OpenAI.Extensions;
 using Server;
 
@@ -14,6 +16,7 @@ AppDomain.CurrentDomain.UnhandledException += (_, args) => {
     var ex = (Exception)args.ExceptionObject;
     provider.GetRequiredService<ILogger<Program>>()
         .LogCritical(ex, "Unhandled exception");
+    LogManager.Shutdown();
     Environment.Exit(1);
 };
 
@@ -54,7 +57,11 @@ static ServiceProvider BuilderServiceProvider() {
 
     services.AddOpenAIService();
 
-    services.AddLogging()
+    services.AddLogging(loggingBuilder => {
+        loggingBuilder.ClearProviders();
+        loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+        loggingBuilder.AddNLog(configuration);
+    })
         .AddSingleton<ISerializer>(MyJsonSerializer.Instance)
         .AddSingleton<IOrderApi, DominosOrderApi>()
         .AddSingleton<IStoreApi, DominosStoreApi>()
