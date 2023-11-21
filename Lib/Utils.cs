@@ -19,6 +19,28 @@ static class Utils {
         && s[2] == '/'
         && int.TryParse(s[3..], out _)
         && month.Between(1, 12);
+
+    public static IEnumerable<string> Wrap(this IEnumerable<string> source, int maxLength, int firstLineOffset = 0) {
+        return source.SelectMany(s => WrapLine(s, firstLineOffset));
+
+        // IEnumerable<string> WrapLine(string line) =>
+        //     line.Length <= maxLength
+        //         ? [line]
+        //         : [line[..maxLength], ...WrapLine(line[(maxLength+1)..])];
+
+        IEnumerable<string> WrapLine(string line, int offset = 0) {
+            if (offset + line.Length <= maxLength) {
+                yield return line;
+                yield break;
+            }
+            var (first, rest) = (line[..(maxLength-offset)], line[(maxLength-offset)..]);
+
+            yield return first;
+            foreach (var l in WrapLine(rest)) {
+                yield return l;
+            }
+        }
+    }
 }
 
 public abstract record Validation<T> {

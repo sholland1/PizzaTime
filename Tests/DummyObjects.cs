@@ -88,7 +88,7 @@ public class DummyTerminalUI : ITerminalUI {
 
     public override string ToString() => string.Join("", PrintedMessages);
 
-    public string? EditLine(string _) => ReadLine();
+    public string? EditLine(string _, int? __) => ReadLine();
     public void Clear() { }
 }
 
