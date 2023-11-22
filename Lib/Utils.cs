@@ -41,6 +41,14 @@ static class Utils {
             }
         }
     }
+
+    public static IEnumerable<T> Cycle<T>(this IEnumerable<T> source) {
+        while (true) {
+            foreach (var item in source) {
+                yield return item;
+            }
+        }
+    }
 }
 
 public abstract record Validation<T> {
