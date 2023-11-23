@@ -55,23 +55,15 @@ public class FallbackEditor : IEditor {
     public string? Create() => EditImpl("Describe your new pizza:", Array.Empty<string>());
 
     public string? Edit(string pizzaName, Pizza pizza) =>
-        EditImpl($"Editing '{pizzaName}' pizza:",
-            pizza.Summarize().Split('\n').Append("---").Prepend("Current pizza:"));
+        EditImpl($"Editing pizza:", pizza.Summarize()
+            .Split('\n')
+            .Append("---")
+            .Prepend($"Pizza '{pizzaName}':"));
 
     private string? EditImpl(string promptMessage, IEnumerable<string> prependInstructions) {
-        var editorWidth = 50;
+        var editorWidth = Math.Clamp(Console.WindowWidth / 4, promptMessage.Length, 50);
 
-        var hPos = editorWidth;
-        var width = Console.WindowWidth - hPos;
-        var lines = prependInstructions
-            .Concat(_instructions.Wrap(width - 3))
-            .ToList();
-
-        int vPos = 0;
-        foreach (var line in lines) {
-            Console.SetCursorPosition(hPos, vPos++);
-            Console.WriteLine(" | " + line);
-        }
+        DrawInstructions(editorWidth, prependInstructions);
 
         Console.SetCursorPosition(0, 0);
 
@@ -80,5 +72,19 @@ public class FallbackEditor : IEditor {
         var input = Utils.EditLine("", editorWidth);
         Console.Clear();
         return string.IsNullOrWhiteSpace(input) ? null : input;
+    }
+
+    private void DrawInstructions(int hPos, IEnumerable<string> prependInstructions) {
+        const string divider = " │ ";
+        var width = Console.WindowWidth - hPos;
+        var lines = prependInstructions
+            .Concat(_instructions.Wrap(width - divider.Length))
+            .ToList();
+
+        int vPos = 0;
+        foreach (var line in lines) {
+            Console.SetCursorPosition(hPos, vPos++);
+            Console.WriteLine(divider + line);
+        }
     }
 }
