@@ -3,9 +3,17 @@ using Hollandsoft.OrderPizza;
 namespace Controllers;
 public partial class PizzaController {
     public async Task<Pizza?> CreatePizza() {
-        _terminalUI.PrintLine("Describe your new pizza:");
-        var input = _terminalUI.Prompt("> ") ?? "";
-        var result = await _aiPizzaBuilder.CreatePizza(input);
+        var input = _editor.Edit();
+        if (input is null) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No pizza created.");
+            return default;
+        }
+
+        _terminalUI.SetCursorPosition(0, 0);
+
+        var result = await _spinner.Show("Synthesizing pizza...", async () => await _aiPizzaBuilder.CreatePizza(input));
+        _terminalUI.Clear();
 
         return await result.Match(async es => {
             _terminalUI.PrintLine("Failed to create pizza:");

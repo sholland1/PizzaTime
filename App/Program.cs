@@ -48,6 +48,7 @@ static ServiceProvider BuilderServiceProvider() {
     var configuration = new ConfigurationBuilder()
         .AddJsonFile("appsettings.json")
         .AddUserSecrets<Program>()
+        .AddEnvironmentVariables()
         .Build();
 
     ServiceCollection services = new();
@@ -78,9 +79,16 @@ static ServiceProvider BuilderServiceProvider() {
 
         .AddSingleton<ITerminalUI, RealTerminalUI>()
         .AddSingleton<IUserChooser, FzfChooser>()
-        .AddSingleton<PizzaController>();
+        .AddSingleton<TerminalSpinner>();
 
-    services.AddSingleton<PizzaQueryServer>();
+    var editor = configuration.GetValue<string>("EDITOR");
+    services.AddSingleton<IEditor>(editor is not null
+        ? new InstalledProgramEditor(editor, "AIPizzaPromptSystemMessage.txt")
+        : new FallbackEditor("AIPizzaPromptSystemMessage.txt"));
+
+    services
+        .AddSingleton<PizzaController>()
+        .AddSingleton<PizzaQueryServer>();
 
     return services.BuildServiceProvider();
 }

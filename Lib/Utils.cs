@@ -2,7 +2,7 @@ using System.Diagnostics;
 using FluentValidation.Results;
 
 namespace Hollandsoft.OrderPizza;
-static class Utils {
+public static partial class Utils {
     public static bool In<T>(this T source, params T[] items) => items.Contains(source);
 
     public static bool Between<T>(this T source, T a, T b) where T : IComparable<T> =>

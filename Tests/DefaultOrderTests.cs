@@ -12,7 +12,7 @@ public class DefaultOrderTests {
         DummyTerminalUI terminalUI = new(userChoice);
         DummyPizzaRepository repo = new();
         DummyPizzaCart cart = new();
-        PizzaController controller = new(repo, _ => cart, terminalUI, default!, default!, default!);
+        PizzaController controller = new(repo, _ => cart, default!, default!, terminalUI, default!, default!, default!);
 
         await controller.PlaceDefaultOrder();
 
@@ -57,7 +57,7 @@ public class DefaultOrderTests {
         DummyTerminalUI terminalUI = new("n");
         DummyPizzaRepository repo = new();
         DummyPizzaCart cart = new();
-        PizzaController controller = new(repo, _ => cart, terminalUI, default!, default!, default!);
+        PizzaController controller = new(repo, _ => cart, default!, default!, terminalUI, default!, default!, default!);
 
         await controller.PlaceDefaultOrder();
 

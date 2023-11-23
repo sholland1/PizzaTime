@@ -4,13 +4,23 @@ namespace Controllers;
 public partial class PizzaController {
     private readonly IPizzaRepo _repo;
     private readonly Func<OrderInfo, ICart> _startOrder;
-    private readonly ITerminalUI _terminalUI;
-    private readonly IUserChooser _chooser;
     private readonly IAIPizzaBuilder _aiPizzaBuilder;
     private readonly IStoreApi _storeApi;
+    private readonly ITerminalUI _terminalUI;
+    private readonly IUserChooser _chooser;
+    private readonly TerminalSpinner _spinner;
+    private readonly IEditor _editor;
 
-    public PizzaController(IPizzaRepo repo, Func<OrderInfo, ICart> startOrder, ITerminalUI terminalUI, IUserChooser chooser, IAIPizzaBuilder aiPizzaBuilder, IStoreApi storeApi) =>
-        (_repo, _startOrder, _terminalUI, _chooser, _aiPizzaBuilder, _storeApi) = (repo, startOrder, terminalUI, chooser, aiPizzaBuilder, storeApi);
+    public PizzaController(IPizzaRepo repo,
+                           Func<OrderInfo, ICart> startOrder,
+                           IAIPizzaBuilder aiPizzaBuilder,
+                           IStoreApi storeApi,
+                           ITerminalUI terminalUI,
+                           IUserChooser chooser,
+                           TerminalSpinner spinner,
+                           IEditor editor) =>
+        (_repo, _startOrder, _aiPizzaBuilder, _storeApi, _terminalUI, _chooser, _spinner, _editor) =
+        (repo, startOrder, aiPizzaBuilder, storeApi, terminalUI, chooser, spinner, editor);
 
     public async Task PlaceDefaultOrder() {
         var userOrder = _repo.GetDefaultOrder();
@@ -100,6 +110,7 @@ public partial class PizzaController {
 
         _terminalUI.PrintLine("Ordering pizza...");
 
+        //TODO: log order
         var orderResult = await cart.PlaceOrder(personalInfo, userOrder.Payment);
         _terminalUI.PrintLine(
             orderResult.Match(
