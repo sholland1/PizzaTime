@@ -3,7 +3,7 @@ using Hollandsoft.OrderPizza;
 namespace Controllers;
 public partial class PizzaController {
     public async Task<Pizza?> CreatePizza() {
-        var input = _editor.Edit();
+        var input = _editor.Create();
         if (input is null) {
             _terminalUI.Clear();
             _terminalUI.PrintLine("No pizza created.");
@@ -100,10 +100,17 @@ public partial class PizzaController {
 
         var pizza = _repo.GetPizza(pizzaName) ?? throw new Exception("Pizza not found.");
 
-        _terminalUI.PrintLine($"Editing '{pizzaName}' pizza:");
-        _terminalUI.PrintLine(pizza.Summarize());
-        var input = _terminalUI.Prompt("> ") ?? "";
-        var result = await _aiPizzaBuilder.EditPizza(pizza, input);
+        var input = _editor.Edit(pizzaName, pizza);
+        if (input is null) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No pizza created.");
+            return default;
+        }
+
+        _terminalUI.SetCursorPosition(0, 0);
+
+        var result = await _spinner.Show("Synthesizing pizza...", async () => await _aiPizzaBuilder.EditPizza(pizza, input));
+        _terminalUI.Clear();
 
         return await result.Match(async es => {
             _terminalUI.PrintLine("Failed to edit pizza:");

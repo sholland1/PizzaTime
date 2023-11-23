@@ -3,7 +3,8 @@ using System.Diagnostics;
 namespace Hollandsoft.OrderPizza;
 
 public interface IEditor {
-    string? Edit();
+    string? Create();
+    string? Edit(string pizzaName, Pizza pizza);
 }
 
 public class InstalledProgramEditor : IEditor {
@@ -13,11 +14,24 @@ public class InstalledProgramEditor : IEditor {
     public InstalledProgramEditor(string editor, string instructionsFilename) =>
         (_editor, _instructions) = (editor, File.ReadAllText(instructionsFilename));
 
-    public string? Edit() {
+    public string? Create() => EditImpl("");
+
+    public string? Edit(string pizzaName, Pizza pizza) => EditImpl($"""
+
+        Editing '{pizzaName}' pizza:
+        {pizza.Summarize()}
+        ---
+        """);
+
+    private string? EditImpl(string prependInstructions) {
         string separator = new('-', 40);
         var filename = GenerateFilename();
+        var contents = $"""
 
-        File.WriteAllText(filename, $"\n{separator}\n\n{_instructions}");
+            {separator}{prependInstructions}
+            {_instructions}
+            """;
+        File.WriteAllText(filename, contents);
         Process.Start(_editor, filename).WaitForExit();
         var lines = File.ReadAllLines(filename)
             .TakeWhile(s => s != separator)
@@ -38,12 +52,20 @@ public class FallbackEditor : IEditor {
     public FallbackEditor(string instructionsFilename) =>
         _instructions = File.ReadAllLines(instructionsFilename);
 
-    public string? Edit() {
+    public string? Create() => EditImpl("Describe your new pizza:", Array.Empty<string>());
+
+    public string? Edit(string pizzaName, Pizza pizza) =>
+        EditImpl($"Editing '{pizzaName}' pizza:",
+            pizza.Summarize().Split('\n').Append("---").Prepend("Current pizza:"));
+
+    private string? EditImpl(string promptMessage, IEnumerable<string> prependInstructions) {
         var editorWidth = 50;
 
         var hPos = editorWidth;
         var width = Console.WindowWidth - hPos;
-        var lines = _instructions.Wrap(width - 3).ToList();
+        var lines = prependInstructions
+            .Concat(_instructions.Wrap(width - 3))
+            .ToList();
 
         int vPos = 0;
         foreach (var line in lines) {
@@ -53,7 +75,7 @@ public class FallbackEditor : IEditor {
 
         Console.SetCursorPosition(0, 0);
 
-        Console.WriteLine("Describe your new pizza:");
+        Console.WriteLine(promptMessage);
         Console.Write("> ");
         var input = Utils.EditLine("", editorWidth);
         Console.Clear();
