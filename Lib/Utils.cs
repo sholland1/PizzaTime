@@ -49,6 +49,13 @@ public static partial class Utils {
             }
         }
     }
+
+    private static readonly char[] _invalidChars = Path
+        .GetInvalidFileNameChars()
+        .Concat("`$&*()[]{}\\|:;\"'<>?/") //zsh/netcat don't like these
+        .Distinct()
+        .ToArray();
+    public static bool IsValidName(this string filename) => !filename.Any(_invalidChars.Contains);
 }
 
 public abstract record Validation<T> {

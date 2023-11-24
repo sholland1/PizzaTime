@@ -130,13 +130,34 @@ public partial class PizzaController {
             PaymentInfoName = paymentInfoName
         };
 
-        var orderName = _terminalUI.Prompt("Order name: ") ?? "";
+        var orderName = GetOrderName();
         _terminalUI.PrintLine($"Creating '{orderName}' order:");
 
         _repo.SaveOrder(orderName, order);
 
         _terminalUI.Clear();
         _terminalUI.PrintLine("Order saved.");
+    }
+
+    private string GetOrderName() {
+        string? orderName = _terminalUI.Prompt("Order name: ");
+        if (orderName is null) {
+            _terminalUI.PrintLine("No order name entered. Try again.");
+            return GetOrderName();
+        }
+
+        if (!orderName.IsValidName()) {
+            _terminalUI.PrintLine("Invalid order name. Try again.");
+            return GetOrderName();
+        }
+
+        if (_repo.ListOrders().Contains(orderName)) {
+            _terminalUI.PrintLine($"Order '{orderName}' already exists. Try again.");
+            return GetOrderName();
+        }
+
+        _terminalUI.Clear();
+        return orderName;
     }
 
     private List<SavedPizza> GetPizzas() {

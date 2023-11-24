@@ -21,7 +21,7 @@ public partial class PizzaController {
         }, p => {
             _terminalUI.PrintLine("New payment information:");
             _terminalUI.PrintLine(p.Summarize());
-            var paymentName = _terminalUI.Prompt("Payment name: ") ?? "";
+            var paymentName = GetPaymentName();
             var shouldSave = IsAffirmative(_terminalUI.Prompt($"Save payment information ({paymentName})? [Y/n]: "));
             _terminalUI.Clear();
 
@@ -33,6 +33,27 @@ public partial class PizzaController {
             _terminalUI.PrintLine("Payment not saved.");
             return default;
         });
+    }
+
+    private string GetPaymentName() {
+        string? paymentName = _terminalUI.Prompt("Payment name: ");
+        if (paymentName is null) {
+            _terminalUI.PrintLine("No payment name entered. Try again.");
+            return GetPaymentName();
+        }
+
+        if (!paymentName.IsValidName()) {
+            _terminalUI.PrintLine("Invalid payment name. Try again.");
+            return GetPaymentName();
+        }
+
+        if (_repo.ListPayments().Contains(paymentName)) {
+            _terminalUI.PrintLine($"Payment '{paymentName}' already exists. Try again.");
+            return GetPaymentName();
+        }
+
+        _terminalUI.Clear();
+        return paymentName;
     }
 
     public async Task CreatePaymentsMenu() {

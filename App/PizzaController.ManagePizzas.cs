@@ -24,7 +24,7 @@ public partial class PizzaController {
         }, p => {
             _terminalUI.PrintLine("New pizza:");
             _terminalUI.PrintLine(p.Summarize());
-            var pizzaName = _terminalUI.Prompt("Pizza name: ") ?? "";
+            var pizzaName = GetPizzaName();
             var shouldSave = IsAffirmative(_terminalUI.Prompt($"Save pizza ({pizzaName})? [Y/n]: "));
             _terminalUI.Clear();
 
@@ -36,6 +36,27 @@ public partial class PizzaController {
             _terminalUI.PrintLine("Pizza not saved.");
             return default;
         });
+    }
+
+    private string GetPizzaName() {
+        string? pizzaName = _terminalUI.Prompt("Pizza name: ");
+        if (pizzaName is null) {
+            _terminalUI.PrintLine("No pizza name entered. Try again.");
+            return GetPizzaName();
+        }
+
+        if (!pizzaName.IsValidName()) {
+            _terminalUI.PrintLine("Invalid pizza name. Try again.");
+            return GetPizzaName();
+        }
+
+        if (_repo.ListPizzas().Contains(pizzaName)) {
+            _terminalUI.PrintLine($"Pizza '{pizzaName}' already exists. Try again.");
+            return GetPizzaName();
+        }
+
+        _terminalUI.Clear();
+        return pizzaName;
     }
 
     public async Task CreatePizzasMenu() {
