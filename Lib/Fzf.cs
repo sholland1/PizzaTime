@@ -150,7 +150,7 @@ public static class Fzf {
                 #region Display
                 if (Ansi is bool a) yield return a ? "--ansi" : "--no-ansi";
                 if (Tabstop is not null) yield return $"--tabstop={Tabstop}";
-                if (Color is not null) yield return $"--color={Color.ToString()?.ToLower()}";
+                if (Color is not null) yield return $"--color={Color.ToString()?.Replace("_", "").ToLower()}";
                 if (NoBold is bool nb) yield return nb ? "--no-bold" : "--bold";
                 if (Black is bool b) yield return b ? "--black" : "--no-black";
                 #endregion
@@ -216,7 +216,7 @@ public static class Fzf {
         return items;
     }
 
-    public enum FzfColor { Dark, Light, Sixteen, BW }
+    public enum FzfColor { Dark, Light, _16, BW }
     public enum FzfBorder { Rounded, Sharp, Bold, Block, Thinblock, Double, Horizontal, Vertical, Top, Bottom, Left, Right, None }
     public enum FzfLayout { Default, Reverse, Reverse_List }
     public enum FzfTieBreak { Length, Chunk, Begin, End, Index }
