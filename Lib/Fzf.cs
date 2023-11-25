@@ -10,6 +10,7 @@ public static class Fzf {
         public bool? CaseSensitive { get; init; }
         public FzfScheme Scheme { get; init; }
         public bool Literal { get; init; }
+        public FzfAlgo? Algo { get; init; }
         // public ??? Nth { get; init; }
         // public ??? WithNth { get; init; }
         // public ??? Delimiter { get; init; }
@@ -96,6 +97,7 @@ public static class Fzf {
                 if (CaseSensitive is bool cs) yield return cs ? "+i" : "-i";
                 if (Scheme != FzfScheme.Default) yield return $"--scheme={Scheme.ToString().ToLower()}";
                 if (Literal) yield return "--literal";
+                if (Algo is not null) yield return $"--algo={Algo.ToString()?.ToLower()}";
                 if (NoSort) yield return "--no-sort";
                 if (Track) yield return "--track";
                 if (TAC) yield return "--tac";
@@ -205,4 +207,5 @@ public static class Fzf {
     public enum FzfLayout { Default, Reverse, Reverse_List }
     public enum FzfTieBreak { Length, Chunk, Begin, End, Index }
     public enum FzfScheme { Default, Path, History }
+    public enum FzfAlgo { V1, V2 }
 }
