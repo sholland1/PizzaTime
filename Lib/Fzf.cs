@@ -40,12 +40,15 @@ public static class Fzf {
         // public ??? Height { get; init; }
         // public ??? MinHeight { get; init; }
         public FzfLayout? Layout { get; init; }
+        public bool Reverse { get; init; }
         public FzfBorder? Border { get; init; }
         public string? BorderLabel { get; init; }
         // public ??? BorderLabelPos { get; init; }
+        public bool NoUnicode { get; init; }
         // public ??? Margin { get; init; }
         // public ??? Padding { get; init; }
         // public ??? Info { get; init; }
+        // public bool NoInfo { get; init; }
         public string? Separator { get; init; }
         public bool NoSeparator { get; init; }
         // public ??? ScrollBar { get; init; }
@@ -65,6 +68,7 @@ public static class Fzf {
         //FIXME: No custom colors
         public FzfColor? Color { get; init; }
         public bool NoBold { get; init; }
+        public bool Black { get; init; }
         #endregion
 
         #region History
@@ -74,9 +78,9 @@ public static class Fzf {
 
         #region Preview
         public string? Preview { get; init; }
-        public string? PreviewWindow { get; init; }
         public string? PreviewLabel { get; init; }
         // public ??? PreviewLabelPos { get; init; }
+        public string? PreviewWindow { get; init; }
         #endregion
 
         #region Scripting
@@ -88,6 +92,7 @@ public static class Fzf {
         public string? Expect { get; init; }
         public bool Read0 { get; init; }
         public bool Print0 { get; init; }
+        public bool NoClear { get; init; }
         public bool Sync { get; init; }
         // public int Listen { get; init; }
         #endregion
@@ -126,8 +131,10 @@ public static class Fzf {
 
                 #region Layout
                 if (Layout is not null) yield return $"--layout={Layout.ToString()?.Replace('_', '-').ToLower()}";
+                if (Reverse) yield return "--reverse";
                 if (Border is not null) yield return $"--border={Border.ToString()?.ToLower()}";
                 if (BorderLabel is not null) yield return $"--border-label=\"{BorderLabel}\"";
+                if (NoUnicode) yield return "--no-unicode";
                 if (Separator is not null) yield return $"--separator=\"{Separator}\"";
                 if (NoSeparator) yield return "--no-separator";
                 if (NoScrollBar) yield return "--no-scrollbar";
@@ -145,6 +152,7 @@ public static class Fzf {
                 if (Tabstop is not null) yield return $"--tabstop={Tabstop}";
                 if (Color is not null) yield return $"--color={Color.ToString()?.ToLower()}";
                 if (NoBold) yield return "--no-bold";
+                if (Black) yield return "--black";
                 #endregion
 
                 #region History
@@ -154,18 +162,19 @@ public static class Fzf {
 
                 #region Preview
                 if (Preview is not null) yield return $"--preview=\"{Preview}\"";
-                if (PreviewWindow is not null) yield return $"--preview-window={PreviewWindow}";
                 if (PreviewLabel is not null) yield return $"--preview-label=\"{PreviewLabel}\"";
+                if (PreviewWindow is not null) yield return $"--preview-window={PreviewWindow}";
                 #endregion
 
                 #region Scripting
                 if (Query is not null) yield return $"--query=\"{Query}\"";
-                if (PrintQuery) yield return "--print-query";
                 if (Select1) yield return "-1";
                 if (Exit0) yield return "-0";
+                if (PrintQuery) yield return "--print-query";
                 if (Expect is not null) yield return $"--expect=\"{Expect}\"";
                 if (Read0) yield return "--read0";
                 if (Print0) yield return "--print0";
+                if (NoClear) yield return "--no-clear";
                 if (Sync) yield return "--sync";
                 #endregion
             }
@@ -173,7 +182,7 @@ public static class Fzf {
     }
 
     public static string? ChooseWithFzf(this IEnumerable<string> source, FzfOptions? options = null) =>
-        ChooseImpl(source, (options ?? new()).Arguments).SingleOrDefault();
+        ChooseImpl(source, (options ?? new()).Arguments.Prepend("--no-multi")).SingleOrDefault();
 
     public static List<string> ChooseMultiWithFzf(this IEnumerable<string> source, FzfOptions? options = null, int? maxSelect = null) =>
         ChooseImpl(source, (options ?? new()).Arguments.Prepend("--multi" + (maxSelect == null ? "" : $"={maxSelect}")));
