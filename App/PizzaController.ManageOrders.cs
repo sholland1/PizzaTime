@@ -69,26 +69,62 @@ public partial class PizzaController {
         _terminalUI.PrintLine($"Default order set to '{orderName}'.");
     }
 
-    private Task EditOrder() {
-        throw new NotImplementedException();
+    private async Task EditOrder() {
+        var orderName = _chooser.GetUserChoice(
+            "Choose an order to edit: ", _repo.ListOrders(), "order");
+        if (orderName is null) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No order selected.");
+            return;
+        }
+
+        var order = _repo.GetSavedOrder(orderName) ?? throw new Exception("Order not found.");
+        await EditOrder(orderName, order);
+    }
+
+    private async Task EditOrder(string orderName, SavedOrder order) {
+        _terminalUI.PrintLine($"--Editing order '{orderName}'--");
+
+        string[] options = new[] {
+            "1. Edit order info",
+            "2. Edit coupons",
+            "3. Edit pizzas",
+            "4. Edit payment",
+            "s. Save & Return",
+            "q. Return without saving"
+        };
+        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = _terminalUI.PromptKey("Choose an option: ");
+        _terminalUI.Clear();
+
+        switch (choice) {
+            case '1': var newOrder1 = order.WithOrderInfo(await CreateOrderInfo()); await EditOrder(orderName, newOrder1); break;
+            case '2': var newOrder2 = order.WithCoupons(await GetCoupons(order.OrderInfo.StoreId)); await EditOrder(orderName, newOrder2); break;
+            case '3': var newOrder3 = order.WithPizzas(GetPizzas()); await EditOrder(orderName, newOrder3); break;
+            case '4': var newOrder4 = order.WithPayment(GetPayment()); await EditOrder(orderName, newOrder4); break;
+            case 'S' or 's': SaveOrder(orderName, order); return;
+            case 'Q' or 'q': return;
+            default:
+                _terminalUI.PrintLine("Not a valid option. Try again.");
+                await EditOrder(orderName, order);
+                break;
+        }
+    }
+
+    private void SaveOrder(string orderName, SavedOrder order) {
+        _terminalUI.PrintLine($"Saving '{orderName}' order:");
+
+        _repo.SaveOrder(orderName, order);
+
+        _terminalUI.Clear();
+        _terminalUI.PrintLine("Order saved.");
     }
 
     private async Task CreateOrder() {
-        var serviceMethod = GetServiceMethod();
-        if (serviceMethod is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No service method selected.");
-            return;
-        }
+        var orderInfo = await CreateOrderInfo();
+        if (orderInfo is null) return;
 
-        var storeId = await GetStoreId(serviceMethod);
-        if (storeId is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No store selected.");
-            return;
-        }
-
-        var coupons = await GetCoupons(storeId);
+        var coupons = await GetCoupons(orderInfo.StoreId);
 
         var savedPizzas = GetPizzas();
         if (!savedPizzas.Any()) {
@@ -97,37 +133,15 @@ public partial class PizzaController {
             return;
         }
 
-        //TODO: Now/Later
-        var timing = OrderTiming.Now.Instance;
-
-        var paymentType = GetPaymentType();
-        if (paymentType is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No payment type selected.");
-            return;
-        }
-
-        string? paymentInfoName = null;
-        if (paymentType == PaymentType.PayWithCard) {
-            paymentInfoName = _chooser.GetUserChoice(
-                "Choose a payment info to use: ", _repo.ListPayments(), "payment");
-            if (paymentInfoName is null) {
-                _terminalUI.Clear();
-                _terminalUI.PrintLine("No payment info selected.");
-                return;
-            }
-        }
+        var payment = GetPayment();
+        if (payment is not { } p) return;
 
         SavedOrder order = new() {
             Pizzas = savedPizzas,
-            Coupons = coupons.Select(c => new Coupon(c)).ToList(),
-            OrderInfo = new UnvalidatedOrderInfo {
-                StoreId = storeId,
-                ServiceMethod = serviceMethod,
-                Timing = timing
-            }.Validate(),
-            PaymentType = paymentType.Value,
-            PaymentInfoName = paymentInfoName
+            Coupons = coupons,
+            OrderInfo = orderInfo,
+            PaymentType = p.Type,
+            PaymentInfoName = p.InfoName
         };
 
         var orderName = GetOrderName();
@@ -137,6 +151,54 @@ public partial class PizzaController {
 
         _terminalUI.Clear();
         _terminalUI.PrintLine("Order saved.");
+    }
+
+    private (PaymentType Type, string? InfoName)? GetPayment() {
+        var paymentType = GetPaymentType();
+        if (paymentType is null) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No payment type selected.");
+            return null;
+        }
+
+        string? paymentInfoName = null;
+        if (paymentType == PaymentType.PayWithCard) {
+            paymentInfoName = _chooser.GetUserChoice(
+                "Choose a payment info to use: ", _repo.ListPayments(), "payment");
+            if (paymentInfoName is null) {
+                _terminalUI.Clear();
+                _terminalUI.PrintLine("No payment info selected.");
+                return null;
+            }
+        }
+
+        return (paymentType.Value, paymentInfoName);
+    }
+
+    private async Task<OrderInfo?> CreateOrderInfo() {
+        var serviceMethod = GetServiceMethod();
+        if (serviceMethod is null) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No service method selected.");
+            return null;
+        }
+
+        var storeId = await GetStoreId(serviceMethod);
+        if (storeId is null) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No store selected.");
+            return null;
+        }
+
+        //TODO: Now/Later
+        var timing = OrderTiming.Now.Instance;
+
+        _terminalUI.Clear();
+        return new UnvalidatedOrderInfo {
+            StoreId = storeId,
+            ServiceMethod = serviceMethod,
+            Timing = timing
+        }.Validate();
     }
 
     private string GetOrderName() {
@@ -190,11 +252,11 @@ public partial class PizzaController {
         }
     }
 
-    private async Task<List<string>> GetCoupons(string storeId) {
-        MenuRequest request = new(storeId);
-        return _chooser.GetUserChoices(
-            "Choose coupons to add to order: ", await _storeApi.ListCoupons(request), "coupon");
-    }
+    private async Task<List<Coupon>> GetCoupons(string storeId) =>
+        _chooser.GetUserChoices(
+            "Choose coupons to add to order: ", await _storeApi.ListCoupons(new(storeId)), "coupon")
+            .Select(c => new Coupon(c))
+            .ToList();
 
     private async Task<string?> GetStoreId(ServiceMethod serviceMethod) {
         var zipCode = _terminalUI.Prompt("Zip code: ");

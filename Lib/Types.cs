@@ -166,6 +166,42 @@ public class SavedOrder {
     public required UnvalidatedOrderInfo OrderInfo { get; init; }
     public required PaymentType PaymentType { get; init; }
     public string? PaymentInfoName { get; init; } = null;
+
+    public SavedOrder WithCoupons(List<Coupon> coupons) =>
+        new() {
+            Pizzas = Pizzas,
+            Coupons = coupons,
+            OrderInfo = OrderInfo,
+            PaymentType = PaymentType,
+            PaymentInfoName = PaymentInfoName
+        };
+
+    public SavedOrder WithOrderInfo(OrderInfo? orderInfo) =>
+        orderInfo is null ? this : new() {
+            Pizzas = Pizzas,
+            Coupons = Coupons,
+            OrderInfo = orderInfo,
+            PaymentType = PaymentType,
+            PaymentInfoName = PaymentInfoName
+        };
+
+    public SavedOrder WithPayment((PaymentType type, string? infoName)? payment) =>
+        payment is not {} x ? this : new() {
+            Pizzas = Pizzas,
+            Coupons = Coupons,
+            OrderInfo = OrderInfo,
+            PaymentType = x.type,
+            PaymentInfoName = x.infoName
+        };
+
+    public SavedOrder WithPizzas(List<SavedPizza> pizzas) =>
+        !pizzas.Any() ? this : new() {
+            Pizzas = pizzas,
+            Coupons = Coupons,
+            OrderInfo = OrderInfo,
+            PaymentType = PaymentType,
+            PaymentInfoName = PaymentInfoName
+        };
 }
 
 public record SavedPizza(string Name, int Quantity);

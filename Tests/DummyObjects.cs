@@ -72,6 +72,10 @@ public class DummyPizzaRepository : IPizzaRepo {
 
     private string? _defaultOrderName = "";
     public void SetDefaultOrder(string name) => _defaultOrderName = name;
+
+    public SavedOrder? GetSavedOrder(string name) {
+        throw new NotImplementedException();
+    }
 }
 
 public class DummyTerminalUI : ITerminalUI {

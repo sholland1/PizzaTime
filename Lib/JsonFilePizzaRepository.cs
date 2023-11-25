@@ -3,6 +3,7 @@ public interface IPizzaRepo {
     Pizza? GetPizza(string name);
     Payment? GetPayment(string name);
     ActualOrder? GetOrder(string name);
+    SavedOrder? GetSavedOrder(string name);
     PersonalInfo? GetPersonalInfo();
     ActualOrder? GetDefaultOrder();
 
@@ -31,7 +32,9 @@ public class JsonFilePizzaRepository : IPizzaRepo {
     public Payment? GetPayment(string name) =>
         DeserializeFromFile<UnvalidatedPayment>(name + ".payment")?.Validate();
     public ActualOrder? GetOrder(string name) =>
-        ToUnvalidatedOrder(DeserializeFromFile<SavedOrder>(name + ".order")!).Validate();
+        ToUnvalidatedOrder(GetSavedOrder(name)!).Validate();
+    public SavedOrder? GetSavedOrder(string name) =>
+        DeserializeFromFile<SavedOrder>(name + ".order");
 
     private UnvalidatedActualOrder ToUnvalidatedOrder(SavedOrder savedOrder) => new() {
         Coupons = savedOrder.Coupons,
