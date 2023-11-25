@@ -6,33 +6,33 @@ public static class Fzf {
     public class FzfOptions {
         #region Search Mode
         public bool? Extended { get; init; }
-        public bool Exact { get; init; }
+        public bool? Exact { get; init; }
         public bool? CaseSensitive { get; init; }
-        public bool Literal { get; init; }
+        public bool? Literal { get; init; }
         public FzfScheme? Scheme { get; init; }
         public FzfAlgo? Algo { get; init; }
         // public ??? Nth { get; init; }
         // public ??? WithNth { get; init; }
         // public ??? Delimiter { get; init; }
-        public bool Disabled { get; init; }
+        public bool? Disabled { get; init; }
         #endregion
 
         #region Search Result
-        public bool NoSort { get; init; }
-        public bool Track { get; init; }
-        public bool TAC { get; init; }
+        public bool? NoSort { get; init; }
+        public bool? Track { get; init; }
+        public bool? TAC { get; init; }
         public FzfTieBreak[] TieBreak { get; init; } = Array.Empty<FzfTieBreak>();
         #endregion
 
         #region Interface
         public bool NoMouse { get; init; }
         public string? Bind { get; init; }
-        public bool Cycle { get; init; }
-        public bool KeepRight { get; init; }
+        public bool? Cycle { get; init; }
+        public bool? KeepRight { get; init; }
         public int? ScrollOff { get; init; }
-        public bool NoHScroll { get; init; }
+        public bool? NoHScroll { get; init; }
         public int? HScrollOff { get; init; }
-        public bool FilepathWord { get; init; }
+        public bool? FilepathWord { get; init; }
         public string? JumpLabels { get; init; }
         #endregion
 
@@ -40,11 +40,11 @@ public static class Fzf {
         // public ??? Height { get; init; }
         // public ??? MinHeight { get; init; }
         public FzfLayout? Layout { get; init; }
-        public bool Reverse { get; init; }
+        public bool? Reverse { get; init; }
         public FzfBorder? Border { get; init; }
         public string? BorderLabel { get; init; }
         // public ??? BorderLabelPos { get; init; }
-        public bool NoUnicode { get; init; }
+        public bool? NoUnicode { get; init; }
         // public ??? Margin { get; init; }
         // public ??? Padding { get; init; }
         // public ??? Info { get; init; }
@@ -58,17 +58,17 @@ public static class Fzf {
         public string? Marker { get; init; }
         public string? Header { get; init; }
         public int? HeaderLines { get; init; }
-        public bool HeaderFirst { get; init; }
+        public bool? HeaderFirst { get; init; }
         public string? Ellipsis { get; init; }
         #endregion
 
         #region Display
-        public bool Ansi { get; init; }
+        public bool? Ansi { get; init; }
         public int? Tabstop { get; init; }
         //FIXME: No custom colors
         public FzfColor? Color { get; init; }
-        public bool NoBold { get; init; }
-        public bool Black { get; init; }
+        public bool? NoBold { get; init; }
+        public bool? Black { get; init; }
         #endregion
 
         #region History
@@ -85,34 +85,34 @@ public static class Fzf {
 
         #region Scripting
         public string? Query { get; init; }
-        public bool Select1 { get; init; }
-        public bool Exit0 { get; init; }
+        public bool? Select1 { get; init; }
+        public bool? Exit0 { get; init; }
         // public ??? Filter { get; init; }
-        public bool PrintQuery { get; init; }
+        public bool? PrintQuery { get; init; }
         public string? Expect { get; init; }
-        public bool Read0 { get; init; }
-        public bool Print0 { get; init; }
-        public bool NoClear { get; init; }
-        public bool Sync { get; init; }
+        public bool? Read0 { get; init; }
+        public bool? Print0 { get; init; }
+        public bool? NoClear { get; init; }
+        public bool? Sync { get; init; }
         // public int Listen { get; init; }
         #endregion
 
         public virtual IEnumerable<string> Arguments {
             get {
                 #region Search Mode
-                if (Extended is bool x) yield return x ? "-x" : "+x";
-                if (Exact) yield return "--exact";
+                if (Extended is bool extended) yield return extended ? "-x" : "+x";
+                if (Exact is bool exact) yield return exact ? "--exact" : "--no-exact";
                 if (CaseSensitive is bool cs) yield return cs ? "+i" : "-i";
-                if (Literal) yield return "--literal";
+                if (Literal is bool l) yield return l ? "--literal" : "--no-literal";
                 if (Scheme is not null) yield return $"--scheme={Scheme.ToString()?.ToLower()}";
                 if (Algo is not null) yield return $"--algo={Algo.ToString()?.ToLower()}";
-                if (Disabled) yield return "--disabled";
+                if (Disabled is bool d) yield return d ? "--disabled" : "--enabled";
                 #endregion
 
                 #region Search Result
-                if (NoSort) yield return "--no-sort";
-                if (Track) yield return "--track";
-                if (TAC) yield return "--tac";
+                if (NoSort is bool ns) yield return ns ? "--no-sort" : "--sort";
+                if (Track is bool track) yield return track ? "--track" : "--no-track";
+                if (TAC is bool tac) yield return tac ? "--tac" : "--no-tac";
                 if (TieBreak.Any())
                     yield return $"--tiebreak={string.Join(',', TieBreak.Select(t => t.ToString().ToLower()))}";
                 #endregion
@@ -120,21 +120,21 @@ public static class Fzf {
                 #region Interface
                 if (NoMouse) yield return "--no-mouse";
                 if (Bind is not null) yield return $"--bind={Bind}";
-                if (Cycle) yield return "--cycle";
-                if (KeepRight) yield return "--keep-right";
+                if (Cycle is bool c) yield return c ? "--cycle" : "--no-cycle";
+                if (KeepRight is bool kr) yield return kr ? "--keep-right" : "--no-keep-right";
                 if (ScrollOff is not null) yield return $"--scroll-off={ScrollOff}";
-                if (NoHScroll) yield return "--no-hscroll";
+                if (NoHScroll is bool nhs) yield return nhs ? "--no-hscroll" : "--hscroll";
                 if (HScrollOff is not null) yield return $"--hscroll-off={HScrollOff}";
-                if (FilepathWord) yield return "--filepath-word";
+                if (FilepathWord is bool fpw) yield return fpw ? "--filepath-word" : "--no-filepath-word";
                 if (JumpLabels is not null) yield return $"--jump-labels={JumpLabels}";
                 #endregion
 
                 #region Layout
                 if (Layout is not null) yield return $"--layout={Layout.ToString()?.Replace('_', '-').ToLower()}";
-                if (Reverse) yield return "--reverse";
+                if (Reverse is bool r) yield return r ? "--reverse" : "--no-reverse";
                 if (Border is not null) yield return $"--border={Border.ToString()?.ToLower()}";
                 if (BorderLabel is not null) yield return $"--border-label=\"{BorderLabel}\"";
-                if (NoUnicode) yield return "--no-unicode";
+                if (NoUnicode is bool nu) yield return nu ? "--no-unicode" : "--unicode";
                 if (Separator is not null) yield return $"--separator=\"{Separator}\"";
                 if (NoSeparator) yield return "--no-separator";
                 if (NoScrollBar) yield return "--no-scrollbar";
@@ -143,16 +143,16 @@ public static class Fzf {
                 if (Marker is not null) yield return $"--marker=\"{Marker}\"";
                 if (Header is not null) yield return $"--header=\"{Header}\"";
                 if (HeaderLines is not null) yield return $"--header-lines={HeaderLines}";
-                if (HeaderFirst) yield return "--header-first";
+                if (HeaderFirst is bool hf) yield return hf ? "--header-first" : "--no-header-first";
                 if (Ellipsis is not null) yield return $"--ellipsis=\"{Ellipsis}\"";
                 #endregion
 
                 #region Display
-                if (Ansi) yield return "--ansi";
+                if (Ansi is bool a) yield return a ? "--ansi" : "--no-ansi";
                 if (Tabstop is not null) yield return $"--tabstop={Tabstop}";
                 if (Color is not null) yield return $"--color={Color.ToString()?.ToLower()}";
-                if (NoBold) yield return "--no-bold";
-                if (Black) yield return "--black";
+                if (NoBold is bool nb) yield return nb ? "--no-bold" : "--bold";
+                if (Black is bool b) yield return b ? "--black" : "--no-black";
                 #endregion
 
                 #region History
@@ -168,14 +168,14 @@ public static class Fzf {
 
                 #region Scripting
                 if (Query is not null) yield return $"--query=\"{Query}\"";
-                if (Select1) yield return "-1";
-                if (Exit0) yield return "-0";
-                if (PrintQuery) yield return "--print-query";
+                if (Select1 is bool s1) yield return s1 ? "-1" : "+1";
+                if (Exit0 is bool e0) yield return e0 ? "-0" : "+0";
+                if (PrintQuery is bool pq) yield return pq ? "--print-query" : "--no-print-query";
                 if (Expect is not null) yield return $"--expect=\"{Expect}\"";
-                if (Read0) yield return "--read0";
-                if (Print0) yield return "--print0";
-                if (NoClear) yield return "--no-clear";
-                if (Sync) yield return "--sync";
+                if (Read0 is bool r0) yield return r0 ? "--read0" : "--no-read0";
+                if (Print0 is bool p0) yield return p0 ? "--print0" : "--no-print0";
+                if (NoClear is bool nc) yield return nc ? "--no-clear" : "--clear";
+                if (Sync is bool sync) yield return sync ? "--sync" : "--no-sync";
                 #endregion
             }
         }
