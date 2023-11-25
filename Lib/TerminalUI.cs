@@ -25,6 +25,8 @@ public interface ITerminalUI {
         var result = EditLine(lineToEdit)?.Trim();
         return string.IsNullOrEmpty(result) ? null : result;
     }
+
+    void WriteInfoPanel(int hPos, IEnumerable<string> lines);
 }
 
 public class RealTerminalUI : ITerminalUI {
@@ -40,4 +42,6 @@ public class RealTerminalUI : ITerminalUI {
     public void Clear() => Console.Clear();
 
     public void SetCursorPosition(int left, int top) => Console.SetCursorPosition(left, top);
+
+    public void WriteInfoPanel(int hPos, IEnumerable<string> lines) => Utils.WriteInfoPanel(hPos, lines);
 }

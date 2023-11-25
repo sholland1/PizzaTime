@@ -21,6 +21,8 @@ public interface IPizzaRepo {
     void DeleteOrder(string name);
 
     void SetDefaultOrder(string name);
+
+    ActualOrder GetActualFromSavedOrder(SavedOrder order);
 }
 
 public class JsonFilePizzaRepository : IPizzaRepo {
@@ -93,4 +95,7 @@ public class JsonFilePizzaRepository : IPizzaRepo {
     public void DeleteOrder(string name) => File.Delete(name + ".order.json");
 
     public void SetDefaultOrder(string name) => File.WriteAllText("default_order", name);
+
+    public ActualOrder GetActualFromSavedOrder(SavedOrder order) =>
+        ToUnvalidatedOrder(order).Validate();
 }

@@ -74,17 +74,6 @@ public class FallbackEditor : IEditor {
         return string.IsNullOrWhiteSpace(input) ? null : input;
     }
 
-    private void DrawInstructions(int hPos, IEnumerable<string> prependInstructions) {
-        const string divider = " │ ";
-        var width = Console.WindowWidth - hPos;
-        var lines = prependInstructions
-            .Concat(_instructions.Wrap(width - divider.Length))
-            .ToList();
-
-        int vPos = 0;
-        foreach (var line in lines) {
-            Console.SetCursorPosition(hPos, vPos++);
-            Console.WriteLine(divider + line);
-        }
-    }
+    private void DrawInstructions(int hPos, IEnumerable<string> prependInstructions) =>
+        Utils.WriteInfoPanel(hPos, prependInstructions.Concat(_instructions));
 }

@@ -83,6 +83,10 @@ public partial class PizzaController {
     }
 
     private async Task EditOrder(string orderName, SavedOrder order) {
+        var actualOrder = _repo.GetActualFromSavedOrder(order);
+        _terminalUI.WriteInfoPanel(50, actualOrder.Summarize().Split('\n'));
+        _terminalUI.SetCursorPosition(0, 0);
+
         _terminalUI.PrintLine($"--Editing order '{orderName}'--");
 
         string[] options = new[] {
@@ -172,6 +176,7 @@ public partial class PizzaController {
             }
         }
 
+        _terminalUI.Clear();
         return (paymentType.Value, paymentInfoName);
     }
 

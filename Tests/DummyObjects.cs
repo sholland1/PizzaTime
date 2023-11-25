@@ -76,6 +76,10 @@ public class DummyPizzaRepository : IPizzaRepo {
     public SavedOrder? GetSavedOrder(string name) {
         throw new NotImplementedException();
     }
+
+    public ActualOrder GetActualFromSavedOrder(SavedOrder order) {
+        throw new NotImplementedException();
+    }
 }
 
 public class DummyTerminalUI : ITerminalUI {
@@ -96,6 +100,8 @@ public class DummyTerminalUI : ITerminalUI {
     public void Clear() { }
 
     public void SetCursorPosition(int left, int top) { }
+
+    public void WriteInfoPanel(int hPos, IEnumerable<string> lines) { }
 }
 
 public class DummyPizzaCart : ICart {

@@ -126,4 +126,16 @@ public static partial class Utils {
             Console.Write(' ');
         }
     }
+
+    public static void WriteInfoPanel(int hPos, IEnumerable<string> lines) {
+        const string divider = " │ ";
+        var width = Console.WindowWidth - hPos;
+        var wrappedLines = lines.Wrap(width - divider.Length);
+
+        int vPos = 0;
+        foreach (var line in wrappedLines) {
+            Console.SetCursorPosition(hPos, vPos++);
+            Console.WriteLine(divider + line);
+        }
+    }
 }
