@@ -182,5 +182,5 @@ public partial class PizzaController {
         await MainMenu();
     }
 
-    private static bool IsAffirmative(string? answer) => (answer?.ToLower() ?? "y") == "y";
+    private static bool IsAffirmative(string? answer) => answer is null or "Y" or "y";
 }
