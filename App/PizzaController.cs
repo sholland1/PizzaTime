@@ -160,20 +160,26 @@ public partial class PizzaController {
         _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
         var choice = _terminalUI.PromptKey("Choose an option: ");
 
+        if (choice is 'Q' or 'q') {
+            _terminalUI.PrintLine("Goodbye!");
+            return;
+        }
+
+        _terminalUI.Clear(); 
+
         switch (choice) {
-            case '1': _terminalUI.Clear(); await PlaceOrder(); await MainMenu(); break;
-            case '2': _terminalUI.Clear(); await ManageOrdersMenu(); await MainMenu(); break;
-            case '3': _terminalUI.Clear(); await ManagePizzasMenu(); await MainMenu(); break;
-            case '4': _terminalUI.Clear(); _ = ManagePaymentsMenu(); await MainMenu(); break;
-            case '5': _terminalUI.Clear(); _ = ManagePersonalInfo(); await MainMenu(); break;
-            // case '6': _terminalUI.Clear(); await TrackOrder(); await MainMenu(); break;
-            case 'Q' or 'q': _terminalUI.PrintLine("Goodbye!"); return;
+            case '1': await PlaceOrder(); break;
+            case '2': await ManageOrdersMenu(); break;
+            case '3': await ManagePizzasMenu(); break;
+            case '4': _ = ManagePaymentsMenu(); break;
+            case '5': _ = ManagePersonalInfo(); break;
+            // case '6': await TrackOrder(); break;
             default:
-                _terminalUI.Clear();
                 _terminalUI.PrintLine("Not a valid option. Try again.");
-                await MainMenu();
                 break;
         }
+
+        await MainMenu();
     }
 
     private static bool IsAffirmative(string? answer) => (answer?.ToLower() ?? "y") == "y";
