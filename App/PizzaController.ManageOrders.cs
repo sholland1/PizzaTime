@@ -37,6 +37,7 @@ public partial class PizzaController {
             "2. Create new order",
             "3. Edit existing order",
             "4. Delete existing order",
+            "5. Rename existing order",
             "q. Return"
         };
         _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
@@ -48,12 +49,34 @@ public partial class PizzaController {
             case '2': await CreateOrder(); await ManageOrdersMenu(); break;
             case '3': await EditOrder(); await ManageOrdersMenu(); break;
             case '4': DeleteOrder(); await ManageOrdersMenu(); break;
+            case '5': RenameOrder(); await ManageOrdersMenu(); break;
             case 'Q' or 'q': return;
             default:
                 _terminalUI.PrintLine("Not a valid option. Try again.");
                 await ManageOrdersMenu();
                 break;
         }
+    }
+
+    private void RenameOrder() {
+        var orderName = _chooser.GetUserChoice(
+            "Choose an order to rename: ", _repo.ListOrders(), "order");
+        if (orderName is null) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No order selected.");
+            return;
+        }
+
+        var newOrderName = GetOrderName(orderName);
+        if (orderName == newOrderName) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("Order not renamed.");
+            return;
+        }
+        _repo.RenameOrder(orderName, newOrderName);
+
+        _terminalUI.Clear();
+        _terminalUI.PrintLine($"Order renamed to '{newOrderName}'.");
     }
 
     private void SetDefaultOrder() {
@@ -206,21 +229,21 @@ public partial class PizzaController {
         }.Validate();
     }
 
-    private string GetOrderName() {
-        string? orderName = _terminalUI.Prompt("Order name: ");
+    private string GetOrderName(string existingName = "") {
+        string? orderName = _terminalUI.PromptForEdit("Order name: ", existingName);
         if (orderName is null) {
             _terminalUI.PrintLine("No order name entered. Try again.");
-            return GetOrderName();
+            return GetOrderName(existingName);
         }
 
         if (!orderName.IsValidName()) {
             _terminalUI.PrintLine("Invalid order name. Try again.");
-            return GetOrderName();
+            return GetOrderName(existingName);
         }
 
-        if (_repo.ListOrders().Contains(orderName)) {
+        if (_repo.ListOrders().Where(n => n != existingName).Contains(orderName)) {
             _terminalUI.PrintLine($"Order '{orderName}' already exists. Try again.");
-            return GetOrderName();
+            return GetOrderName(existingName);
         }
 
         _terminalUI.Clear();

@@ -23,6 +23,10 @@ public interface IPizzaRepo {
     void SetDefaultOrder(string name);
 
     ActualOrder GetActualFromSavedOrder(SavedOrder order);
+
+    void RenamePizza(string name, string newName);
+    void RenamePayment(string name, string newName);
+    void RenameOrder(string name, string newName);
 }
 
 public class JsonFilePizzaRepository : IPizzaRepo {
@@ -98,4 +102,51 @@ public class JsonFilePizzaRepository : IPizzaRepo {
 
     public ActualOrder GetActualFromSavedOrder(SavedOrder order) =>
         ToUnvalidatedOrder(order).Validate();
+
+    public void RenamePizza(string name, string newName) {
+        if (!File.Exists(name + ".pizza.json")) {
+            throw new ArgumentException($"Pizza '{name}' does not exist");
+        }
+
+        File.Move(name + ".pizza.json", newName + ".pizza.json");
+
+        var ordersToUpdate = ListOrders()
+            .Select(o => (o, Order: GetSavedOrder(o)))
+            .Where(o => o.Order?.Pizzas.Select(p => p.Name).Contains(name) == true);
+
+        foreach (var (orderName, order) in ordersToUpdate) {
+            var updatedPizzas = order!.Pizzas
+                .Select(p => p.Name == name ? p with { Name = newName } : p)
+                .ToList();
+            SaveOrder(orderName, order!.WithPizzas(updatedPizzas));
+        }
+    }
+
+    public void RenamePayment(string name, string newName) {
+        if (!File.Exists(name + ".payment.json")) {
+            throw new ArgumentException($"Payment info '{name}' does not exist");
+        }
+
+        File.Move(name + ".payment.json", newName + ".payment.json");
+
+        var ordersToUpdate = ListOrders()
+            .Select(o => (o, Order: GetSavedOrder(o)))
+            .Where(o => o.Order?.PaymentInfoName == name);
+
+        foreach (var (orderName, order) in ordersToUpdate) {
+            SaveOrder(orderName, order!.WithPayment((order!.PaymentType, newName)));
+        }
+    }
+
+    public void RenameOrder(string name, string newName) {
+        if (!File.Exists(name + ".order.json")) {
+            throw new ArgumentException($"Order '{name}' does not exist");
+        }
+
+        File.Move(name + ".order.json", newName + ".order.json");
+
+        if (File.Exists("default_order") && File.ReadAllText("default_order") == name) {
+            File.WriteAllText("default_order", newName);
+        }
+    }
 }

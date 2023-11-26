@@ -35,21 +35,21 @@ public partial class PizzaController {
         });
     }
 
-    private string GetPaymentName() {
-        string? paymentName = _terminalUI.Prompt("Payment name: ");
+    private string GetPaymentName(string existingName = "") {
+        string? paymentName = _terminalUI.PromptForEdit("Payment name: ", existingName);
         if (paymentName is null) {
             _terminalUI.PrintLine("No payment name entered. Try again.");
-            return GetPaymentName();
+            return GetPaymentName(existingName);
         }
 
         if (!paymentName.IsValidName()) {
             _terminalUI.PrintLine("Invalid payment name. Try again.");
-            return GetPaymentName();
+            return GetPaymentName(existingName);
         }
 
-        if (_repo.ListPayments().Contains(paymentName)) {
+        if (_repo.ListPayments().Where(n => n != existingName).Contains(paymentName)) {
             _terminalUI.PrintLine($"Payment '{paymentName}' already exists. Try again.");
-            return GetPaymentName();
+            return GetPaymentName(existingName);
         }
 
         _terminalUI.Clear();
@@ -90,6 +90,7 @@ public partial class PizzaController {
             "1. Create new payment info",
             "2. Edit existing payment info",
             "3. Delete existing payment info",
+            "4. Rename existing payment info",
             "q. Return"
         };
         _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
@@ -100,12 +101,34 @@ public partial class PizzaController {
             case '1': _ = CreatePayment(); await ManagePaymentsMenu(); break;
             case '2': _ = EditPayment(); await ManagePaymentsMenu(); break;
             case '3': DeletePayment(); await ManagePaymentsMenu(); break;
+            case '4': RenamePayment(); await ManagePaymentsMenu(); break;
             case 'Q' or 'q': return;
             default:
                 _terminalUI.PrintLine("Not a valid option. Try again.");
                 await ManagePaymentsMenu();
                 break;
         }
+    }
+
+    private void RenamePayment() {
+        var paymentName = _chooser.GetUserChoice(
+            "Choose a payment to rename: ", _repo.ListPayments(), "payment");
+        if (paymentName is null) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No payment selected.");
+            return;
+        }
+
+        var newPaymentName = GetPaymentName(paymentName);
+        if (paymentName == newPaymentName) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("Payment not renamed.");
+            return;
+        }
+        _repo.RenamePayment(paymentName, newPaymentName);
+
+        _terminalUI.Clear();
+        _terminalUI.PrintLine($"Payment renamed to '{newPaymentName}'.");
     }
 
     public Payment? EditPayment() {

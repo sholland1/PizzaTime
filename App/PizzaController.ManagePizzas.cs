@@ -38,21 +38,21 @@ public partial class PizzaController {
         });
     }
 
-    private string GetPizzaName() {
-        string? pizzaName = _terminalUI.Prompt("Pizza name: ");
+    private string GetPizzaName(string existingName = "") {
+        string? pizzaName = _terminalUI.PromptForEdit("Pizza name: ", existingName);
         if (pizzaName is null) {
             _terminalUI.PrintLine("No pizza name entered. Try again.");
-            return GetPizzaName();
+            return GetPizzaName(existingName);
         }
 
         if (!pizzaName.IsValidName()) {
             _terminalUI.PrintLine("Invalid pizza name. Try again.");
-            return GetPizzaName();
+            return GetPizzaName(existingName);
         }
 
-        if (_repo.ListPizzas().Contains(pizzaName)) {
+        if (_repo.ListPizzas().Where(n => n != existingName).Contains(pizzaName)) {
             _terminalUI.PrintLine($"Pizza '{pizzaName}' already exists. Try again.");
-            return GetPizzaName();
+            return GetPizzaName(existingName);
         }
 
         _terminalUI.Clear();
@@ -92,6 +92,7 @@ public partial class PizzaController {
             "1. Create new pizza",
             "2. Edit existing pizza",
             "3. Delete existing pizza",
+            "4. Rename existing pizza",
             "q. Return"
         };
         _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
@@ -102,12 +103,34 @@ public partial class PizzaController {
             case '1': _ = await CreatePizza(); await ManagePizzasMenu(); break;
             case '2': _ = await EditPizza(); await ManagePizzasMenu(); break;
             case '3': DeletePizza(); await ManagePizzasMenu(); break;
+            case '4': RenamePizza(); await ManagePizzasMenu(); break;
             case 'Q' or 'q': return;
             default:
                 _terminalUI.PrintLine("Not a valid option. Try again.");
                 await ManagePizzasMenu();
                 break;
         }
+    }
+
+    private void RenamePizza() {
+        var pizzaName = _chooser.GetUserChoice(
+            "Choose a pizza to rename: ", _repo.ListPizzas(), "pizza");
+        if (pizzaName is null) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("No pizza selected.");
+            return;
+        }
+
+        var newPizzaName = GetPizzaName(pizzaName);
+        if (pizzaName == newPizzaName) {
+            _terminalUI.Clear();
+            _terminalUI.PrintLine("Pizza not renamed.");
+            return;
+        }
+        _repo.RenamePizza(pizzaName, newPizzaName);
+
+        _terminalUI.Clear();
+        _terminalUI.PrintLine($"Pizza renamed to '{newPizzaName}'.");
     }
 
     private async Task<Pizza?> EditPizza() {

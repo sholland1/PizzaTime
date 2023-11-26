@@ -80,6 +80,18 @@ public class DummyPizzaRepository : IPizzaRepo {
     public ActualOrder GetActualFromSavedOrder(SavedOrder order) {
         throw new NotImplementedException();
     }
+
+    public void RenamePizza(string name, string newName) {
+        throw new NotImplementedException();
+    }
+
+    public void RenamePayment(string name, string newName) {
+        throw new NotImplementedException();
+    }
+
+    public void RenameOrder(string name, string newName) {
+        throw new NotImplementedException();
+    }
 }
 
 public class DummyTerminalUI : ITerminalUI {
