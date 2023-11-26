@@ -102,10 +102,10 @@ public partial class PizzaController {
         _terminalUI.Clear();
 
         switch (choice) {
-            case '1': var newOrder1 = order.WithOrderInfo(await CreateOrderInfo()); await EditOrder(orderName, newOrder1); break;
-            case '2': var newOrder2 = order.WithCoupons(await GetCoupons(order.OrderInfo.StoreId)); await EditOrder(orderName, newOrder2); break;
-            case '3': var newOrder3 = order.WithPizzas(GetPizzas()); await EditOrder(orderName, newOrder3); break;
-            case '4': var newOrder4 = order.WithPayment(GetPayment()); await EditOrder(orderName, newOrder4); break;
+            case '1': await EditOrder(orderName, order.WithOrderInfo(await CreateOrderInfo())); break;
+            case '2': await EditOrder(orderName, order.WithCoupons(await GetCoupons(order.OrderInfo.StoreId))); break;
+            case '3': await EditOrder(orderName, order.WithPizzas(GetPizzas())); break;
+            case '4': await EditOrder(orderName, order.WithPayment(GetPayment())); break;
             case 'S' or 's': SaveOrder(orderName, order); return;
             case 'Q' or 'q': return;
             default:
