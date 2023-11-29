@@ -59,6 +59,10 @@ static ServiceProvider BuilderServiceProvider() {
 
     services.AddOpenAIService();
 
+    var dotnetEnv = configuration.GetValue<string>("DOTNET_ENVIRONMENT");
+    var dataRootDir = GetDataRootDir(dotnetEnv, "OrderPizza");
+    services.AddSingleton(new FileSystem(dataRootDir));
+
     services.AddLogging(loggingBuilder =>
         loggingBuilder
             .ClearProviders()
@@ -105,4 +109,28 @@ RootCommand BuildCommand() {
     RootCommand rootCommand = new("Order a pizza") { defaultOrderOption, orderOption };
     rootCommand.SetHandler(PizzaMain, defaultOrderOption, orderOption);
     return rootCommand;
+}
+
+static string GetDataRootDir(string? dotnetEnv, string programName) {
+    if (dotnetEnv == "Development") return ".";
+
+    var dataDirectory =
+        Environment.OSVersion.Platform switch {
+            //Windows
+            PlatformID.Win32NT =>
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), programName),
+
+            //Unix
+            PlatformID.Unix => Path.Combine(
+                Environment.GetEnvironmentVariable("XDG_DATA_HOME")
+                ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".local", "share"),
+                programName),
+
+            //Fallback
+            _ => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), programName),
+        };
+
+    Directory.CreateDirectory(dataDirectory);
+
+    return dataDirectory;
 }

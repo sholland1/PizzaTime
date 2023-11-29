@@ -31,7 +31,9 @@ public interface IPizzaRepo {
 
 public class JsonFilePizzaRepository : IPizzaRepo {
     private readonly ISerializer _serializer;
-    public JsonFilePizzaRepository(ISerializer serializer) => _serializer = serializer;
+    private readonly FileSystem _fileSystem;
+
+    public JsonFilePizzaRepository(ISerializer serializer, FileSystem fileSystem) => (_serializer, _fileSystem) = (serializer, fileSystem);
 
     public Pizza? GetPizza(string name) =>
         DeserializeFromFile<UnvalidatedPizza>(name + ".pizza")?.Validate();
@@ -58,18 +60,18 @@ public class JsonFilePizzaRepository : IPizzaRepo {
     public PersonalInfo? GetPersonalInfo() =>
         DeserializeFromFile<UnvalidatedPersonalInfo>("personalInfo")?.Validate();
     public ActualOrder? GetDefaultOrder() =>
-        File.Exists("default_order")
-            ? GetOrder(File.ReadAllText("default_order")) : null;
+        _fileSystem.Exists("default_order")
+            ? GetOrder(_fileSystem.ReadAllText("default_order")) : null;
 
     void SerializeToFile<T>(string filename, T obj) {
-        using var fs = File.Create(filename + ".json");
+        using var fs = _fileSystem.Create(filename + ".json");
         _serializer.Serialize(fs, obj);
     }
 
     T? DeserializeFromFile<T>(string filename) {
-        if (!File.Exists(filename + ".json")) return default;
+        if (!_fileSystem.Exists(filename + ".json")) return default;
 
-        using var fs = File.OpenRead(filename + ".json");
+        using var fs = _fileSystem.OpenRead(filename + ".json");
         return _serializer.Deserialize<T>(fs);
     }
 
@@ -86,29 +88,29 @@ public class JsonFilePizzaRepository : IPizzaRepo {
         }
     }
 
-    private static IEnumerable<string> ListItems(string extension) =>
-        Directory.EnumerateFiles(".", "*." + extension + ".json")
+    private IEnumerable<string> ListItems(string extension) =>
+        _fileSystem.EnumerateFiles(".", "*." + extension + ".json")
             .Select(f => Path.GetFileNameWithoutExtension(f.Replace("." + extension, "")));
 
     public IEnumerable<string> ListPizzas() => ListItems("pizza");
     public IEnumerable<string> ListPayments() => ListItems("payment");
     public IEnumerable<string> ListOrders() => ListItems("order");
 
-    public void DeletePizza(string name) => File.Delete(name + ".pizza.json");
-    public void DeletePayment(string name) => File.Delete(name + ".payment.json");
-    public void DeleteOrder(string name) => File.Delete(name + ".order.json");
+    public void DeletePizza(string name) => _fileSystem.Delete(name + ".pizza.json");
+    public void DeletePayment(string name) => _fileSystem.Delete(name + ".payment.json");
+    public void DeleteOrder(string name) => _fileSystem.Delete(name + ".order.json");
 
-    public void SetDefaultOrder(string name) => File.WriteAllText("default_order", name);
+    public void SetDefaultOrder(string name) => _fileSystem.WriteAllText("default_order", name);
 
     public ActualOrder GetActualFromSavedOrder(SavedOrder order) =>
         ToUnvalidatedOrder(order).Validate();
 
     public void RenamePizza(string name, string newName) {
-        if (!File.Exists(name + ".pizza.json")) {
+        if (!_fileSystem.Exists(name + ".pizza.json")) {
             throw new ArgumentException($"Pizza '{name}' does not exist");
         }
 
-        File.Move(name + ".pizza.json", newName + ".pizza.json");
+        _fileSystem.Move(name + ".pizza.json", newName + ".pizza.json");
 
         var ordersToUpdate = ListOrders()
             .Select(o => (o, Order: GetSavedOrder(o)))
@@ -123,11 +125,11 @@ public class JsonFilePizzaRepository : IPizzaRepo {
     }
 
     public void RenamePayment(string name, string newName) {
-        if (!File.Exists(name + ".payment.json")) {
+        if (!_fileSystem.Exists(name + ".payment.json")) {
             throw new ArgumentException($"Payment info '{name}' does not exist");
         }
 
-        File.Move(name + ".payment.json", newName + ".payment.json");
+        _fileSystem.Move(name + ".payment.json", newName + ".payment.json");
 
         var ordersToUpdate = ListOrders()
             .Select(o => (o, Order: GetSavedOrder(o)))
@@ -139,14 +141,32 @@ public class JsonFilePizzaRepository : IPizzaRepo {
     }
 
     public void RenameOrder(string name, string newName) {
-        if (!File.Exists(name + ".order.json")) {
+        if (!_fileSystem.Exists(name + ".order.json")) {
             throw new ArgumentException($"Order '{name}' does not exist");
         }
 
-        File.Move(name + ".order.json", newName + ".order.json");
+        _fileSystem.Move(name + ".order.json", newName + ".order.json");
 
-        if (File.Exists("default_order") && File.ReadAllText("default_order") == name) {
-            File.WriteAllText("default_order", newName);
+        if (_fileSystem.Exists("default_order") && _fileSystem.ReadAllText("default_order") == name) {
+            _fileSystem.WriteAllText("default_order", newName);
         }
     }
+}
+
+public class FileSystem {
+    private readonly string _root;
+
+    public FileSystem(string root) => _root = root;
+
+    public bool Exists(string path) => File.Exists(Path.Combine(_root, path));
+    public void WriteAllText(string path, string contents) => File.WriteAllText(Path.Combine(_root, path), contents);
+    public string ReadAllText(string path) => File.ReadAllText(Path.Combine(_root, path));
+    public void Move(string sourceFileName, string destFileName) => File.Move(
+        Path.Combine(_root, sourceFileName),
+        Path.Combine(_root, destFileName));
+    public void Delete(string path) => File.Delete(Path.Combine(_root, path));
+    public IEnumerable<string> EnumerateFiles(string path, string searchPattern) =>
+        Directory.EnumerateFiles(Path.Combine(_root, path), searchPattern);
+    public FileStream OpenRead(string path) => File.OpenRead(Path.Combine(_root, path));
+    public FileStream Create(string path) => File.Create(Path.Combine(_root, path));
 }
