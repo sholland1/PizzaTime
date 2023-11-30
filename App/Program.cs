@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.Net;
 using Controllers;
 using Hollandsoft.OrderPizza;
@@ -14,10 +15,10 @@ using var provider = BuilderServiceProvider();
 
 return await BuildCommand().InvokeAsync(args);
 
-async Task<int> PizzaMain(bool defaultOrder, string? orderName) {
-    if (defaultOrder && orderName is not null) {
-        Console.WriteLine("Cannot specify both --defaultOrder and --order");
-        return 2;
+async Task<int> PizzaMain(bool defaultOrder, string? orderName, bool track, string? apiKey) {
+    if (apiKey is not null) {
+        //Environment.SetEnvironmentVariable("OPENAI_API_KEY", apiKey);
+        return 0;
     }
 
     try {
@@ -29,6 +30,11 @@ async Task<int> PizzaMain(bool defaultOrder, string? orderName) {
 
         if (orderName is not null) {
             await controller.PlaceOrder(orderName);
+            return 0;
+        }
+
+        if (track) {
+            await controller.TrackOrder();
             return 0;
         }
 
@@ -99,15 +105,30 @@ static ServiceProvider BuilderServiceProvider() {
 
 RootCommand BuildCommand() {
     Option<bool> defaultOrderOption = new(
-        new[] { "--defaultOrder" },
+        new[] { "--default-order" },
         "Place the default order with user confirmation only");
 
     Option<string> orderOption = new(
         new[] { "--order" },
         "Place the order with the specified name with user confirmation only");
 
-    RootCommand rootCommand = new("Order a pizza") { defaultOrderOption, orderOption };
-    rootCommand.SetHandler(PizzaMain, defaultOrderOption, orderOption);
+    Option<bool> trackOption = new(
+        new[] { "--track" },
+        "Track your recent order");
+
+    Option<string> apiKeyOption = new(
+        new[] { "--set-api-key" },
+        "OpenAI API key");
+
+    RootCommand rootCommand = new("Order a pizza") { defaultOrderOption, orderOption, trackOption, apiKeyOption };
+
+    rootCommand.AddValidator(commandResult => {
+        if (commandResult.Children.Count > 1) {
+            commandResult.ErrorMessage = "All arguments are mutually exclusive.";
+        }
+    });
+
+    rootCommand.SetHandler(PizzaMain, defaultOrderOption, orderOption, trackOption, apiKeyOption);
     return rootCommand;
 }
 

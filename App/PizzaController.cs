@@ -155,6 +155,7 @@ public partial class PizzaController {
             "4. Manage payments",
             "5. Edit personal info",
             "6. Track order",
+            "7. View order history",
             "q. Exit"
         };
         _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
@@ -174,12 +175,17 @@ public partial class PizzaController {
             case '4': _ = ManagePaymentsMenu(); break;
             case '5': _ = ManagePersonalInfo(); break;
             // case '6': await TrackOrder(); break;
+            // case '7': ViewOrderHistory(); break;
             default:
                 _terminalUI.PrintLine("Not a valid option. Try again.");
                 break;
         }
 
         await MainMenu();
+    }
+
+    public Task TrackOrder() {
+        throw new NotImplementedException();
     }
 
     private static bool IsAffirmative(string? answer) => answer is null or "Y" or "y";
