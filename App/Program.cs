@@ -11,8 +11,6 @@ using NLog.Extensions.Logging;
 using OpenAI.Extensions;
 using Server;
 
-using var provider = BuilderServiceProvider();
-
 return await BuildCommand().InvokeAsync(args);
 
 async Task<int> PizzaMain(bool defaultOrder, string? orderName, bool track, string? apiKey) {
@@ -20,6 +18,8 @@ async Task<int> PizzaMain(bool defaultOrder, string? orderName, bool track, stri
         //Environment.SetEnvironmentVariable("OPENAI_API_KEY", apiKey);
         return 0;
     }
+
+    using var provider = BuilderServiceProvider();
 
     try {
         var controller = provider.GetRequiredService<PizzaController>();
