@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Hollandsoft.OrderPizza;
 using static Hollandsoft.OrderPizza.BuilderHelpers;
 
@@ -10,9 +9,9 @@ public static class TestOrder {
     public static IEnumerable<InvalidData2> BadEnumOrders() {
         yield return new(new("1", new ServiceMethod.Delivery(
             new((AddressType)10, "My House", "1234 Main St", null, "12345", "ACity", "NY")),
-            OrderTiming.Now.Instance), new[] { "ServiceMethod.Address.AddressType" });
+            OrderTiming.Now.Instance), ["ServiceMethod.Address.AddressType"]);
         yield return new(new("1", new ServiceMethod.Carryout((PickupLocation)10), OrderTiming.Now.Instance),
-            new[] { "ServiceMethod.Location" });
+            ["ServiceMethod.Location"]);
     }
 
     public record ValidData(UnvalidatedOrderInfo OrderInfo, string JsonFile, string SummaryFile);
@@ -23,7 +22,7 @@ public static class TestOrder {
     public static IEnumerable<object[]> GenerateInvalidOrders() => InvalidOrders().Select(o => new[] { o });
 
     private static IEnumerable<InvalidData> InvalidOrders() {
-        yield return new("InvalidOrderInfo0.json", new[] { "ServiceMethod.Address.Apt", "ServiceMethod.Address.State", "ServiceMethod.Address.ZipCode", "StoreId" });
+        yield return new("InvalidOrderInfo0.json", ["ServiceMethod.Address.Apt", "ServiceMethod.Address.State", "ServiceMethod.Address.ZipCode", "StoreId"]);
     }
 
     public static IEnumerable<object[]> GenerateBadEnumOrders() => BadEnumOrders().Select(o => new[] { o });
@@ -55,7 +54,7 @@ public static class TestPayment {
     public static IEnumerable<object[]> GenerateInvalidPayments() => InvalidPayments().Select(p => new[] { p });
 
     private static IEnumerable<InvalidData> InvalidPayments() {
-        yield return new("InvalidPaymentInfo0.json", new[] { "PaymentInfo.BillingZip", "PaymentInfo.CardNumber", "PaymentInfo.Expiration", "PaymentInfo.SecurityCode"});
+        yield return new("InvalidPaymentInfo0.json", ["PaymentInfo.BillingZip", "PaymentInfo.CardNumber", "PaymentInfo.Expiration", "PaymentInfo.SecurityCode"]);
     }
 
     public static IEnumerable<ValidData> ValidPayments() {

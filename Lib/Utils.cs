@@ -9,7 +9,7 @@ public static partial class Utils {
         source.CompareTo(a) >= 0 && source.CompareTo(b) <= 0;
 
     public static bool ContainsDuplicates<T>(this IEnumerable<T> source) {
-        HashSet<T> knownKeys = new();
+        HashSet<T> knownKeys = [];
         return source.Any(k => !knownKeys.Add(k));
     }
 
@@ -67,7 +67,7 @@ public abstract record Validation<T> {
         _ => default
     };
 
-    public R Match<R>(Func<List<ValidationFailure>, R> failure, Func<T, R> success) => this switch {
+    public TResult Match<TResult>(Func<List<ValidationFailure>, TResult> failure, Func<T, TResult> success) => this switch {
         Failure f => failure(f.Value),
         Success s => success(s.Value),
         _ => throw new UnreachableException($"Invalid Result! {this}")

@@ -1,39 +1,28 @@
 using Hollandsoft.OrderPizza;
 
 namespace Controllers;
-public partial class PizzaController {
-    private readonly IPizzaRepo _repo;
-    private readonly Func<OrderInfo, ICart> _startOrder;
-    private readonly IAIPizzaBuilder _aiPizzaBuilder;
-    private readonly IStoreApi _storeApi;
-    private readonly ITerminalUI _terminalUI;
-    private readonly IUserChooser _chooser;
-    private readonly TerminalSpinner _spinner;
-    private readonly IEditor _editor;
-
-    public PizzaController(IPizzaRepo repo,
-                           Func<OrderInfo, ICart> startOrder,
-                           IAIPizzaBuilder aiPizzaBuilder,
-                           IStoreApi storeApi,
-                           ITerminalUI terminalUI,
-                           IUserChooser chooser,
-                           TerminalSpinner spinner,
-                           IEditor editor) =>
-        (_repo, _startOrder, _aiPizzaBuilder, _storeApi, _terminalUI, _chooser, _spinner, _editor) =
-        (repo, startOrder, aiPizzaBuilder, storeApi, terminalUI, chooser, spinner, editor);
+public partial class PizzaController(
+    IPizzaRepo Repo,
+    Func<OrderInfo, ICart> StartOrder,
+    IAIPizzaBuilder AiPizzaBuilder,
+    IStoreApi StoreApi,
+    ITerminalUI TerminalUI,
+    IUserChooser Chooser,
+    TerminalSpinner Spinner,
+    IEditor Editor) {
 
     public async Task PlaceDefaultOrder() {
-        var userOrder = _repo.GetDefaultOrder();
+        var userOrder = Repo.GetDefaultOrder();
         if (userOrder is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No default order found.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No default order found.");
             return;
         }
 
-        var personalInfo = _repo.GetPersonalInfo();
+        var personalInfo = Repo.GetPersonalInfo();
         if (personalInfo is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No personal information found.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No personal information found.");
             return;
         }
 
@@ -41,17 +30,17 @@ public partial class PizzaController {
     }
 
     public async Task PlaceOrder(string orderName) {
-        var order = _repo.GetOrder(orderName);
+        var order = Repo.GetOrder(orderName);
         if (order is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("Order not found.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("Order not found.");
             return;
         }
 
-        var personalInfo = _repo.GetPersonalInfo();
+        var personalInfo = Repo.GetPersonalInfo();
         if (personalInfo is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No personal information found.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No personal information found.");
             return;
         }
 
@@ -59,36 +48,36 @@ public partial class PizzaController {
     }
 
     public async Task OrderPizza(ActualOrder userOrder, PersonalInfo personalInfo) {
-        var cart = _startOrder(userOrder.OrderInfo);
+        var cart = StartOrder(userOrder.OrderInfo);
 
         bool firstTime = true;
         foreach (var pizza in userOrder.Pizzas) {
             var cartResult = await cart.AddPizza(pizza);
             cartResult.Match(
-                _terminalUI.PrintLine,
+                TerminalUI.PrintLine,
                 v => {
                     if (firstTime) {
                         firstTime = false;
-                        _terminalUI.PrintLine($"Order ID: {v.OrderID}\n");
+                        TerminalUI.PrintLine($"Order ID: {v.OrderID}\n");
                     }
 
-                    _terminalUI.PrintLine($"Pizza was added to cart. Product Count: {v.ProductCount}\n{pizza.Summarize()}\n");
+                    TerminalUI.PrintLine($"Pizza was added to cart. Product Count: {v.ProductCount}\n{pizza.Summarize()}\n");
                 });
             if (cartResult.IsFailure) return;
         }
 
         foreach (var coupon in userOrder.Coupons) {
             cart.AddCoupon(coupon);
-            _terminalUI.PrintLine($"Coupon {coupon.Code} was added to cart.");
+            TerminalUI.PrintLine($"Coupon {coupon.Code} was added to cart.");
         }
-        if (userOrder.Coupons.Any()) {
-            _terminalUI.PrintLine();
+        if (userOrder.Coupons.Count != 0) {
+            TerminalUI.PrintLine();
         }
 
         var priceResult = await cart.GetSummary();
         priceResult.Match(
-            message => _terminalUI.PrintLine($"Failed to check cart price:\n{message}"),
-            summary => _terminalUI.PrintLine(
+            message => TerminalUI.PrintLine($"Failed to check cart price:\n{message}"),
+            summary => TerminalUI.PrintLine(
                 $"""
                 Cart summary:
                 {userOrder.OrderInfo.Summarize()}
@@ -100,55 +89,55 @@ public partial class PizzaController {
                 """));
         if (priceResult.IsFailure) return;
 
-        var answer = _terminalUI.Prompt("Confirm order? [Y/n]: ");
-        _terminalUI.PrintLine();
+        var answer = TerminalUI.Prompt("Confirm order? [Y/n]: ");
+        TerminalUI.PrintLine();
 
         if (!IsAffirmative(answer)) {
-            _terminalUI.PrintLine("Order cancelled.");
+            TerminalUI.PrintLine("Order cancelled.");
             return;
         }
 
-        _terminalUI.PrintLine("Ordering pizza...");
+        TerminalUI.PrintLine("Ordering pizza...");
 
         //TODO: log order
         var orderResult = await cart.PlaceOrder(personalInfo, userOrder.Payment);
-        _terminalUI.PrintLine(
+        TerminalUI.PrintLine(
             orderResult.Match(
                 message => $"Failed to place order: {message}",
                 message => $"Order summary:\n{message}\nDone."));
     }
 
     private async Task PlaceOrder() {
-        var orderName = _chooser.GetUserChoice(
-            "Choose an order to place: ", _repo.ListOrders(), "order");
+        var orderName = Chooser.GetUserChoice(
+            "Choose an order to place: ", Repo.ListOrders(), "order");
         if (orderName is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No order selected.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No order selected.");
             return;
         }
 
-        var order = _repo.GetOrder(orderName) ?? throw new Exception("Order not found.");
+        var order = Repo.GetOrder(orderName) ?? throw new Exception("Order not found.");
 
-        var personalInfo = _repo.GetPersonalInfo();
+        var personalInfo = Repo.GetPersonalInfo();
         if (personalInfo is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No personal information found.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No personal information found.");
             return;
         }
 
-        _terminalUI.PrintLine($"Placing '{orderName}' order:");
-        await OrderPizza(order, _repo.GetPersonalInfo()!);
+        TerminalUI.PrintLine($"Placing '{orderName}' order:");
+        await OrderPizza(order, Repo.GetPersonalInfo()!);
     }
 
     public async Task OpenProgram() {
-        _terminalUI.Clear();
+        TerminalUI.Clear();
         await MainMenu();
     }
 
     public async Task MainMenu() {
-        _terminalUI.PrintLine("Welcome to the pizza ordering app!🍕");
+        TerminalUI.PrintLine("Welcome to the pizza ordering app!🍕");
 
-        string[] options = {
+        string[] options = [
             "1. Place order",
             "2. Manage orders",
             "3. Manage pizzas",
@@ -157,16 +146,16 @@ public partial class PizzaController {
             "6. Track order",
             "7. View order history",
             "q. Exit"
-        };
-        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
-        var choice = _terminalUI.PromptKey("Choose an option: ");
+        ];
+        TerminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = TerminalUI.PromptKey("Choose an option: ");
 
         if (choice is 'Q' or 'q') {
-            _terminalUI.PrintLine("Goodbye!");
+            TerminalUI.PrintLine("Goodbye!");
             return;
         }
 
-        _terminalUI.Clear(); 
+        TerminalUI.Clear(); 
 
         switch (choice) {
             case '1': await PlaceOrder(); break;
@@ -177,7 +166,7 @@ public partial class PizzaController {
             // case '6': await TrackOrder(); break;
             // case '7': ViewOrderHistory(); break;
             default:
-                _terminalUI.PrintLine("Not a valid option. Try again.");
+                TerminalUI.PrintLine("Not a valid option. Try again.");
                 break;
         }
 

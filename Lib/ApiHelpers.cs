@@ -17,17 +17,17 @@ public static class ApiHelpers {
             };
         }
 
-        if (!o.ContainsKey("C")) {
+        if (!o.TryGetValue("C", out Dictionary<string, string>? cValue)) {
             o["C"] = val;
         }
-        else if (o["C"] is not null && o["C"]!.ContainsKey("1/1") && o["C"]!["1/1"] == "0.0") {
+        else if (cValue is not null && cValue!.TryGetValue("1/1", out string? c1Value) && c1Value == "0.0") {
             o["C"] = null;
         }
 
-        if (!o.ContainsKey("X")) {
+        if (!o.TryGetValue("X", out Dictionary<string, string>? xValue)) {
             o["X"] = val;
         }
-        else if (o["X"] is not null && o["X"]!.ContainsKey("1/1") && o["X"]!["1/1"] == "0.0") {
+        else if (xValue is not null && xValue!.TryGetValue("1/1", out string? x1Value) && x1Value == "0.0") {
             o["X"] = null;
         }
 

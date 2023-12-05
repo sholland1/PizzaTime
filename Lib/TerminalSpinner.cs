@@ -4,7 +4,7 @@ public class TerminalSpinner {
     private readonly int _delay;
 
     public TerminalSpinner(string sequence = "/-\\|", int delay = 50) {
-        if (!sequence.Any()) {
+        if (sequence.Length == 0) {
             throw new ArgumentException("Sequence must not be empty", nameof(sequence));
         }
         _sequence = sequence;

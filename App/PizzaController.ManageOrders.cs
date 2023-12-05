@@ -3,46 +3,46 @@ using Hollandsoft.OrderPizza;
 namespace Controllers;
 public partial class PizzaController {
     public async Task CreateOrdersMenu() {
-        _terminalUI.PrintLine("--Manage Orders--");
+        TerminalUI.PrintLine("--Manage Orders--");
 
-        string[] options = new[] {
+        string[] options = [
             "1. Create new order",
             "q. Return"
-        };
+        ];
 
-        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
-        var choice = _terminalUI.PromptKey("Choose an option: ");
-        _terminalUI.Clear();
+        TerminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = TerminalUI.PromptKey("Choose an option: ");
+        TerminalUI.Clear();
 
         switch (choice) {
             case '1': _ = CreateOrder(); await ManageOrdersMenu(); break;
             case 'Q' or 'q': return;
             default:
-                _terminalUI.PrintLine("Not a valid option. Try again.");
+                TerminalUI.PrintLine("Not a valid option. Try again.");
                 await CreateOrdersMenu();
                 break;
         }
     }
 
     public async Task ManageOrdersMenu() {
-        if (!_repo.ListOrders().Any()) {
+        if (!Repo.ListOrders().Any()) {
             await CreateOrdersMenu();
             return;
         }
 
-        _terminalUI.PrintLine("--Manage Orders--");
+        TerminalUI.PrintLine("--Manage Orders--");
 
-        string[] options = new[] {
+        string[] options = [
             "1. Set default order",
             "2. Create new order",
             "3. Edit existing order",
             "4. Delete existing order",
             "5. Rename existing order",
             "q. Return"
-        };
-        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
-        var choice = _terminalUI.PromptKey("Choose an option: ");
-        _terminalUI.Clear();
+        ];
+        TerminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = TerminalUI.PromptKey("Choose an option: ");
+        TerminalUI.Clear();
 
         switch (choice) {
             case '1': SetDefaultOrder(); await ManageOrdersMenu(); break;
@@ -52,77 +52,77 @@ public partial class PizzaController {
             case '5': RenameOrder(); await ManageOrdersMenu(); break;
             case 'Q' or 'q': return;
             default:
-                _terminalUI.PrintLine("Not a valid option. Try again.");
+                TerminalUI.PrintLine("Not a valid option. Try again.");
                 await ManageOrdersMenu();
                 break;
         }
     }
 
     private void RenameOrder() {
-        var orderName = _chooser.GetUserChoice(
-            "Choose an order to rename: ", _repo.ListOrders(), "order");
+        var orderName = Chooser.GetUserChoice(
+            "Choose an order to rename: ", Repo.ListOrders(), "order");
         if (orderName is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No order selected.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No order selected.");
             return;
         }
 
         var newOrderName = GetOrderName(orderName);
         if (orderName == newOrderName) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("Order not renamed.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("Order not renamed.");
             return;
         }
-        _repo.RenameOrder(orderName, newOrderName);
+        Repo.RenameOrder(orderName, newOrderName);
 
-        _terminalUI.Clear();
-        _terminalUI.PrintLine($"Order renamed to '{newOrderName}'.");
+        TerminalUI.Clear();
+        TerminalUI.PrintLine($"Order renamed to '{newOrderName}'.");
     }
 
     private void SetDefaultOrder() {
-        var orderName = _chooser.GetUserChoice(
-            "Choose an order to set as default: ", _repo.ListOrders(), "order");
-        _terminalUI.Clear();
+        var orderName = Chooser.GetUserChoice(
+            "Choose an order to set as default: ", Repo.ListOrders(), "order");
+        TerminalUI.Clear();
         if (orderName is null) {
-            _terminalUI.PrintLine("No order selected.");
+            TerminalUI.PrintLine("No order selected.");
             return;
         }
 
-        _repo.SetDefaultOrder(orderName);
-        _terminalUI.PrintLine($"Default order set to '{orderName}'.");
+        Repo.SetDefaultOrder(orderName);
+        TerminalUI.PrintLine($"Default order set to '{orderName}'.");
     }
 
     private async Task EditOrder() {
-        var orderName = _chooser.GetUserChoice(
-            "Choose an order to edit: ", _repo.ListOrders(), "order");
+        var orderName = Chooser.GetUserChoice(
+            "Choose an order to edit: ", Repo.ListOrders(), "order");
         if (orderName is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No order selected.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No order selected.");
             return;
         }
 
-        var order = _repo.GetSavedOrder(orderName) ?? throw new Exception("Order not found.");
+        var order = Repo.GetSavedOrder(orderName) ?? throw new Exception("Order not found.");
         await EditOrder(orderName, order);
     }
 
     private async Task EditOrder(string orderName, SavedOrder order) {
-        var actualOrder = _repo.GetActualFromSavedOrder(order);
-        _terminalUI.WriteInfoPanel(50, actualOrder.Summarize().Split('\n'));
-        _terminalUI.SetCursorPosition(0, 0);
+        var actualOrder = Repo.GetActualFromSavedOrder(order);
+        TerminalUI.WriteInfoPanel(50, actualOrder.Summarize().Split('\n'));
+        TerminalUI.SetCursorPosition(0, 0);
 
-        _terminalUI.PrintLine($"--Editing order '{orderName}'--");
+        TerminalUI.PrintLine($"--Editing order '{orderName}'--");
 
-        string[] options = new[] {
+        string[] options = [
             "1. Edit order info",
             "2. Edit coupons",
             "3. Edit pizzas",
             "4. Edit payment",
             "s. Save & Return",
             "q. Return without saving"
-        };
-        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
-        var choice = _terminalUI.PromptKey("Choose an option: ");
-        _terminalUI.Clear();
+        ];
+        TerminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = TerminalUI.PromptKey("Choose an option: ");
+        TerminalUI.Clear();
 
         switch (choice) {
             case '1': await EditOrder(orderName, order.WithOrderInfo(await CreateOrderInfo())); break;
@@ -132,19 +132,19 @@ public partial class PizzaController {
             case 'S' or 's': SaveOrder(orderName, order); return;
             case 'Q' or 'q': return;
             default:
-                _terminalUI.PrintLine("Not a valid option. Try again.");
+                TerminalUI.PrintLine("Not a valid option. Try again.");
                 await EditOrder(orderName, order);
                 break;
         }
     }
 
     private void SaveOrder(string orderName, SavedOrder order) {
-        _terminalUI.PrintLine($"Saving '{orderName}' order:");
+        TerminalUI.PrintLine($"Saving '{orderName}' order:");
 
-        _repo.SaveOrder(orderName, order);
+        Repo.SaveOrder(orderName, order);
 
-        _terminalUI.Clear();
-        _terminalUI.PrintLine("Order saved.");
+        TerminalUI.Clear();
+        TerminalUI.PrintLine("Order saved.");
     }
 
     private async Task CreateOrder() {
@@ -154,9 +154,9 @@ public partial class PizzaController {
         var coupons = await GetCoupons(orderInfo.StoreId);
 
         var savedPizzas = GetPizzas();
-        if (!savedPizzas.Any()) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No pizzas selected.");
+        if (savedPizzas.Count == 0) {
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No pizzas selected.");
             return;
         }
 
@@ -172,56 +172,56 @@ public partial class PizzaController {
         };
 
         var orderName = GetOrderName();
-        _terminalUI.PrintLine($"Creating '{orderName}' order:");
+        TerminalUI.PrintLine($"Creating '{orderName}' order:");
 
-        _repo.SaveOrder(orderName, order);
+        Repo.SaveOrder(orderName, order);
 
-        _terminalUI.Clear();
-        _terminalUI.PrintLine("Order saved.");
+        TerminalUI.Clear();
+        TerminalUI.PrintLine("Order saved.");
     }
 
     private (PaymentType Type, string? InfoName)? GetPayment() {
         var paymentType = GetPaymentType();
         if (paymentType is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No payment type selected.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No payment type selected.");
             return null;
         }
 
         string? paymentInfoName = null;
         if (paymentType == PaymentType.PayWithCard) {
-            paymentInfoName = _chooser.GetUserChoice(
-                "Choose a payment info to use: ", _repo.ListPayments(), "payment");
+            paymentInfoName = Chooser.GetUserChoice(
+                "Choose a payment info to use: ", Repo.ListPayments(), "payment");
             if (paymentInfoName is null) {
-                _terminalUI.Clear();
-                _terminalUI.PrintLine("No payment info selected.");
+                TerminalUI.Clear();
+                TerminalUI.PrintLine("No payment info selected.");
                 return null;
             }
         }
 
-        _terminalUI.Clear();
+        TerminalUI.Clear();
         return (paymentType.Value, paymentInfoName);
     }
 
     private async Task<OrderInfo?> CreateOrderInfo() {
         var serviceMethod = GetServiceMethod();
         if (serviceMethod is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No service method selected.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No service method selected.");
             return null;
         }
 
         var storeId = await GetStoreId(serviceMethod);
         if (storeId is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No store selected.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No store selected.");
             return null;
         }
 
         //TODO: Now/Later
         var timing = OrderTiming.Now.Instance;
 
-        _terminalUI.Clear();
+        TerminalUI.Clear();
         return new UnvalidatedOrderInfo {
             StoreId = storeId,
             ServiceMethod = serviceMethod,
@@ -230,50 +230,50 @@ public partial class PizzaController {
     }
 
     private string GetOrderName(string existingName = "") {
-        string? orderName = _terminalUI.PromptForEdit("Order name: ", existingName);
+        string? orderName = TerminalUI.PromptForEdit("Order name: ", existingName);
         if (orderName is null) {
-            _terminalUI.PrintLine("No order name entered. Try again.");
+            TerminalUI.PrintLine("No order name entered. Try again.");
             return GetOrderName(existingName);
         }
 
         if (!orderName.IsValidName()) {
-            _terminalUI.PrintLine("Invalid order name. Try again.");
+            TerminalUI.PrintLine("Invalid order name. Try again.");
             return GetOrderName(existingName);
         }
 
-        if (_repo.ListOrders().Where(n => n != existingName).Contains(orderName)) {
-            _terminalUI.PrintLine($"Order '{orderName}' already exists. Try again.");
+        if (Repo.ListOrders().Where(n => n != existingName).Contains(orderName)) {
+            TerminalUI.PrintLine($"Order '{orderName}' already exists. Try again.");
             return GetOrderName(existingName);
         }
 
-        _terminalUI.Clear();
+        TerminalUI.Clear();
         return orderName;
     }
 
     private List<SavedPizza> GetPizzas() {
-        var pizzaNames = _chooser.GetUserChoices(
-            "Choose pizzas to add to order: ", _repo.ListPizzas(), "pizza");
-        if (!pizzaNames.Any()) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No pizzas selected.");
-            return new();
+        var pizzaNames = Chooser.GetUserChoices(
+            "Choose pizzas to add to order: ", Repo.ListPizzas(), "pizza");
+        if (pizzaNames.Count == 0) {
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No pizzas selected.");
+            return [];
         }
 
         var quantities = GetQuantities(pizzaNames).ToList();
         if (quantities.Any(q => q is < 1 or > 25)) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("Invalid quantity.");
-            return new();
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("Invalid quantity.");
+            return [];
         }
         return pizzaNames.Zip(quantities, (p, q) => new SavedPizza(p, q)).ToList();
 
         IEnumerable<int> GetQuantities(List<string> pizzaNames) {
             foreach (var pizzaName in pizzaNames) {
-                var pizza = _repo.GetPizza(pizzaName)
+                var pizza = Repo.GetPizza(pizzaName)
                     ?? throw new InvalidOperationException("Pizza not found.");
 
-                _terminalUI.PrintLine(pizza.Summarize());
-                var input = _terminalUI.Prompt($"Quantity for {pizzaName} pizza: ") ?? "0";
+                TerminalUI.PrintLine(pizza.Summarize());
+                var input = TerminalUI.Prompt($"Quantity for {pizzaName} pizza: ") ?? "0";
                 var quantity = int.TryParse(input, out int result) ? result : 0;
                 yield return quantity;
             }
@@ -281,54 +281,54 @@ public partial class PizzaController {
     }
 
     private async Task<List<Coupon>> GetCoupons(string storeId) =>
-        _chooser.GetUserChoices(
-            "Choose coupons to add to order: ", await _storeApi.ListCoupons(new(storeId)), "coupon")
+        Chooser.GetUserChoices(
+            "Choose coupons to add to order: ", await StoreApi.ListCoupons(new(storeId)), "coupon")
             .Select(c => new Coupon(c))
             .ToList();
 
     private async Task<string?> GetStoreId(ServiceMethod serviceMethod) {
-        var zipCode = _terminalUI.Prompt("Zip code: ");
+        var zipCode = TerminalUI.Prompt("Zip code: ");
         StoreRequest request = new() {
             ServiceMethod = serviceMethod,
             ZipCode = zipCode
         };
-        return _chooser.GetUserChoice(
-            "Choose a store: ", await _storeApi.ListStores(request), "store");
+        return Chooser.GetUserChoice(
+            "Choose a store: ", await StoreApi.ListStores(request), "store");
     }
 
     private ServiceMethod GetServiceMethod() {
-        var options = new[] {
+        string[] options = [
             "1. Delivery",
             "2. Carryout"
-        };
+        ];
 
-        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
-        var choice = _terminalUI.PromptKey("Choose a service method: ");
+        TerminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = TerminalUI.PromptKey("Choose a service method: ");
         switch (choice) {
             case '1': return new ServiceMethod.Delivery(GetAddress());
             case '2': return new ServiceMethod.Carryout(GetPickupLocation());
             default:
-                _terminalUI.Clear();
-                _terminalUI.PrintLine("Not a valid option. Try again.");
+                TerminalUI.Clear();
+                TerminalUI.PrintLine("Not a valid option. Try again.");
                 return GetServiceMethod();
         }
 
         PickupLocation GetPickupLocation() {
-            var options = new[] {
+            string[] options = [
                 "1. In store",
                 "2. Drive thru",
                 "3. Carside"
-            };
+            ];
 
-            _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
-            var choice = _terminalUI.PromptKey("Choose a pickup location: ");
+            TerminalUI.PrintLine(string.Join(Environment.NewLine, options));
+            var choice = TerminalUI.PromptKey("Choose a pickup location: ");
             switch (choice) {
                 case '1': return PickupLocation.InStore;
                 case '2': return PickupLocation.DriveThru;
                 case '3': return PickupLocation.Carside;
                 default:
-                    _terminalUI.Clear();
-                    _terminalUI.PrintLine("Not a valid option. Try again.");
+                    TerminalUI.Clear();
+                    TerminalUI.PrintLine("Not a valid option. Try again.");
                     return GetPickupLocation();
             }
         }
@@ -337,43 +337,43 @@ public partial class PizzaController {
     }
 
     private PaymentType? GetPaymentType() {
-        var options = new[] {
+        string[] options = [
             "1. Pay at store",
             "2. Pay with card"
-        };
+        ];
 
-        _terminalUI.PrintLine(string.Join(Environment.NewLine, options));
-        var choice = _terminalUI.PromptKey("Choose a payment type: ");
+        TerminalUI.PrintLine(string.Join(Environment.NewLine, options));
+        var choice = TerminalUI.PromptKey("Choose a payment type: ");
         switch (choice) {
             case '1': return PaymentType.PayAtStore;
             case '2': return PaymentType.PayWithCard;
             default:
-                _terminalUI.Clear();
-                _terminalUI.PrintLine("Not a valid option. Try again.");
+                TerminalUI.Clear();
+                TerminalUI.PrintLine("Not a valid option. Try again.");
                 return null;
         }
     }
 
     private void DeleteOrder() {
-        var orderName = _chooser.GetUserChoice(
-            "Choose an order to delete: ", _repo.ListOrders(), "order");
+        var orderName = Chooser.GetUserChoice(
+            "Choose an order to delete: ", Repo.ListOrders(), "order");
         if (orderName is null) {
-            _terminalUI.Clear();
-            _terminalUI.PrintLine("No order selected.");
+            TerminalUI.Clear();
+            TerminalUI.PrintLine("No order selected.");
             return;
         }
 
-        var order = _repo.GetOrder(orderName) ?? throw new Exception("Order not found.");
-        _terminalUI.PrintLine($"Deleting '{orderName}' order:");
-        _terminalUI.PrintLine(order.Summarize());
-        var shouldDelete = IsAffirmative(_terminalUI.Prompt($"Delete order ({orderName}) [Y/n]: "));
-        _terminalUI.Clear();
+        var order = Repo.GetOrder(orderName) ?? throw new Exception("Order not found.");
+        TerminalUI.PrintLine($"Deleting '{orderName}' order:");
+        TerminalUI.PrintLine(order.Summarize());
+        var shouldDelete = IsAffirmative(TerminalUI.Prompt($"Delete order ({orderName}) [Y/n]: "));
+        TerminalUI.Clear();
 
         if (shouldDelete) {
-            _repo.DeleteOrder(orderName);
-            _terminalUI.PrintLine("Order deleted.");
+            Repo.DeleteOrder(orderName);
+            TerminalUI.PrintLine("Order deleted.");
             return;
         }
-        _terminalUI.PrintLine("Order not deleted.");
+        TerminalUI.PrintLine("Order not deleted.");
     }
 }

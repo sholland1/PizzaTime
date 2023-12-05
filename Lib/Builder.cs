@@ -2,24 +2,18 @@
 //TODO: Disallow Shredded Provolone Cheese Pan/Brooklyn
 //TODO: Disallow more than 5 toppings on Pan
 namespace Hollandsoft.OrderPizza;
-public class PizzaBuilder<TBuilder> : IPizzaBuilder
+public class PizzaBuilder<TBuilder>(Size Size, Crust Crust) : IPizzaBuilder
     where TBuilder : PizzaBuilder<TBuilder> {
-    protected Size _size;
-    protected Crust _crust;
     protected Cheese _cheese = new Cheese.Full(Amount.Normal);
     protected Sauce? _sauce = new(SauceType.Tomato, Amount.Normal);
-    protected List<Topping> _toppings = new();
+    protected List<Topping> _toppings = [];
     protected Bake _bake;
     protected Cut _cut;
     protected bool _oregano;
     protected bool _garlicCrust;
 
-    protected PizzaBuilder(Size size, Crust crust) {
-        _size = size;
-        _crust = crust;
-    }
     public UnvalidatedPizza Build(int quantity = 1) => new(
-        _size, _crust, _cheese, _sauce, new(_toppings),
+        Size, Crust, _cheese, _sauce, new(_toppings),
         _bake, _cut, _oregano, _garlicCrust, quantity);
 
     public TBuilder AddTopping(ToppingType toppingType, Location location = Location.All, Amount amount = Amount.Normal) {
@@ -153,7 +147,7 @@ public static class BuilderHelpers {
     public static readonly Amount Light = Amount.Light;
     public static readonly Amount Normal = Amount.Normal;
     public static readonly Amount Extra = Amount.Extra;
-    public static readonly Amount? None = null;
+    public static readonly Amount? None;
 
     public static readonly Location All = Location.All;
     public static readonly Location Left = Location.Left;

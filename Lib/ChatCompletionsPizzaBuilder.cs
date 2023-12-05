@@ -34,7 +34,7 @@ public class ChatCompletionsPizzaBuilder : IAIPizzaBuilder {
             .ToList();
     }
 
-    private class PromptPair {
+    private sealed class PromptPair {
         public string User { get; set; } = "";
         public UnvalidatedPizza? Assistant { get; set; }
     }

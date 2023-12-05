@@ -39,7 +39,7 @@ public class DummyPizzaRepository : IPizzaRepo {
 
     public ActualOrder? GetDefaultOrder() => new UnvalidatedActualOrder {
             Pizzas = Pizzas.Values.Take(2).Select(p => p.Validate()).ToList(),
-            Coupons = new() { new("1234") },
+            Coupons = [new("1234")],
             OrderInfo = OrderInfos.First().Value.Validate(),
             Payment = Payments.First().Value.Validate()
         }.Validate();
@@ -52,7 +52,7 @@ public class DummyPizzaRepository : IPizzaRepo {
     public IEnumerable<string> ListPayments() => Payments.Keys;
 
     public void DeletePizza(string name) => Pizzas.Remove(name);
-    public void DeletePayment(string paymentName) => Payments.Remove(paymentName);
+    public void DeletePayment(string name) => Payments.Remove(name);
 
     public ActualOrder? GetOrder(string name) {
         throw new NotImplementedException();
@@ -95,7 +95,7 @@ public class DummyPizzaRepository : IPizzaRepo {
 }
 
 public class DummyTerminalUI : ITerminalUI {
-    public List<string> PrintedMessages = new();
+    public List<string> PrintedMessages = [];
     private readonly Queue<string> _readLines = new();
 
     public DummyTerminalUI(params string[] readLines) => Array.ForEach(readLines, _readLines.Enqueue);
@@ -108,7 +108,7 @@ public class DummyTerminalUI : ITerminalUI {
 
     public override string ToString() => string.Join("", PrintedMessages);
 
-    public string? EditLine(string _) => ReadLine();
+    public string? EditLine(string lineToEdit) => ReadLine();
     public void Clear() { }
 
     public void SetCursorPosition(int left, int top) { }
@@ -120,14 +120,14 @@ public class DummyPizzaCart : ICart {
     private readonly bool _cartFail;
     private readonly bool _priceFail;
     private readonly bool _orderFail;
-    public readonly HashSet<Coupon> Coupons = new();
+    public readonly HashSet<Coupon> Coupons = [];
 
-    public List<MethodCall> Calls = new();
+    public List<MethodCall> Calls = [];
 
     public DummyPizzaCart(bool cartFail = false, bool priceFail = false, bool orderFail = false) =>
         (_cartFail, _priceFail, _orderFail) = (cartFail, priceFail, orderFail);
 
-    private int _pizzaCount = 0;
+    private int _pizzaCount;
     public Task<CartResult<AddPizzaSuccess>> AddPizza(Pizza userPizza) {
         var result = _cartFail
             ? AddPizzaFailure("Pizza was not added to cart.")

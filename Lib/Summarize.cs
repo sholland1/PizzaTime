@@ -4,12 +4,12 @@ namespace Hollandsoft.OrderPizza;
 public static class SummaryUtils {
     //TODO: maybe rethink this summary
     public static string Summarize(this UnvalidatedOrderInfo o) =>
-        string.Join(Environment.NewLine, new[] {
-            $"Order for {o.Timing.Match(() => "now", dt => $"later at {dt}")}",
+        string.Join(Environment.NewLine, [
+            $"Order for {o.Timing.Match(() => "now", dt => $"later at {dt}".Replace(" ", " "))}", //HACK: replace non-breaking space with normal space
             $"{o.ServiceMethod.Match(
                     address => $"Delivery from Store #{o.StoreId} to\n{address.Summarize()}",
                     loc => $"Carryout at {loc} at Store #{o.StoreId}")}",
-        });
+        ]);
 
     public static string Summarize(this Address a) =>
         string.Join(Environment.NewLine, new[] {

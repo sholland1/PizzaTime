@@ -6,8 +6,8 @@ namespace Hollandsoft.OrderPizza;
 using static AIPizzaResultHelpers;
 
 public interface IAIPizzaBuilder {
-    Task<AIPizzaResult> CreatePizza(string input);
-    Task<AIPizzaResult> EditPizza(Pizza? pizza, string input);
+    Task<AIPizzaResult> CreatePizza(string userCreateMessage);
+    Task<AIPizzaResult> EditPizza(Pizza? pizza, string userEditMessage);
 }
 
 public class AIPizzaBuilderConfig {

@@ -1,3 +1,4 @@
+using System.Globalization;
 using static Hollandsoft.OrderPizza.CartResult;
 
 namespace Hollandsoft.OrderPizza;
@@ -22,8 +23,8 @@ public static class CartResult {
 }
 
 public abstract record CartResult<T> where T : class {
-    internal record Failure(string Message) : CartResult<T>;
-    internal record Success(T Value) : CartResult<T>;
+    internal sealed record Failure(string Message) : CartResult<T>;
+    internal sealed record Success(T Value) : CartResult<T>;
 
     public bool IsSuccess => this is Success;
     public bool IsFailure => this is Failure;
@@ -31,7 +32,7 @@ public abstract record CartResult<T> where T : class {
     public string? FailureMessage => (this as Failure)?.Message;
     public T? SuccessValue => (this as Success)?.Value;
 
-    public U Match<U>(Func<string, U> failure, Func<T, U> success) =>
+    public TResult Match<TResult>(Func<string, TResult> failure, Func<T, TResult> success) =>
         this switch {
             Failure f => failure(f.Message),
             Success s => success(s.Value),
@@ -52,17 +53,12 @@ public abstract record CartResult<T> where T : class {
     }
 }
 
+public class DominosCart(IOrderApi Api, OrderInfo OrderInfo) : ICart {
+    private readonly HashSet<Coupon> _coupons = [];
 
-public class DominosCart : ICart {
-    private readonly IOrderApi _api;
-    private readonly OrderInfo _orderInfo;
-    private readonly HashSet<Coupon> _coupons = new();
-
-    protected List<Product> _products = new();
-    private string? _orderID = null;
+    protected List<Product> _products = [];
+    private string? _orderID;
     private decimal _currentTotal = 0;
-
-    public DominosCart(IOrderApi api, OrderInfo orderInfo) => (_api, _orderInfo) = (api, orderInfo);
 
     public void AddCoupon(Coupon coupon) => _coupons.Add(coupon);
     public void RemoveCoupon(Coupon coupon) => _coupons.Remove(coupon);
@@ -70,21 +66,21 @@ public class DominosCart : ICart {
     public async Task<CartResult<AddPizzaSuccess>> AddPizza(Pizza userPizza) {
         _currentTotal = 0;
 
-        var timing = _orderInfo.Timing.Match<string?>(
+        var timing = OrderInfo.Timing.Match<string?>(
             () => null, d => $"{MoveToNext15MinuteInterval(d):yyyy-MM-dd HH:mm:ss}");
-        var address = _orderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
+        var address = OrderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
 
         ValidateRequest request = new() {
             Order = new() {
                 Address = address,
                 OrderID = _orderID ?? "",
                 Products = _products.Append(userPizza.ToProduct(_products.Count + 1)).ToList(),
-                ServiceMethod = _orderInfo.ServiceMethod.Name,
-                StoreID = _orderInfo.StoreId,
+                ServiceMethod = OrderInfo.ServiceMethod.Name,
+                StoreID = OrderInfo.StoreId,
                 FutureOrderTime = timing
             }
         };
-        var response = await _api.ValidateOrder(request);
+        var response = await Api.ValidateOrder(request);
 
         _orderID = response.Order.OrderID;
         _products = response.Order.Products.Normalize().ToList();
@@ -103,19 +99,19 @@ public class DominosCart : ICart {
             return SummaryFailure("Cart is empty.");
         }
 
-        var address = _orderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
+        var address = OrderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
 
         PriceRequest request = new() {
             Order = new() {
                 Address = address,
                 OrderID = _orderID,
                 Products = _products,
-                ServiceMethod = _orderInfo.ServiceMethod.Name,
-                StoreID = _orderInfo.StoreId,
+                ServiceMethod = OrderInfo.ServiceMethod.Name,
+                StoreID = OrderInfo.StoreId,
                 Coupons = _coupons.ToList()
             }
         };
-        var response = await _api.PriceOrder(request);
+        var response = await Api.PriceOrder(request);
 
         if (response.Order.OrderID != _orderID) {
             return SummaryFailure("Order ID mismatch.");
@@ -140,7 +136,7 @@ public class DominosCart : ICart {
             return PlaceOrderFailure("Cart is empty.");
         }
 
-        var address = _orderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
+        var address = OrderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
 
         PlaceRequest request = new() {
             Order = new() {
@@ -151,21 +147,21 @@ public class DominosCart : ICart {
                 LastName = personalInfo.LastName,
                 Phone = personalInfo.Phone,
                 OrderID = _orderID,
-                Payments = new() { GetPayment(userPayment, _currentTotal) },
+                Payments = [GetPayment(userPayment, _currentTotal)],
                 Products = _products,
                 ServiceMethod = GetDetailedServiceMethod(),
-                StoreID = _orderInfo.StoreId,
+                StoreID = OrderInfo.StoreId,
             }
         };
 
-        var response = await _api.PlaceOrder(request);
+        var response = await Api.PlaceOrder(request);
         return response.Status == -1
             ? PlaceOrderFailure(string.Join("\n", response.Order.StatusItems))
             : Success("Order was placed.");
     }
 
     private string GetDetailedServiceMethod() =>
-        _orderInfo.ServiceMethod.Match(_ => "Delivery", pl => $"{pl}");
+        OrderInfo.ServiceMethod.Match(_ => "Delivery", pl => $"{pl}");
 
     private OrderAddress Convert(Address addr) {
         var addressParts = addr.StreetAddress.Split(' ');
@@ -179,7 +175,7 @@ public class DominosCart : ICart {
             StreetName = streetName,
             StreetNumber = streetNum,
             Type = $"{addr.AddressType}",
-            UnitNumber = addr.Apt?.ToString(),
+            UnitNumber = addr.Apt?.ToString(CultureInfo.InvariantCulture),
             UnitType = addr.Apt.HasValue ? "APT" : null
         };
     }

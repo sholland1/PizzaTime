@@ -4,13 +4,10 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace Hollandsoft.OrderPizza;
-public class DominosOrderApi : IOrderApi {
-    const string _baseUrl = "https://order.dominos.com";
-    private readonly ILogger<DominosOrderApi> _log;
-    private readonly ISerializer _serializer;
 
-    //TODO: Use HttpClientFactory
-    public DominosOrderApi(ILogger<DominosOrderApi> log, ISerializer serializer) => (_log, _serializer) = (log, serializer);
+//TODO: Use HttpClientFactory
+public class DominosOrderApi(ILogger<DominosOrderApi> Log, ISerializer Serializer) : IOrderApi {
+    const string _baseUrl = "https://order.dominos.com";
 
     public async Task<ValidateResponse> ValidateOrder(ValidateRequest request) =>
         await PostAsync<ValidateRequest, ValidateResponse>(
@@ -25,8 +22,8 @@ public class DominosOrderApi : IOrderApi {
             "/power/place-order", request);
 
     private async Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest request) {
-        var requestJson = _serializer.Serialize(request);
-        _log.LogDebug("{url}\nRequest:\n{requestJson}", requestUri, requestJson);
+        var requestJson = Serializer.Serialize(request);
+        Log.LogDebug("{Url}\nRequest:\n{RequestJson}", requestUri, requestJson);
 
         using HttpClient client = new() {
             BaseAddress = new(_baseUrl),
@@ -34,12 +31,12 @@ public class DominosOrderApi : IOrderApi {
         var response = await client.PostAsync(requestUri,
             new StringContent(requestJson, Encoding.UTF8, "application/json"));
         var statusCode = response.StatusCode;
-        _log.LogDebug("Response: {statusCode}", statusCode);
+        Log.LogDebug("Response: {StatusCode}", statusCode);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
-        _log.LogTrace(content);
-        return _serializer.Deserialize<TResponse>(content)!;
+        Log.LogTrace(content);
+        return Serializer.Deserialize<TResponse>(content)!;
     }
 }
 
@@ -58,14 +55,14 @@ public class Order2 : Order {
     public string FirstName { get; init; } = "";
     public string LastName { get; init; } = "";
     public string Phone { get; init; } = "";
-    public List<OrderPayment> Payments { get; init; } = new();
+    public List<OrderPayment> Payments { get; init; } = [];
     public int? Status { get; init; }
-    public List<StatusItem> StatusItems { get; init; } = new();
+    public List<StatusItem> StatusItems { get; init; } = [];
 }
 
 public class StatusItem {
     public string Code { get; set; } = "";
-    public int PulseCode { get; set; } = 0;
+    public int PulseCode { get; set; }
     public string PulseText { get; set; } = "";
     public override string ToString() =>
         $"Code: \"{Code}\", PulseCode: {PulseCode}, PulseText: \"{PulseText}\"";
@@ -74,7 +71,7 @@ public class StatusItem {
 public class PlaceResponse {
     public Order2 Order { get; init; } = new();
     public int? Status { get; init; }
-    public List<StatusItem> StatusItems { get; init; } = new();
+    public List<StatusItem> StatusItems { get; init; } = [];
 }
 
 public class OrderPayment {
@@ -103,10 +100,10 @@ public class PriceResponse {
 
 public class PricedOrder {
     public string OrderID { get; set; } = "";
-    public List<Product> Products { get; set; } = new();
+    public List<Product> Products { get; set; } = [];
     public Amounts Amounts { get; set; } = new();
     public string EstimatedWaitMinutes { get; set; } = "";
-    public List<Coupon> Coupons { get; set; } = new();
+    public List<Coupon> Coupons { get; set; } = [];
 }
 
 public class Amounts {
@@ -115,10 +112,10 @@ public class Amounts {
 
 public class Order {
     public string OrderID { get; set; } = "";
-    public List<Product> Products { get; set; } = new();
+    public List<Product> Products { get; set; } = [];
     public string ServiceMethod { get; set; } = "";
     public string StoreID { get; set; } = "0";
-    public List<Coupon> Coupons { get; set; } = new();
+    public List<Coupon> Coupons { get; set; } = [];
     public OrderAddress? Address { get; set; }
     public string? FutureOrderTime { get; set; }
 }
@@ -139,8 +136,8 @@ public class Coupon {
     [SetsRequiredMembers]
     public Coupon(string code) => Code = code;
     public required string Code { get; init; }
-    public int Status { get; init; } = 0;
-    public List<StatusItem> StatusItems { get; init; } = new();
+    public int Status { get; init; }
+    public List<StatusItem> StatusItems { get; init; } = [];
 }
 
 public class Options : Dictionary<string, Dictionary<string, string>?> {

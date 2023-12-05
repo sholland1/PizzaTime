@@ -8,8 +8,8 @@ public class DominosStoreApi : IStoreApi {
     const string _baseUrl = "https://order.dominos.com";
     private readonly ILogger<DominosStoreApi> _log;
     private readonly ISerializer _serializer;
-    private Dictionary<string, Store> _stores = new();
-    private Dictionary<string, MenuCoupon> _coupons = new();
+    private Dictionary<string, Store> _stores = [];
+    private Dictionary<string, MenuCoupon> _coupons = [];
 
     public DominosStoreApi(ILogger<DominosStoreApi> log, ISerializer serializer) =>
         (_log, _serializer) = (log, serializer);
@@ -23,7 +23,7 @@ public class DominosStoreApi : IStoreApi {
         };
         var response = await client.GetAsync(requestUri);
         var statusCode = response.StatusCode;
-        _log.LogDebug("Response: {statusCode}", statusCode);
+        _log.LogDebug("Response: {StatusCode}", statusCode);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
@@ -47,7 +47,7 @@ public class DominosStoreApi : IStoreApi {
         };
         var response = await client.GetAsync(requestUri);
         var statusCode = response.StatusCode;
-        _log.LogDebug("Response: {statusCode}", statusCode);
+        _log.LogDebug("Response: {StatusCode}", statusCode);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
@@ -99,10 +99,10 @@ public class StoreRequest {
 
     public string UrlParameters {
         get {
-            List<string> ps = new() {
+            List<string> ps = [
                 $"type={ServiceMethod.Name}",
                 $"c={string.Join(" ", Helper())}"
-            };
+            ];
 
             return "?" + string.Join("&", ps.Select(p => p.Replace(" ", "%20")));
 

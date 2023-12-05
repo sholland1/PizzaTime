@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using static Hollandsoft.OrderPizza.BuilderHelpers;
@@ -31,12 +32,12 @@ public class CouponJsonCoverter : JsonConverter<Coupon> {
 }
 
 public class OptionsJsonConverter : JsonConverter<Options> {
-    public override Options? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions _) {
+    public override Options? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         if (reader.TokenType != JsonTokenType.StartObject) {
             throw new NotSupportedException($"Invalid Options! Token: {reader.TokenType}");
         }
 
-        var options = new Dictionary<string, Dictionary<string, string>?>();
+        var parsedOptions = new Dictionary<string, Dictionary<string, string>?>();
         while (reader.Read()) {
             if (reader.TokenType == JsonTokenType.EndObject) {
                 break;
@@ -45,7 +46,7 @@ public class OptionsJsonConverter : JsonConverter<Options> {
                 var option = reader.GetString()!;
                 reader.Read();
                 if (reader.TokenType == JsonTokenType.Number) {
-                    options.Add(option, null);
+                    parsedOptions.Add(option, null);
                 }
                 else {
                     var optionValues = new Dictionary<string, string>();
@@ -57,7 +58,7 @@ public class OptionsJsonConverter : JsonConverter<Options> {
                         }
 
                         if (reader.TokenType == JsonTokenType.EndObject) {
-                            options.Add(option, optionValues);
+                            parsedOptions.Add(option, optionValues);
                             break;
                         }
                     }
@@ -65,7 +66,7 @@ public class OptionsJsonConverter : JsonConverter<Options> {
             }
         }
 
-        return new(options);
+        return new(parsedOptions);
     }
 
     public override void Write(Utf8JsonWriter writer, Options value, JsonSerializerOptions options) {
@@ -91,7 +92,7 @@ public class OrderTimingJsonCoverter : JsonConverter<OrderTiming> {
         var value = reader.GetString()!;
         return value == "Now"
             ? OrderTiming.Now.Instance
-            : new OrderTiming.Later(DateTime.Parse(value));
+            : new OrderTiming.Later(DateTime.Parse(value, CultureInfo.InvariantCulture));
 
         throw new NotSupportedException($"Invalid OrderTiming! Value: {value}");
     }
@@ -99,7 +100,7 @@ public class OrderTimingJsonCoverter : JsonConverter<OrderTiming> {
     public override void Write(Utf8JsonWriter writer, OrderTiming value, JsonSerializerOptions options) =>
         value.Match(
             () => writer.WriteStringValue("Now"),
-            later => writer.WriteStringValue(later));
+            writer.WriteStringValue);
 }
 
 public class ServiceMethodJsonConverter : JsonConverter<ServiceMethod> {
@@ -110,7 +111,7 @@ public class ServiceMethodJsonConverter : JsonConverter<ServiceMethod> {
 
         if (reader.TokenType == JsonTokenType.String) {
             var value = reader.GetString()!;
-            return value.StartsWith("Carryout")
+            return value.StartsWith("Carryout", StringComparison.InvariantCulture)
                 ? new ServiceMethod.Carryout(Enum.Parse<PickupLocation>(value.Replace("Carryout - ", "")))
                 : throw new NotSupportedException($"Invalid ServiceMethod! Value: {value}");
         }

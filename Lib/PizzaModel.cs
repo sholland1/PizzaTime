@@ -6,7 +6,7 @@ public class UnvalidatedPizza {
     public Crust Crust { get; init; }
     public Cheese Cheese { get; init; } = new Cheese.Full(Amount.Normal);
     public Sauce? Sauce { get; init; }
-    public Toppings Toppings { get; init; } = new Toppings();
+    public Toppings Toppings { get; init; } = [];
     public Bake Bake { get; init; }
     public Cut Cut { get; init; }
     public bool Oregano { get; init; }
@@ -75,10 +75,10 @@ public static class SizeHelpers {
         string.Join("\n", Enum.GetValues<Size>().Select(s => $"{s}: {string.Join(" ", s.AllowedCrusts())}"));
 
     public static Crust[] AllowedCrusts(this Size size) => size switch {
-        Size.Small => new[] { Crust.HandTossed, Crust.Thin, Crust.GlutenFree },
-        Size.Medium => new[] { Crust.HandTossed, Crust.Thin, Crust.HandmadePan },
-        Size.Large => new[] { Crust.HandTossed, Crust.Thin, Crust.Brooklyn },
-        Size.XL => new[] { Crust.Brooklyn },
+        Size.Small => [Crust.HandTossed, Crust.Thin, Crust.GlutenFree],
+        Size.Medium => [Crust.HandTossed, Crust.Thin, Crust.HandmadePan],
+        Size.Large => [Crust.HandTossed, Crust.Thin, Crust.Brooklyn],
+        Size.XL => [Crust.Brooklyn],
         _ => Array.Empty<Crust>()
     };
 }

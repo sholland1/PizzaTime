@@ -147,25 +147,25 @@ public class ActualOrder {
         Payment = order.Payment;
     }
 
-    public List<Pizza> Pizzas { get; } = new();
+    public List<Pizza> Pizzas { get; } = [];
     public List<Coupon> Coupons { get; }
     public OrderInfo OrderInfo { get; }
     public Payment Payment { get; }
 }
 
 public class UnvalidatedActualOrder {
-    public List<Pizza> Pizzas { get; init; } = new();
+    public List<Pizza> Pizzas { get; init; } = [];
     public required List<Coupon> Coupons { get; init; }
     public required OrderInfo OrderInfo { get; init; }
     public required Payment Payment { get; init; }
 }
 
 public class SavedOrder {
-    public List<SavedPizza> Pizzas { get; init; } = new();
+    public List<SavedPizza> Pizzas { get; init; } = [];
     public required List<Coupon> Coupons { get; init; }
     public required UnvalidatedOrderInfo OrderInfo { get; init; }
     public required PaymentType PaymentType { get; init; }
-    public string? PaymentInfoName { get; init; } = null;
+    public string? PaymentInfoName { get; init; }
 
     public SavedOrder WithCoupons(List<Coupon> coupons) =>
         new() {
@@ -195,7 +195,7 @@ public class SavedOrder {
         };
 
     public SavedOrder WithPizzas(List<SavedPizza> pizzas) =>
-        !pizzas.Any() ? this : new() {
+        pizzas.Count == 0 ? this : new() {
             Pizzas = pizzas,
             Coupons = Coupons,
             OrderInfo = OrderInfo,

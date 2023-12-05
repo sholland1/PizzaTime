@@ -1,8 +1,8 @@
 namespace Hollandsoft.OrderPizza;
 
 public abstract record AIPizzaResult {
-    internal record Failure(List<string> Messages) : AIPizzaResult;
-    internal record Success(Pizza Value) : AIPizzaResult;
+    internal sealed record Failure(List<string> Messages) : AIPizzaResult;
+    internal sealed record Success(Pizza Value) : AIPizzaResult;
 
     public bool IsSuccess => this is Success;
     public bool IsFailure => this is Failure;
@@ -54,6 +54,6 @@ public abstract record AIPizzaResult {
 
 public static class AIPizzaResultHelpers {
     public static AIPizzaResult Success(Pizza value) => new AIPizzaResult.Success(value);
-    public static AIPizzaResult Failure(string message) => new AIPizzaResult.Failure(new() { message });
+    public static AIPizzaResult Failure(string message) => new AIPizzaResult.Failure([message]);
     public static AIPizzaResult Failure(List<string> messages) => new AIPizzaResult.Failure(messages);
 }

@@ -3,7 +3,7 @@ using TestData;
 
 namespace Tests;
 public class CartProductTests {
-    private readonly ISerializer _serializer = MyJsonSerializer.Instance;
+    private readonly MyJsonSerializer _serializer = MyJsonSerializer.Instance;
 
     [Fact]
     public void PizzaToProduct() {

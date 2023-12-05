@@ -3,7 +3,7 @@ using TestData;
 
 namespace Tests;
 public class SerializationTests {
-    private readonly ISerializer _serializer = MyJsonSerializer.Instance;
+    private readonly MyJsonSerializer _serializer = MyJsonSerializer.Instance;
 
     [Fact]
     public void RoundTripA() {
@@ -87,7 +87,6 @@ public class SerializationTests {
         var serialized = _serializer.Serialize(p.Payment);
         Assert.Equal(json, serialized);
     }
-
 
     [Theory]
     [MemberData(nameof(TestOrder.GenerateValidOrders), MemberType = typeof(TestOrder))]

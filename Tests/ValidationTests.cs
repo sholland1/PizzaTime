@@ -4,7 +4,7 @@ using TestData;
 
 namespace Tests;
 public class ValidationTests {
-    private readonly ISerializer _serializer = MyJsonSerializer.Instance;
+    private readonly MyJsonSerializer _serializer = MyJsonSerializer.Instance;
 
     [Theory]
     [MemberData(nameof(TestPizza.GenerateValidPizzas), MemberType = typeof(TestPizza))]
@@ -19,10 +19,10 @@ public class ValidationTests {
 
     [Fact]
     public void InvalidationWorks2() {
-        var invalidProperties = new[] {
+        string[] invalidProperties = [
             "Bake", "Cheese.Amount", "Crust", "Crust", "Cut", "Sauce.Value.Amount", "Sauce.Value.SauceType",
             "Size", "Toppings[0].Amount", "Toppings[0].Location", "Toppings[0].ToppingType"
-        };
+        ];
 
         TestPizza.BadEnumPizza.Parse().Match(
             vp => Assert.Fail("Shouldn't be valid."),

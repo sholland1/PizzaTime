@@ -8,7 +8,7 @@ public static partial class Utils {
         var stringIndex = lineToEdit.Length;
         var width = maxWidth ?? Console.WindowWidth;
 
-        List<char> chars = new();
+        List<char> chars = [];
         if (!string.IsNullOrEmpty(lineToEdit)) {
             chars.AddRange(lineToEdit.ToCharArray());
         }

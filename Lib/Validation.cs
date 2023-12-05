@@ -1,5 +1,6 @@
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using FluentValidation;
 using static Hollandsoft.OrderPizza.BuilderHelpers;
 
@@ -161,7 +162,7 @@ public class Pizza : UnvalidatedPizza {
     public Pizza WithQuantity(int quantity) => new(this) { Quantity = Math.Max(1, quantity) };
 }
 
-internal class ActualOrderValidator : AbstractValidator<UnvalidatedActualOrder> {
+internal sealed class ActualOrderValidator : AbstractValidator<UnvalidatedActualOrder> {
     public ActualOrderValidator() {
         RuleFor(o => o.Pizzas).NotEmpty();
         //TODO: don't know if this is true (shouldn't be PayAtStore though)
@@ -170,9 +171,9 @@ internal class ActualOrderValidator : AbstractValidator<UnvalidatedActualOrder> 
     }
 }
 
-internal class OrderInfoValidator : AbstractValidator<UnvalidatedOrderInfo> {
+internal sealed class OrderInfoValidator : AbstractValidator<UnvalidatedOrderInfo> {
     public OrderInfoValidator() {
-        RuleFor(o => int.Parse(o.StoreId)).GreaterThanOrEqualTo(0).WithName("StoreId");
+        RuleFor(o => int.Parse(o.StoreId, NumberStyles.Integer, CultureInfo.InvariantCulture)).GreaterThanOrEqualTo(0).WithName("StoreId");
         When(o => o.ServiceMethod is ServiceMethod.Carryout,
             () => RuleFor(o => ((ServiceMethod.Carryout)o.ServiceMethod).Location).IsInEnum());
         When(o => o.ServiceMethod is ServiceMethod.Delivery,
@@ -185,7 +186,7 @@ internal class OrderInfoValidator : AbstractValidator<UnvalidatedOrderInfo> {
     }
 }
 
-internal class AddressValidator : AbstractValidator<Address> {
+internal sealed class AddressValidator : AbstractValidator<Address> {
     public AddressValidator() {
         RuleFor(a => a.StreetAddress).Matches("^\\d+ ");
         RuleFor(a => a.AddressType).IsInEnum();
@@ -195,21 +196,21 @@ internal class AddressValidator : AbstractValidator<Address> {
     }
 }
 
-internal class PaymentValidator : AbstractValidator<UnvalidatedPayment> {
+internal sealed class PaymentValidator : AbstractValidator<UnvalidatedPayment> {
     public PaymentValidator() {
         When(p => p.PaymentInfo is PaymentInfo.PayWithCard,
             () => RuleFor(p => (PaymentInfo.PayWithCard)p.PaymentInfo).SetValidator(new PayWithCardValidator()));
     }
 }
 
-internal class PersonalInfoValidator : AbstractValidator<UnvalidatedPersonalInfo> {
+internal sealed class PersonalInfoValidator : AbstractValidator<UnvalidatedPersonalInfo> {
     public PersonalInfoValidator() {
         RuleFor(p => p.Email).EmailAddress();
         RuleFor(p => p.Phone).Matches(@"^\d{3}-\d{3}-\d{4}$");
     }
 }
 
-internal class PayWithCardValidator : AbstractValidator<PaymentInfo.PayWithCard> {
+internal sealed class PayWithCardValidator : AbstractValidator<PaymentInfo.PayWithCard> {
     public PayWithCardValidator() {
         RuleFor(p => p.CardNumber).CreditCard();
         RuleFor(p => p.Expiration).Must(Utils.MatchesMMyy);
