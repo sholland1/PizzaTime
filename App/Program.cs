@@ -1,56 +1,27 @@
-﻿using System.CommandLine;
-using System.CommandLine.Parsing;
+﻿using System.ComponentModel;
 using System.Net;
 using Controllers;
 using Hollandsoft.OrderPizza;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NLog;
 using NLog.Extensions.Logging;
 using OpenAI.Extensions;
 using Server;
+using Spectre.Console;
+using Spectre.Console.Cli;
 
-return await BuildCommand().InvokeAsync(args);
+var services = BuildServiceProvider();
+App.TypeRegistrar registrar = new(services);
+CommandApp<DefaultCommand> app = new(registrar);
 
-async Task<int> PizzaMain(bool defaultOrder, string? orderName, bool track, string? apiKey) {
-    if (apiKey is not null) {
-        //Environment.SetEnvironmentVariable("OPENAI_API_KEY", apiKey);
-        return 0;
-    }
+app.Configure(config =>
+    config.SetExceptionHandler(ex =>
+        Console.WriteLine($"Unhandled exception: {ex}")));
 
-    using var provider = BuilderServiceProvider();
+await app.RunAsync(args);
 
-    try {
-        var controller = provider.GetRequiredService<PizzaController>();
-        if (defaultOrder) {
-            await controller.PlaceDefaultOrder();
-            return 0;
-        }
-
-        if (orderName is not null) {
-            await controller.PlaceOrder(orderName);
-            return 0;
-        }
-
-        if (track) {
-            await controller.TrackOrder();
-            return 0;
-        }
-
-        _ = provider.GetRequiredService<PizzaQueryServer>().StartServer();
-        await controller.OpenProgram();
-        return 0;
-    }
-    catch (Exception ex) {
-        var logger = provider.GetRequiredService<ILogger<Program>>();
-        logger.LogCritical(ex, "Unhandled exception");
-        LogManager.Shutdown();
-        return 1;
-    }
-}
-
-static ServiceProvider BuilderServiceProvider() {
+static ServiceCollection BuildServiceProvider() {
     var configuration = new ConfigurationBuilder()
         .AddJsonFile("appsettings.json")
         .AddUserSecrets<Program>()
@@ -100,36 +71,7 @@ static ServiceProvider BuilderServiceProvider() {
         .AddSingleton<PizzaController>()
         .AddSingleton<PizzaQueryServer>();
 
-    return services.BuildServiceProvider();
-}
-
-RootCommand BuildCommand() {
-    Option<bool> defaultOrderOption = new(
-        new[] { "--default-order" },
-        "Place the default order with user confirmation only");
-
-    Option<string> orderOption = new(
-        new[] { "--order" },
-        "Place the order with the specified name with user confirmation only");
-
-    Option<bool> trackOption = new(
-        new[] { "--track" },
-        "Track your recent order");
-
-    Option<string> apiKeyOption = new(
-        new[] { "--set-api-key" },
-        "OpenAI API key");
-
-    RootCommand rootCommand = new("Order a pizza") { defaultOrderOption, orderOption, trackOption, apiKeyOption };
-
-    rootCommand.AddValidator(commandResult => {
-        if (commandResult.Children.Count > 1) {
-            commandResult.ErrorMessage = "All arguments are mutually exclusive.";
-        }
-    });
-
-    rootCommand.SetHandler(PizzaMain, defaultOrderOption, orderOption, trackOption, apiKeyOption);
-    return rootCommand;
+    return services;
 }
 
 static string GetDataRootDir(string? dotnetEnv, string programName) {
@@ -154,4 +96,51 @@ static string GetDataRootDir(string? dotnetEnv, string programName) {
     Directory.CreateDirectory(dataDirectory);
 
     return dataDirectory;
+}
+
+internal sealed class DefaultCommand(PizzaQueryServer server, PizzaController controller) : AsyncCommand<DefaultCommand.Settings> {
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings) =>
+        await PizzaMain(settings.DefaultOrder, settings.OrderName, settings.Track);
+
+    public sealed class Settings : CommandSettings {
+        [CommandOption("--default-order")]
+        [Description("Place the default order with user confirmation only")]
+        public bool DefaultOrder { get; set; }
+
+        [CommandOption("---order <NAME>")]
+        [Description("Place the order with the specified name with user confirmation only")]
+        public string? OrderName { get; set; }
+
+        [CommandOption("--track")]
+        [Description("Track your recent order")]
+        public bool Track { get; set; }
+
+        public override ValidationResult Validate() =>
+            DefaultOrder && OrderName is not null
+            || DefaultOrder && Track
+            || OrderName is not null && Track
+                ? ValidationResult.Error("All arguments are mutually exclusive.")
+                : base.Validate();
+    }
+
+    private async Task<int> PizzaMain(bool defaultOrder, string? orderName, bool track) {
+        if (defaultOrder) {
+            await controller.PlaceDefaultOrder();
+            return 0;
+        }
+
+        if (orderName is not null) {
+            await controller.PlaceOrder(orderName);
+            return 0;
+        }
+
+        if (track) {
+            await controller.TrackOrder();
+            return 0;
+        }
+
+        _ = server.StartServer();
+        await controller.OpenProgram();
+        return 0;
+    }
 }

@@ -155,7 +155,6 @@ public class Options : Dictionary<string, Dictionary<string, string>?> {
     }
 
     public override int GetHashCode() => base.GetHashCode();
-    public override void GetObjectData(SerializationInfo info, StreamingContext context) => base.GetObjectData(info, context);
     public override void OnDeserialization(object? sender) => base.OnDeserialization(sender);
     public override string? ToString() => base.ToString();
 }
