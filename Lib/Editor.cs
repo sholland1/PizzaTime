@@ -7,12 +7,8 @@ public interface IEditor {
     string? Edit(string pizzaName, Pizza pizza);
 }
 
-public class InstalledProgramEditor : IEditor {
-    private readonly string _editor;
-    private readonly string _instructions;
-
-    public InstalledProgramEditor(string editor, string instructionsFilename) =>
-        (_editor, _instructions) = (editor, File.ReadAllText(instructionsFilename));
+public class InstalledProgramEditor(string _editor, string _instructionsFilename) : IEditor {
+    private readonly string _instructions = File.ReadAllText(_instructionsFilename);
 
     public string? Create() => EditImpl("");
 
@@ -46,11 +42,8 @@ public class InstalledProgramEditor : IEditor {
     private static string GenerateFilename() => Path.GetTempFileName();
 }
 
-public class FallbackEditor : IEditor {
-    private readonly string[] _instructions;
-
-    public FallbackEditor(string instructionsFilename) =>
-        _instructions = File.ReadAllLines(instructionsFilename);
+public class FallbackEditor(string _instructionsFilename) : IEditor {
+    private readonly string[] _instructions = File.ReadAllLines(_instructionsFilename);
 
     public string? Create() => EditImpl("Describe your new pizza:", Array.Empty<string>());
 

@@ -53,7 +53,7 @@ public abstract record CartResult<T> where T : class {
     }
 }
 
-public class DominosCart(IOrderApi Api, OrderInfo OrderInfo) : ICart {
+public class DominosCart(IOrderApi _api, OrderInfo _orderInfo) : ICart {
     private readonly HashSet<Coupon> _coupons = [];
 
     protected List<Product> _products = [];
@@ -66,21 +66,21 @@ public class DominosCart(IOrderApi Api, OrderInfo OrderInfo) : ICart {
     public async Task<CartResult<AddPizzaSuccess>> AddPizza(Pizza userPizza) {
         _currentTotal = 0;
 
-        var timing = OrderInfo.Timing.Match<string?>(
+        var timing = _orderInfo.Timing.Match<string?>(
             () => null, d => $"{MoveToNext15MinuteInterval(d):yyyy-MM-dd HH:mm:ss}");
-        var address = OrderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
+        var address = _orderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
 
         ValidateRequest request = new() {
             Order = new() {
                 Address = address,
                 OrderID = _orderID ?? "",
                 Products = _products.Append(userPizza.ToProduct(_products.Count + 1)).ToList(),
-                ServiceMethod = OrderInfo.ServiceMethod.Name,
-                StoreID = OrderInfo.StoreId,
+                ServiceMethod = _orderInfo.ServiceMethod.Name,
+                StoreID = _orderInfo.StoreId,
                 FutureOrderTime = timing
             }
         };
-        var response = await Api.ValidateOrder(request);
+        var response = await _api.ValidateOrder(request);
 
         _orderID = response.Order.OrderID;
         _products = response.Order.Products.Normalize().ToList();
@@ -99,19 +99,19 @@ public class DominosCart(IOrderApi Api, OrderInfo OrderInfo) : ICart {
             return SummaryFailure("Cart is empty.");
         }
 
-        var address = OrderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
+        var address = _orderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
 
         PriceRequest request = new() {
             Order = new() {
                 Address = address,
                 OrderID = _orderID,
                 Products = _products,
-                ServiceMethod = OrderInfo.ServiceMethod.Name,
-                StoreID = OrderInfo.StoreId,
+                ServiceMethod = _orderInfo.ServiceMethod.Name,
+                StoreID = _orderInfo.StoreId,
                 Coupons = _coupons.ToList()
             }
         };
-        var response = await Api.PriceOrder(request);
+        var response = await _api.PriceOrder(request);
 
         if (response.Order.OrderID != _orderID) {
             return SummaryFailure("Order ID mismatch.");
@@ -136,7 +136,7 @@ public class DominosCart(IOrderApi Api, OrderInfo OrderInfo) : ICart {
             return PlaceOrderFailure("Cart is empty.");
         }
 
-        var address = OrderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
+        var address = _orderInfo.ServiceMethod.Match<OrderAddress?>(Convert, _ => null);
 
         PlaceRequest request = new() {
             Order = new() {
@@ -150,18 +150,18 @@ public class DominosCart(IOrderApi Api, OrderInfo OrderInfo) : ICart {
                 Payments = [GetPayment(userPayment, _currentTotal)],
                 Products = _products,
                 ServiceMethod = GetDetailedServiceMethod(),
-                StoreID = OrderInfo.StoreId,
+                StoreID = _orderInfo.StoreId,
             }
         };
 
-        var response = await Api.PlaceOrder(request);
+        var response = await _api.PlaceOrder(request);
         return response.Status == -1
             ? PlaceOrderFailure(string.Join("\n", response.Order.StatusItems))
             : Success("Order was placed.");
     }
 
     private string GetDetailedServiceMethod() =>
-        OrderInfo.ServiceMethod.Match(_ => "Delivery", pl => $"{pl}");
+        _orderInfo.ServiceMethod.Match(_ => "Delivery", pl => $"{pl}");
 
     private OrderAddress Convert(Address addr) {
         var addressParts = addr.StreetAddress.Split(' ');

@@ -3,26 +3,26 @@ using Hollandsoft.OrderPizza;
 namespace Controllers;
 public partial class PizzaController {
     public PersonalInfo CreatePersonalInfo() {
-        TerminalUI.PrintLine("Please enter your personal information.");
-        var firstName = TerminalUI.Prompt("First name: ") ?? "";
-        var lastName = TerminalUI.Prompt("Last name: ") ?? "";
-        var email = TerminalUI.Prompt("Email: ") ?? "";
-        var phone = TerminalUI.Prompt("Phone: ") ?? "";
+        _terminalUI.PrintLine("Please enter your personal information.");
+        var firstName = _terminalUI.Prompt("First name: ") ?? "";
+        var lastName = _terminalUI.Prompt("Last name: ") ?? "";
+        var email = _terminalUI.Prompt("Email: ") ?? "";
+        var phone = _terminalUI.Prompt("Phone: ") ?? "";
 
         return ValidatePersonalAndSave(firstName, lastName, email, phone) ?? CreatePersonalInfo();
     }
 
     public PersonalInfo ManagePersonalInfo() {
-        var currentInfo = Repo.GetPersonalInfo();
+        var currentInfo = _repo.GetPersonalInfo();
         if (currentInfo is null) {
             return CreatePersonalInfo();
         }
 
-        TerminalUI.PrintLine("Edit your personal information:");
-        var firstName = TerminalUI.PromptForEdit("First Name: ", currentInfo.FirstName) ?? "";
-        var lastName = TerminalUI.PromptForEdit("Last Name: ", currentInfo.LastName) ?? "";
-        var email = TerminalUI.PromptForEdit("Email: ", currentInfo.Email) ?? "";
-        var phone = TerminalUI.PromptForEdit("Phone Number: ", currentInfo.Phone) ?? "";
+        _terminalUI.PrintLine("Edit your personal information:");
+        var firstName = _terminalUI.PromptForEdit("First Name: ", currentInfo.FirstName) ?? "";
+        var lastName = _terminalUI.PromptForEdit("Last Name: ", currentInfo.LastName) ?? "";
+        var email = _terminalUI.PromptForEdit("Email: ", currentInfo.Email) ?? "";
+        var phone = _terminalUI.PromptForEdit("Phone Number: ", currentInfo.Phone) ?? "";
 
         return ValidatePersonalAndSave(firstName, lastName, email, phone) ?? ManagePersonalInfo();
     }
@@ -35,14 +35,14 @@ public partial class PizzaController {
             Phone = phone
         }.Parse();
 
-        TerminalUI.Clear();
+        _terminalUI.Clear();
         return personalInfo.Match<PersonalInfo?>(es => {
-            TerminalUI.PrintLine("Failed to parse personal info:");
-            TerminalUI.PrintLine(string.Join(Environment.NewLine, es.Select(e => e.ErrorMessage)));
+            _terminalUI.PrintLine("Failed to parse personal info:");
+            _terminalUI.PrintLine(string.Join(Environment.NewLine, es.Select(e => e.ErrorMessage)));
             return default;
         }, pi => {
-            Repo.SavePersonalInfo(pi);
-            TerminalUI.PrintLine("Personal info saved.");
+            _repo.SavePersonalInfo(pi);
+            _terminalUI.PrintLine("Personal info saved.");
             return pi;
         });
     }

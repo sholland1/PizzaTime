@@ -134,7 +134,7 @@ static string GetDataRootDir(string? dotnetEnv, string programName) {
     return dataDirectory;
 }
 
-internal sealed class DefaultCommand(PizzaQueryServer server, PizzaController controller) : AsyncCommand<DefaultCommand.Settings> {
+internal sealed class DefaultCommand(PizzaQueryServer _server, PizzaController _controller) : AsyncCommand<DefaultCommand.Settings> {
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings) =>
         await PizzaMain(settings.DefaultOrder, settings.OrderName, settings.Track);
 
@@ -161,22 +161,22 @@ internal sealed class DefaultCommand(PizzaQueryServer server, PizzaController co
 
     private async Task<int> PizzaMain(bool defaultOrder, string? orderName, bool track) {
         if (defaultOrder) {
-            await controller.PlaceDefaultOrder();
+            await _controller.PlaceDefaultOrder();
             return 0;
         }
 
         if (orderName is not null) {
-            await controller.PlaceOrder(orderName);
+            await _controller.PlaceOrder(orderName);
             return 0;
         }
 
         if (track) {
-            await controller.TrackOrder();
+            await _controller.TrackOrder();
             return 0;
         }
 
-        _ = server.StartServer();
-        await controller.OpenProgram();
+        _ = _server.StartServer();
+        await _controller.OpenProgram();
         return 0;
     }
 }

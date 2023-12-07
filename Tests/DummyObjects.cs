@@ -94,12 +94,11 @@ public class DummyPizzaRepository : IPizzaRepo {
     }
 }
 
-public class DummyTerminalUI : ITerminalUI {
+
+
+public class DummyTerminalUI(params string[] _readLines) : ITerminalUI {
     public List<string> PrintedMessages = [];
-    private readonly Queue<string> _readLines = new();
-
-    public DummyTerminalUI(params string[] readLines) => Array.ForEach(readLines, _readLines.Enqueue);
-
+    private readonly Queue<string> _readLines = new(_readLines);
     public void Print(string message) => PrintedMessages.Add(message);
     public void PrintLine(string message) => PrintedMessages.Add(message + "\n");
     public void PrintLine() => PrintedMessages.Add("\n");
@@ -116,16 +115,10 @@ public class DummyTerminalUI : ITerminalUI {
     public void WriteInfoPanel(int hPos, IEnumerable<string> lines) { }
 }
 
-public class DummyPizzaCart : ICart {
-    private readonly bool _cartFail;
-    private readonly bool _priceFail;
-    private readonly bool _orderFail;
+public class DummyPizzaCart(bool _cartFail = false, bool _priceFail = false, bool _orderFail = false) : ICart {
     public readonly HashSet<Coupon> Coupons = [];
 
     public List<MethodCall> Calls = [];
-
-    public DummyPizzaCart(bool cartFail = false, bool priceFail = false, bool orderFail = false) =>
-        (_cartFail, _priceFail, _orderFail) = (cartFail, priceFail, orderFail);
 
     private int _pizzaCount;
     public Task<CartResult<AddPizzaSuccess>> AddPizza(Pizza userPizza) {

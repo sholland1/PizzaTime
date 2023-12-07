@@ -7,10 +7,7 @@ public interface IUserChooser {
     List<string> GetUserChoices(string prompt, IEnumerable<string> choices, string? itemType = null);
 }
 
-public class FzfChooser : IUserChooser {
-    private readonly HttpOptions _httpOptions;
-    public FzfChooser(HttpOptions httpOptions) => _httpOptions = httpOptions;
-
+public class FzfChooser(HttpOptions _httpOptions) : IUserChooser {
     public string? GetUserChoice(string prompt, IEnumerable<string> choices, string? itemType = null) =>
         choices.ChooseWithFzf(GetOptions(prompt, itemType));
 

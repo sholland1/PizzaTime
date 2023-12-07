@@ -60,8 +60,7 @@ public class IntegrationTests {
         Debug.WriteLine($"Success: {result.IsSuccess}, Message:\n{message}");
     }
 
-    private sealed class TestDominosCart : DominosCart {
-        public TestDominosCart(IOrderApi api, OrderInfo orderInfo) : base(api, orderInfo) { }
+    private sealed class TestDominosCart(IOrderApi _api, OrderInfo _orderInfo) : DominosCart(_api, _orderInfo) {
         public List<Product> Products => _products;
     }
 

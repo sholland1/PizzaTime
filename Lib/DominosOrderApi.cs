@@ -1,12 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace Hollandsoft.OrderPizza;
 
 //TODO: Use HttpClientFactory
-public class DominosOrderApi(ILogger<DominosOrderApi> Log, ISerializer Serializer) : IOrderApi {
+public class DominosOrderApi(ILogger<DominosOrderApi> _log, ISerializer _serializer) : IOrderApi {
     const string _baseUrl = "https://order.dominos.com";
 
     public async Task<ValidateResponse> ValidateOrder(ValidateRequest request) =>
@@ -22,8 +21,8 @@ public class DominosOrderApi(ILogger<DominosOrderApi> Log, ISerializer Serialize
             "/power/place-order", request);
 
     private async Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest request) {
-        var requestJson = Serializer.Serialize(request);
-        Log.LogDebug("{Url}\nRequest:\n{RequestJson}", requestUri, requestJson);
+        var requestJson = _serializer.Serialize(request);
+        _log.LogDebug("{Url}\nRequest:\n{RequestJson}", requestUri, requestJson);
 
         using HttpClient client = new() {
             BaseAddress = new(_baseUrl),
@@ -31,12 +30,12 @@ public class DominosOrderApi(ILogger<DominosOrderApi> Log, ISerializer Serialize
         var response = await client.PostAsync(requestUri,
             new StringContent(requestJson, Encoding.UTF8, "application/json"));
         var statusCode = response.StatusCode;
-        Log.LogDebug("Response: {StatusCode}", statusCode);
+        _log.LogDebug("Response: {StatusCode}", statusCode);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
-        Log.LogTrace(content);
-        return Serializer.Deserialize<TResponse>(content)!;
+        _log.LogTrace(content);
+        return _serializer.Deserialize<TResponse>(content)!;
     }
 }
 
@@ -132,10 +131,9 @@ public class OrderAddress {
     public string? UnitType { get; set; }
 }
 
-public class Coupon {
-    [SetsRequiredMembers]
-    public Coupon(string code) => Code = code;
-    public required string Code { get; init; }
+[method: SetsRequiredMembers]
+public class Coupon(string code) {
+    public required string Code { get; init; } = code;
     public int Status { get; init; }
     public List<StatusItem> StatusItems { get; init; } = [];
 }

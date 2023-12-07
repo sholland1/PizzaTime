@@ -10,12 +10,10 @@ public interface ISerializer {
     T Deserialize<T>(FileStream fs);
 }
 
-public class MyJsonSerializer : ISerializer {
+public class MyJsonSerializer(JsonSerializerOptions? _options = null) : ISerializer {
     public static MyJsonSerializer Instance { get; } = new(PizzaSerializer.Options);
 
-    public JsonSerializerOptions Options { get; set; }
-    public MyJsonSerializer(JsonSerializerOptions? options = null) =>
-        Options = options ?? new();
+    public JsonSerializerOptions Options { get; set; } = _options ?? new();
 
     public string Serialize<T>(T obj) =>
         JsonSerializer.Serialize(obj, Options);
