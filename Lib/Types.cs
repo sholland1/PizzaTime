@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
-using static Hollandsoft.OrderPizza.PaymentInfo;
+using static Hollandsoft.PizzaTime.PaymentInfo;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public class UnvalidatedOrderInfo {
     public required string StoreId { get; init; }
     public required ServiceMethod ServiceMethod { get; init; }

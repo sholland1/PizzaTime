@@ -1,4 +1,4 @@
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public class TerminalSpinner {
     private readonly string _sequence;
     private readonly int _delay;

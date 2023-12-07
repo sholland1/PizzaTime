@@ -1,4 +1,4 @@
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public interface ITerminalUI {
     void Print(string message);
     void PrintLine(string message);

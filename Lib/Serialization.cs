@@ -2,9 +2,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using static Hollandsoft.OrderPizza.BuilderHelpers;
+using static Hollandsoft.PizzaTime.BuilderHelpers;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public static class PizzaSerializer {
     public static JsonSerializerOptions Options => new() {
         WriteIndented = true,

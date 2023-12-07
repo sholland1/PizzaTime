@@ -1,7 +1,7 @@
 using System.Globalization;
-using static Hollandsoft.OrderPizza.CartResult;
+using static Hollandsoft.PizzaTime.CartResult;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public interface ICart {
     Task<CartResult<AddPizzaSuccess>> AddPizza(Pizza userPizza);
     void AddCoupon(Coupon coupon);

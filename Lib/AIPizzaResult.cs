@@ -1,4 +1,4 @@
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 
 public abstract record AIPizzaResult {
     internal sealed record Failure(List<string> Messages) : AIPizzaResult;

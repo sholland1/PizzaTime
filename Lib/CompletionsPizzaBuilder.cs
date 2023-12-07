@@ -1,7 +1,7 @@
 using System.Text.Json;
 using OpenAI.Interfaces;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 
 using static AIPizzaResultHelpers;
 

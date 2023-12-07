@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 
 public interface IEditor {
     string? Create();

@@ -1,4 +1,4 @@
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public interface IPizzaRepo {
     Pizza? GetPizza(string name);
     Payment? GetPayment(string name);

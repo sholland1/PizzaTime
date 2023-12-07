@@ -1,7 +1,7 @@
 //TODO: Disallow cheeseless Pan/Brooklyn
 //TODO: Disallow Shredded Provolone Cheese Pan/Brooklyn
 //TODO: Disallow more than 5 toppings on Pan
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public class PizzaBuilder<TBuilder>(Size Size, Crust Crust) : IPizzaBuilder
     where TBuilder : PizzaBuilder<TBuilder> {
     protected Cheese _cheese = new Cheese.Full(Amount.Normal);

@@ -1,4 +1,4 @@
-using Hollandsoft.OrderPizza;
+using Hollandsoft.PizzaTime;
 
 namespace Tests;
 public class TerminalSpinnerTests {

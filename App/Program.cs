@@ -1,7 +1,7 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Net;
 using Controllers;
-using Hollandsoft.OrderPizza;
+using Hollandsoft.PizzaTime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -46,7 +46,7 @@ static ServiceCollection BuildServiceProvider() {
 
     services.AddOpenAIService();
 
-    var dataRootDir = GetDataRootDir(dotnetEnv, "OrderPizza");
+    var dataRootDir = GetDataRootDir(dotnetEnv, "PizzaTime");
     services.AddSingleton(new FileSystem(dataRootDir));
 
     services.AddLogging(loggingBuilder =>

@@ -2,9 +2,9 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using FluentValidation;
-using static Hollandsoft.OrderPizza.BuilderHelpers;
+using static Hollandsoft.PizzaTime.BuilderHelpers;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public class PizzaValidator : AbstractValidator<UnvalidatedPizza> {
     public PizzaValidator() {
         //Enums

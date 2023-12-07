@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public static class ApiHelpers {
     public static IEnumerable<Product> Normalize(this IEnumerable<Product> ps) => ps.Select(Normalize);
 

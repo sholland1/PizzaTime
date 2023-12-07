@@ -1,4 +1,4 @@
-using Hollandsoft.OrderPizza;
+using Hollandsoft.PizzaTime;
 
 namespace Controllers;
 public partial class PizzaController(
@@ -151,7 +151,7 @@ public partial class PizzaController(
     }
 
     public async Task MainMenu() {
-        _terminalUI.PrintLine("Welcome to the pizza ordering app!🍕");
+        _terminalUI.PrintLine("It's Pizza Time!🍕");
 
         string[] options = [
             "1. Place order",

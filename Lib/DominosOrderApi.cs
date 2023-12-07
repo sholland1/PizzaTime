@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.Extensions.Logging;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 
 //TODO: Use HttpClientFactory
 public class DominosOrderApi(ILogger<DominosOrderApi> _log, ISerializer _serializer) : IOrderApi {

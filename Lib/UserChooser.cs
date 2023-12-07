@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 
 public interface IUserChooser {
     void IgnoreUserChoice(string prompt, IEnumerable<string> choices, string? itemType = null);

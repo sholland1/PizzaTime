@@ -1,6 +1,6 @@
-using static Hollandsoft.OrderPizza.CartResult;
+using static Hollandsoft.PizzaTime.CartResult;
 using static TestData.TestPizza;
-using Hollandsoft.OrderPizza;
+using Hollandsoft.PizzaTime;
 
 namespace TestData;
 public class DummyPizzaRepository : IPizzaRepo {

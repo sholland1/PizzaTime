@@ -1,5 +1,5 @@
 using FluentValidation.Results;
-using Hollandsoft.OrderPizza;
+using Hollandsoft.PizzaTime;
 using TestData;
 
 namespace Tests;

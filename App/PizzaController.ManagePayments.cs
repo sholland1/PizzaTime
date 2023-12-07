@@ -1,4 +1,4 @@
-using Hollandsoft.OrderPizza;
+using Hollandsoft.PizzaTime;
 
 namespace Controllers;
 public partial class PizzaController {

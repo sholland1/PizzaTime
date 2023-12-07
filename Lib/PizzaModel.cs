@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public class UnvalidatedPizza {
     public Size Size { get; init; }
     public Crust Crust { get; init; }

@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using FluentValidation.Results;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public static partial class Utils {
     public static bool In<T>(this T source, params T[] items) => items.Contains(source);
 

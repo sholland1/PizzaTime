@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public static class SummaryUtils {
     //TODO: maybe rethink this summary
     public static string Summarize(this UnvalidatedOrderInfo o) =>

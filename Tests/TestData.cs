@@ -1,5 +1,5 @@
-using Hollandsoft.OrderPizza;
-using static Hollandsoft.OrderPizza.BuilderHelpers;
+using Hollandsoft.PizzaTime;
+using static Hollandsoft.PizzaTime.BuilderHelpers;
 
 namespace TestData;
 public static class TestOrder {

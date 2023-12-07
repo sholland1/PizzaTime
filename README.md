@@ -1,4 +1,4 @@
-# Order Pizza 🍕
+# It's Pizza Time! 🍕
 
 This application allows ordering Domino's pizzas from the command line. You can manage orders, payments, pizzas, and personal info. You can track your
 order. The application uses OpenAI to design a pizza using natural language.
@@ -25,14 +25,14 @@ $ export OPENAI_API_KEY='<your-key>'
 Go to [OpenAI](https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety) for more information.
 
 ### Run the application
-Run the program with no argmuents to get started:
+Run the program with no arguments to get started:
 ```bash
-$ order-pizza
+$ pizza-time
 ```
 
 You will be presented with a menu where you can create and manage orders, pizzas, payments, and personal info. You can also track your order and view your order history.
 ```
-Welcome to the pizza ordering app!🍕
+It's Pizza Time!🍕
 1. Place order
 2. Manage orders
 3. Manage pizzas
@@ -45,8 +45,8 @@ q. Exit
 
 Once you have created an order, you can place it with one of the following commands:
 ```bash
-$ order-pizza --default-order
-$ order-pizza --order <order-name>
+$ pizza-time --default-order
+$ pizza-time --order <order-name>
 ```
 
 Don't worry. You will be asked to confirm the order before it is placed.
@@ -54,13 +54,13 @@ Don't worry. You will be asked to confirm the order before it is placed.
 You can track your order using the following command:
 
 ```bash
-$ order-pizza --track
+$ pizza-time --track
 ```
 
 Additional commands:
 ```bash
-$ order-pizza --version
-$ order-pizza --help
+$ pizza-time --version
+$ pizza-time --help
 ```
 
 ## Build

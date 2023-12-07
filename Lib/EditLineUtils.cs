@@ -1,4 +1,4 @@
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 public static partial class Utils {
     //TODO: Implement word wrap
     //      I need to make changes to the string and position in the string,

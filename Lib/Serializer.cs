@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Hollandsoft.OrderPizza;
+namespace Hollandsoft.PizzaTime;
 
 public interface ISerializer {
     string Serialize<T>(T obj, bool writeIndented = true);
