@@ -9,6 +9,6 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="11.8.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Betalgo.OpenAI" Version="7.4.1" />
+    <PackageReference Include="Betalgo.OpenAI" Version="7.4.2" />
   </ItemGroup>
 </Project>
