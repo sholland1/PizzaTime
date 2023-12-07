@@ -46,7 +46,7 @@ q. Exit
 Once you have created an order, you can place it with one of the following commands:
 ```bash
 $ order-pizza --default-order
-$ order-pizza --order <named-order>
+$ order-pizza --order <order-name>
 ```
 
 Don't worry. You will be asked to confirm the order before it is placed.
