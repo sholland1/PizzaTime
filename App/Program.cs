@@ -22,11 +22,21 @@ app.Configure(config =>
 await app.RunAsync(args);
 
 static ServiceCollection BuildServiceProvider() {
-    var configuration = new ConfigurationBuilder()
+    ConfigurationBuilder builder = new();
+    var configuration = builder
         .AddJsonFile("appsettings.json")
         .AddUserSecrets<Program>()
-        .AddEnvironmentVariables()
+        .AddEnvironmentVariables(static _ => Environment.SetEnvironmentVariable(
+            "OpenAIServiceOptions:ApiKey", Environment.GetEnvironmentVariable("OPENAI_API_KEY")))
         .Build();
+
+    var dotnetEnv = configuration.GetValue<string>("DOTNET_ENVIRONMENT");
+
+    var openAiApiKey = configuration.GetValue<string>("OpenAIServiceOptions:ApiKey");
+    if (openAiApiKey is null){
+        Console.WriteLine(GetMissingApiKeyMessage(dotnetEnv));
+        Environment.Exit(1);
+    }
 
     ServiceCollection services = new();
     services.AddSingleton<IConfiguration>(configuration);
@@ -36,7 +46,6 @@ static ServiceCollection BuildServiceProvider() {
 
     services.AddOpenAIService();
 
-    var dotnetEnv = configuration.GetValue<string>("DOTNET_ENVIRONMENT");
     var dataRootDir = GetDataRootDir(dotnetEnv, "OrderPizza");
     services.AddSingleton(new FileSystem(dataRootDir));
 
@@ -73,6 +82,33 @@ static ServiceCollection BuildServiceProvider() {
 
     return services;
 }
+
+static string GetMissingApiKeyMessage(string? dotnetEnv) => dotnetEnv == "Development"
+    ? """
+    Please set the OpenAI API Key in user secrets:
+
+    $ dotnet user-secrets set "OpenAIServiceOptions:ApiKey" "<your-key>"
+    """
+    : Environment.OSVersion.Platform switch {
+        //Windows
+        PlatformID.Win32NT => """
+            Please set the OPENAI_API_KEY environment variable:
+
+            > set OPENAI_API_KEY=<your-key>
+            """,
+
+        //Unix
+        PlatformID.Unix => """
+            Please set the OPENAI_API_KEY environment variable:
+
+            $ export OPENAI_API_KEY='<your-key>'
+
+            Place this command in your shell's startup file to make it permanent.
+            """,
+
+        //Fallback
+        _ => "Please set the OPENAI_API_KEY environment variable.",
+    };
 
 static string GetDataRootDir(string? dotnetEnv, string programName) {
     if (dotnetEnv == "Development") return ".";
