@@ -37,12 +37,12 @@ public class DummyPizzaRepository : IPizzaRepo {
 
     public PersonalInfo? GetPersonalInfo() => _personalInfo;
 
-    public ActualOrder? GetDefaultOrder() => new UnvalidatedActualOrder {
+    public NamedOrder? GetDefaultOrder() => new("default", new UnvalidatedActualOrder {
             Pizzas = Pizzas.Values.Take(2).Select(p => p.Validate()).ToList(),
             Coupons = [new("1234")],
             OrderInfo = OrderInfos.First().Value.Validate(),
             Payment = Payments.First().Value.Validate()
-        }.Validate();
+        }.Validate());
 
     public void SavePersonalInfo(PersonalInfo personalInfo) => _personalInfo = personalInfo;
     public void SavePizza(string name, Pizza pizza) => Pizzas[name] = pizza;
@@ -92,9 +92,17 @@ public class DummyPizzaRepository : IPizzaRepo {
     public void RenameOrder(string name, string newName) {
         throw new NotImplementedException();
     }
+
+    public void AddOrderToHistory(PastOrder pastOrder) { }
+
+    public IEnumerable<OrderInstance> ListPastOrders() {
+        throw new NotImplementedException();
+    }
+
+    public PastOrder GetPastOrder(OrderInstance orderInstance) {
+        throw new NotImplementedException();
+    }
 }
-
-
 
 public class DummyTerminalUI(params string[] _readLines) : ITerminalUI {
     public List<string> PrintedMessages = [];

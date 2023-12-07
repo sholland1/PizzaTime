@@ -69,7 +69,8 @@ static ServiceCollection BuildServiceProvider() {
 
         .AddSingleton<ITerminalUI, RealTerminalUI>()
         .AddSingleton<IUserChooser, FzfChooser>()
-        .AddSingleton<TerminalSpinner>();
+        .AddSingleton<TerminalSpinner>()
+        .AddSingleton<IDateGetter, CurrentDateGetter>();
 
     var editor = configuration.GetValue<string>("EDITOR");
     services.AddSingleton<IEditor>(editor is not null

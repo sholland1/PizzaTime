@@ -5,7 +5,7 @@ public interface IPizzaRepo {
     ActualOrder? GetOrder(string name);
     SavedOrder? GetSavedOrder(string name);
     PersonalInfo? GetPersonalInfo();
-    ActualOrder? GetDefaultOrder();
+    NamedOrder? GetDefaultOrder();
 
     void SavePersonalInfo(PersonalInfo personalInfo);
     void SavePizza(string name, Pizza pizza);
@@ -27,6 +27,10 @@ public interface IPizzaRepo {
     void RenamePizza(string name, string newName);
     void RenamePayment(string name, string newName);
     void RenameOrder(string name, string newName);
+
+    void AddOrderToHistory(PastOrder pastOrder);
+    IEnumerable<OrderInstance> ListPastOrders();
+    PastOrder GetPastOrder(OrderInstance orderInstance);
 }
 
 public class JsonFilePizzaRepository(ISerializer _serializer, FileSystem _fileSystem) : IPizzaRepo {
@@ -54,9 +58,17 @@ public class JsonFilePizzaRepository(ISerializer _serializer, FileSystem _fileSy
 
     public PersonalInfo? GetPersonalInfo() =>
         DeserializeFromFile<UnvalidatedPersonalInfo>("personalInfo")?.Validate();
-    public ActualOrder? GetDefaultOrder() =>
-        _fileSystem.Exists("default_order")
-            ? GetOrder(_fileSystem.ReadAllText("default_order")) : null;
+
+    public NamedOrder? GetDefaultOrder() {
+        if (!_fileSystem.Exists("default_order")) return null;
+
+        var orderName = _fileSystem.ReadAllText("default_order");
+        var order = GetOrder(orderName);
+        if (order is not null) return new(orderName, order);
+
+        _fileSystem.Delete("default_order");
+        return null;
+    }
 
     void SerializeToFile<T>(string filename, T obj) {
         using var fs = _fileSystem.Create(filename + ".json");
@@ -146,13 +158,34 @@ public class JsonFilePizzaRepository(ISerializer _serializer, FileSystem _fileSy
             _fileSystem.WriteAllText("default_order", newName);
         }
     }
-}
 
+    const string OrderHistoryFilename = "orderHistory.jsonl";
+    private readonly Dictionary<OrderInstance, PastOrder> _orderHistory = [];
+    public void AddOrderToHistory(PastOrder pastOrder) =>
+        _fileSystem.AppendAllLines(OrderHistoryFilename, _serializer.Serialize(pastOrder, false));
+
+    public IEnumerable<OrderInstance> ListPastOrders() {
+        _orderHistory.Clear();
+        if (!_fileSystem.Exists(OrderHistoryFilename)) yield break;
+
+        foreach (var line in _fileSystem.ReadLines(OrderHistoryFilename)) {
+            var pastOrder = _serializer.Deserialize<PastOrder>(line)!;
+            var instance = pastOrder.ToOrderInstance();
+            _orderHistory.Add(instance, pastOrder);
+            yield return instance;
+        }
+    }
+
+    public PastOrder GetPastOrder(OrderInstance orderInstance) => _orderHistory[orderInstance];
+}
 
 public class FileSystem(string _root) {
     public bool Exists(string path) => File.Exists(Path.Combine(_root, path));
     public void WriteAllText(string path, string contents) => File.WriteAllText(Path.Combine(_root, path), contents);
+    public void AppendAllLines(string path, params string[] contents) => File.AppendAllLines(Path.Combine(_root, path), contents);
     public string ReadAllText(string path) => File.ReadAllText(Path.Combine(_root, path));
+    public IEnumerable<string> ReadLines(string path) => File.ReadLines(Path.Combine(_root, path));
+    public IAsyncEnumerable<string> ReadLinesAsync(string path) => File.ReadLinesAsync(Path.Combine(_root, path));
     public void Move(string sourceFileName, string destFileName) => File.Move(
         Path.Combine(_root, sourceFileName),
         Path.Combine(_root, destFileName));

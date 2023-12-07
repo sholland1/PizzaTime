@@ -56,6 +56,14 @@ public static partial class Utils {
         .Distinct()
         .ToArray();
     public static bool IsValidName(this string filename) => !filename.Any(_invalidChars.Contains);
+
+    public static (string, string) SplitAtFirst(string s, char c) {
+        var index = s.IndexOf(c);
+        return index == -1 ? (s, "") : (s[..index], s[(index + 1)..]);
+    }
+
+    public static DateTime TruncateToSeconds(this DateTime d) =>
+        new(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
 }
 
 public abstract record Validation<T> {

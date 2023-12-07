@@ -3,11 +3,15 @@ using System.Net;
 namespace Hollandsoft.OrderPizza;
 
 public interface IUserChooser {
+    void IgnoreUserChoice(string prompt, IEnumerable<string> choices, string? itemType = null);
     string? GetUserChoice(string prompt, IEnumerable<string> choices, string? itemType = null);
     List<string> GetUserChoices(string prompt, IEnumerable<string> choices, string? itemType = null);
 }
 
 public class FzfChooser(HttpOptions _httpOptions) : IUserChooser {
+    public void IgnoreUserChoice(string prompt, IEnumerable<string> choices, string? itemType = null) =>
+        choices.ChooseWithFzf(GetOptions(prompt, itemType));
+
     public string? GetUserChoice(string prompt, IEnumerable<string> choices, string? itemType = null) =>
         choices.ChooseWithFzf(GetOptions(prompt, itemType));
 

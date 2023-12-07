@@ -139,7 +139,8 @@ public class UnvalidatedPersonalInfo {
 
 public enum PaymentType { PayAtStore, PayWithCard }
 
-public class ActualOrder {
+public class ActualOrder : UnvalidatedActualOrder {
+    [SetsRequiredMembers]
     internal ActualOrder(UnvalidatedActualOrder order) {
         Pizzas = order.Pizzas;
         Coupons = order.Coupons;
@@ -147,10 +148,51 @@ public class ActualOrder {
         Payment = order.Payment;
     }
 
-    public List<Pizza> Pizzas { get; } = [];
-    public List<Coupon> Coupons { get; }
-    public OrderInfo OrderInfo { get; }
-    public Payment Payment { get; }
+    public UnvalidatedHistoricalOrder ToHistOrder() => new() {
+        Pizzas = Pizzas.Select(p => new UnvalidatedPizza(p)).ToList(),
+        Coupons = Coupons,
+        OrderInfo = OrderInfo,
+        Payment = Payment
+    };
+}
+
+public class UnvalidatedHistoricalOrder {
+    public List<UnvalidatedPizza> Pizzas { get; init; } = [];
+    public required List<Coupon> Coupons { get; init; }
+    public required UnvalidatedOrderInfo OrderInfo { get; init; }
+    public required Payment Payment { get; init; }
+}
+
+public record NamedOrder(string Name, ActualOrder Order);
+
+public record OrderInstance(string Name, DateTime TimeStamp) {
+    public OrderInstance(string displayString) : this("", new(0)) {
+        var (timestamp, name) = Utils.SplitAtFirst(displayString, '-');
+        Name = name.Trim();
+        TimeStamp = DateTime.Parse(timestamp.Trim());
+    }
+
+    public override string ToString() => $"{TimeStamp:MM/dd/yyyy hh:mm:ss tt} - {Name}";
+}
+
+public class PastOrder {
+    public required string OrderName { get; set; }
+    public DateTime TimeStamp { get; set; }
+    public required UnvalidatedHistoricalOrder Order { get; set; }
+    public required string EstimatedWaitMinutes { get; set; }
+    public decimal TotalPrice { get; set; }
+
+    public OrderInstance ToOrderInstance() => new(OrderName, TimeStamp);
+
+    //TODO: Fix this
+    public string Summarize() => $"""
+        Order Name: {OrderName}
+        Time Stamp: {TimeStamp}
+        -- Fix this --
+        Order.Summarize()
+        Estimated Wait: {EstimatedWaitMinutes}
+        Total Price: {TotalPrice:C}
+        """;
 }
 
 public class UnvalidatedActualOrder {

@@ -12,7 +12,7 @@ public class DefaultOrderTests {
         DummyTerminalUI terminalUI = new(userChoice);
         DummyPizzaRepository repo = new();
         DummyPizzaCart cart = new();
-        PizzaController controller = new(repo, _ => cart, default!, default!, terminalUI, default!, default!, default!);
+        PizzaController controller = new(repo, _ => cart, default!, default!, terminalUI, default!, default!, default!, new FixedDateGetter(new(2021, 1, 1, 12, 0, 0)));
 
         await controller.PlaceDefaultOrder();
 
@@ -34,11 +34,11 @@ public class DefaultOrderTests {
             Coupon {cart.Coupons.First().Code} was added to cart.
 
             Cart summary:
-            {repo.GetDefaultOrder()?.OrderInfo?.Summarize()}
+            {repo.GetDefaultOrder()?.Order?.OrderInfo?.Summarize()}
             Estimated Wait: {summaryResult?.WaitTime}
             Price: ${summaryResult?.TotalPrice}
 
-            {repo.GetDefaultOrder()?.Payment?.Summarize()}
+            {repo.GetDefaultOrder()?.Order?.Payment?.Summarize()}
 
             Confirm order? [Y/n]: 
             Ordering pizza...
@@ -57,7 +57,7 @@ public class DefaultOrderTests {
         DummyTerminalUI terminalUI = new("n");
         DummyPizzaRepository repo = new();
         DummyPizzaCart cart = new();
-        PizzaController controller = new(repo, _ => cart, default!, default!, terminalUI, default!, default!, default!);
+        PizzaController controller = new(repo, _ => cart, default!, default!, terminalUI, default!, default!, default!, new FixedDateGetter(new(2021, 1, 1, 12, 0, 0)));
 
         await controller.PlaceDefaultOrder();
 
@@ -76,11 +76,11 @@ public class DefaultOrderTests {
             Coupon {cart.Coupons.First().Code} was added to cart.
 
             Cart summary:
-            {repo.GetDefaultOrder()?.OrderInfo?.Summarize()}
+            {repo.GetDefaultOrder()?.Order?.OrderInfo?.Summarize()}
             Estimated Wait: {summaryResult?.WaitTime}
             Price: ${summaryResult?.TotalPrice}
 
-            {repo.GetDefaultOrder()?.Payment?.Summarize()}
+            {repo.GetDefaultOrder()?.Order?.Payment?.Summarize()}
 
             Confirm order? [Y/n]: 
             Order cancelled.

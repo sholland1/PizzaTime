@@ -24,12 +24,13 @@ public record PizzaQueryServer(HttpOptions HttpOptions, IPizzaRepo PizzaReposito
         }
     });
 
-    private string HandleRequest(string request) => request.Split(":") switch {
-        [ "pizza", string pizzaName ] => PizzaRepository.GetPizza(pizzaName)?.Summarize() ?? "Pizza not found.",
-        [ "payment", string paymentName ] => PizzaRepository.GetPayment(paymentName)?.Summarize() ?? "Payment not found.",
-        [ "order", string orderName ] => PizzaRepository.GetOrder(orderName)?.Summarize() ?? "Order not found.",
-        [ "store", string storeId ] => StoreApi.GetStore(storeId)?.Summarize() ?? "Store not found.",
-        [ "coupon", string couponId ] => StoreApi.GetCoupon(couponId)?.Summarize() ?? "Coupon not found.",
+    private string HandleRequest(string request) => Utils.SplitAtFirst(request, ':') switch {
+        ("pizza", string pizzaName) => PizzaRepository.GetPizza(pizzaName)?.Summarize() ?? "Pizza not found.",
+        ("payment", string paymentName) => PizzaRepository.GetPayment(paymentName)?.Summarize() ?? "Payment not found.",
+        ("order", string orderName) => PizzaRepository.GetOrder(orderName)?.Summarize() ?? "Order not found.",
+        ("pastorder", string orderInstance) => PizzaRepository.GetPastOrder(new(orderInstance))?.Summarize() ?? "Past order not found.",
+        ("store", string storeId) => StoreApi.GetStore(storeId)?.Summarize() ?? "Store not found.",
+        ("coupon", string couponId) => StoreApi.GetCoupon(couponId)?.Summarize() ?? "Coupon not found.",
         _ => "Invalid request"
     };
 }

@@ -9,7 +9,8 @@ public partial class PizzaController(
     ITerminalUI _terminalUI,
     IUserChooser _chooser,
     TerminalSpinner _spinner,
-    IEditor _editor) {
+    IEditor _editor,
+    IDateGetter _dateGetter) {
 
     public async Task PlaceDefaultOrder() {
         var userOrder = _repo.GetDefaultOrder();
@@ -26,7 +27,8 @@ public partial class PizzaController(
             return;
         }
 
-        await OrderPizza(userOrder, personalInfo);
+        var (orderName, order) = userOrder;
+        await OrderPizza(orderName, order, personalInfo);
     }
 
     public async Task PlaceOrder(string orderName) {
@@ -44,10 +46,10 @@ public partial class PizzaController(
             return;
         }
 
-        await OrderPizza(order, personalInfo);
+        await OrderPizza(orderName, order, personalInfo);
     }
 
-    public async Task OrderPizza(ActualOrder userOrder, PersonalInfo personalInfo) {
+    public async Task OrderPizza(string orderName, ActualOrder userOrder, PersonalInfo personalInfo) {
         var cart = _startOrder(userOrder.OrderInfo);
 
         bool firstTime = true;
@@ -75,10 +77,13 @@ public partial class PizzaController(
         }
 
         var priceResult = await cart.GetSummary();
-        priceResult.Match(
-            message => _terminalUI.PrintLine($"Failed to check cart price:\n{message}"),
-            summary => _terminalUI.PrintLine(
-                $"""
+        var summarySuccess = priceResult.Match(
+            message => {
+                _terminalUI.PrintLine($"Failed to check cart price:\n{message}");
+                return default(SummarySuccess?);
+            },
+            summary => {
+                _terminalUI.PrintLine($"""
                 Cart summary:
                 {userOrder.OrderInfo.Summarize()}
                 Estimated Wait: {summary.WaitTime}
@@ -86,8 +91,10 @@ public partial class PizzaController(
 
                 {userOrder.Payment.Summarize()}
 
-                """));
-        if (priceResult.IsFailure) return;
+                """);
+                return summary;
+            });
+        if (summarySuccess is null) return;
 
         var answer = _terminalUI.Prompt("Confirm order? [Y/n]: ");
         _terminalUI.PrintLine();
@@ -100,10 +107,20 @@ public partial class PizzaController(
         _terminalUI.PrintLine("Ordering pizza...");
 
         var orderResult = await cart.PlaceOrder(personalInfo, userOrder.Payment);
-        _terminalUI.PrintLine(
-            orderResult.Match(
-                message => $"Failed to place order: {message}",
-                message => $"Order summary:\n{message}\nDone."));
+
+        orderResult.Match(
+            message => _terminalUI.PrintLine($"Failed to place order: {message}"),
+            message => {
+                PastOrder pastOrder = new() {
+                    OrderName = orderName,
+                    TimeStamp = _dateGetter.GetDateTime().TruncateToSeconds(),
+                    Order = userOrder.ToHistOrder(),
+                    EstimatedWaitMinutes = summarySuccess.WaitTime,
+                    TotalPrice = summarySuccess.TotalPrice
+                };
+                _repo.AddOrderToHistory(pastOrder);
+                _terminalUI.PrintLine($"Order summary:\n{message}\nDone.");
+            });
     }
 
     private async Task PlaceOrder() {
@@ -125,7 +142,7 @@ public partial class PizzaController(
         }
 
         _terminalUI.PrintLine($"Placing '{orderName}' order:");
-        await OrderPizza(order, _repo.GetPersonalInfo()!);
+        await OrderPizza(orderName, order, _repo.GetPersonalInfo()!);
     }
 
     public async Task OpenProgram() {
@@ -163,13 +180,19 @@ public partial class PizzaController(
             case '4': _ = ManagePaymentsMenu(); break;
             case '5': _ = ManagePersonalInfo(); break;
             // case '6': await TrackOrder(); break;
-            // case '7': ViewOrderHistory(); break;
+            case '7': ViewPastOrders(); break;
             default:
                 _terminalUI.PrintLine("Not a valid option. Try again.");
                 break;
         }
 
         await MainMenu();
+    }
+
+    private void ViewPastOrders() {
+        var orders = _repo.ListPastOrders().ToList();
+        var message = $"You have placed {orders.Count} orders with this program.";
+        _chooser.IgnoreUserChoice(message, orders.Select(o => o.ToString()), "pastorder");
     }
 
     public Task TrackOrder() {
