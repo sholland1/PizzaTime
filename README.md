@@ -1,4 +1,4 @@
-# Order Pizza
+# Order Pizza 🍕
 
 This application allows ordering Domino's pizzas from the command line. You can manage orders, payments, pizzas, and personal info. You can track your
 order. The application uses OpenAI to design a pizza using natural language.
