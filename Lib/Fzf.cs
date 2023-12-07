@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
 
 namespace Hollandsoft.OrderPizza;
 
@@ -98,15 +97,15 @@ public static class Fzf {
         // public int Listen { get; init; }
         #endregion
 
-        public virtual IEnumerable<string> Arguments {
+        public IEnumerable<string> Arguments {
             get {
                 #region Search Mode
                 if (Extended is bool extended) yield return extended ? "-x" : "+x";
                 if (Exact is bool exact) yield return exact ? "--exact" : "--no-exact";
                 if (CaseSensitive is bool cs) yield return cs ? "+i" : "-i";
                 if (Literal is bool l) yield return l ? "--literal" : "--no-literal";
-                if (Scheme is not null) yield return $"--scheme={Scheme.ToString()?.ToLower(CultureInfo.InvariantCulture)}";
-                if (Algo is not null) yield return $"--algo={Algo.ToString()?.ToLower(CultureInfo.InvariantCulture)}";
+                if (Scheme is not null) yield return $"--scheme={Scheme.ToString()?.ToLowerInvariant()}";
+                if (Algo is not null) yield return $"--algo={Algo.ToString()?.ToLowerInvariant()}";
                 if (Disabled is bool d) yield return d ? "--disabled" : "--enabled";
                 #endregion
 
@@ -115,7 +114,7 @@ public static class Fzf {
                 if (Track is bool track) yield return track ? "--track" : "--no-track";
                 if (TAC is bool tac) yield return tac ? "--tac" : "--no-tac";
                 if (TieBreak.Length != 0)
-                    yield return $"--tiebreak={string.Join(',', TieBreak.Select(t => t.ToString().ToLower(CultureInfo.InvariantCulture)))}";
+                    yield return $"--tiebreak={string.Join(',', TieBreak.Select(t => t.ToString().ToLowerInvariant()))}";
                 #endregion
 
                 #region Interface
@@ -131,9 +130,9 @@ public static class Fzf {
                 #endregion
 
                 #region Layout
-                if (Layout is not null) yield return $"--layout={Layout.ToString()?.Replace('_', '-').ToLower(CultureInfo.InvariantCulture)}";
+                if (Layout is not null) yield return $"--layout={Layout.ToString()?.Replace('_', '-').ToLowerInvariant()}";
                 if (Reverse is bool r) yield return r ? "--reverse" : "--no-reverse";
-                if (Border is not null) yield return $"--border={Border.ToString()?.ToLower(CultureInfo.InvariantCulture)}";
+                if (Border is not null) yield return $"--border={Border.ToString()?.ToLowerInvariant()}";
                 if (BorderLabel is not null) yield return $"--border-label=\"{BorderLabel}\"";
                 if (NoUnicode is bool nu) yield return nu ? "--no-unicode" : "--unicode";
                 if (Separator is not null) yield return $"--separator=\"{Separator}\"";
@@ -151,7 +150,7 @@ public static class Fzf {
                 #region Display
                 if (Ansi is bool a) yield return a ? "--ansi" : "--no-ansi";
                 if (Tabstop is not null) yield return $"--tabstop={Tabstop}";
-                if (Color is not null) yield return $"--color={Color.ToString()?.Replace("_", "").ToLower(CultureInfo.InvariantCulture)}";
+                if (Color is not null) yield return $"--color={Color.ToString()?.Replace("_", "").ToLowerInvariant()}";
                 if (NoBold is bool nb) yield return nb ? "--no-bold" : "--bold";
                 if (Black is bool b) yield return b ? "--black" : "--no-black";
                 #endregion
