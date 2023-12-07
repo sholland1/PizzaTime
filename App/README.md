@@ -5,15 +5,32 @@ order. The application uses OpenAI to design a pizza using natural language.
 
 ## Example usage
 
-First set the OpenAI API key:
-```bash
-$ order-pizza --set-api-key <api-key>
+### Get an API key from OpenAI
+You will need to set up an account with [OpenAI](https://openai.com/). Once you've created the key, it will be located here: https://platform.openai.com/api-keys. Copy it into your clipboard for the next step.
+
+### Set the environment variable
+
+#### Windows
+Use the following command to set the environment variable. Set the key in the Environment Variables settings dialog to make it permanent.
+```cmd
+> set OPENAI_API_KEY=<your-key>
 ```
 
-Then setup your personal info, pizzas, payments, and orders using the menus:
+#### Linux
+Use the following command to set the environment variable. Put this in your .bashrc or another initialization script to make it permanent.
+```bash
+$ export OPENAI_API_KEY='<your-key>'
+```
+
+Go to [OpenAI](https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety) for more information.
+
+### Run the application
+Run the program with no argmuents to get started:
 ```bash
 $ order-pizza
 ```
+
+You will be presented with a menu where you can create and manage orders, pizzas, payments, and personal info. You can also track your order and view your order history.
 ```
 Welcome to the pizza ordering app!🍕
 1. Place order
@@ -26,7 +43,7 @@ Welcome to the pizza ordering app!🍕
 q. Exit
 ```
 
-You can order a pizza using the menu or by using one of the following commands:
+Once you have created an order, you can place it with one of the following commands:
 ```bash
 $ order-pizza --default-order
 $ order-pizza --order <named-order>
