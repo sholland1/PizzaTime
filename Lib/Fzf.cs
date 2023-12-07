@@ -182,28 +182,42 @@ public static class Fzf {
     }
 
     public static string? ChooseWithFzf(this IEnumerable<string> source, FzfOptions? options = null) =>
-        ChooseImpl(source, (options ?? new()).Arguments.Prepend("--no-multi")).SingleOrDefault();
+        ChooseImpl(source, MakeNoMultiArgs(options)).SingleOrDefault();
+
+    public static async Task<string?> ChooseWithFzf(this IAsyncEnumerable<string> source, FzfOptions? options = null) =>
+        (await ChooseImpl(source, MakeNoMultiArgs(options))).SingleOrDefault();
 
     public static List<string> ChooseMultiWithFzf(this IEnumerable<string> source, FzfOptions? options = null, int? maxSelect = null) =>
-        ChooseImpl(source, (options ?? new()).Arguments.Prepend("--multi" + (maxSelect == null ? "" : $"={maxSelect}")));
+        ChooseImpl(source, MakeMultiArgs(options, maxSelect));
+
+    public static async Task<List<string>> ChooseMultiWithFzf(this IAsyncEnumerable<string> source, FzfOptions? options = null, int? maxSelect = null) =>
+        await ChooseImpl(source, MakeMultiArgs(options, maxSelect));
+
+    private static IEnumerable<string> MakeNoMultiArgs(FzfOptions? options) =>
+        (options ?? new()).Arguments.Prepend("--no-multi");
+    private static IEnumerable<string> MakeMultiArgs(FzfOptions? options, int? maxSelect) =>
+        (options ?? new()).Arguments.Prepend("--multi" + (maxSelect == null ? "" : $"={maxSelect}"));
+
+    private static async Task<List<string>> ChooseImpl(IAsyncEnumerable<string> source, IEnumerable<string> arguments) {
+        List<string> items = [];
+        try {
+            var p = StartFzfProcess(arguments, items);
+
+            await foreach (var s in source) {
+                p.StandardInput.WriteLine(s);
+            }
+
+            p.WaitForExit();
+        }
+        catch (IOException ex) when (ex.Message.Contains("Broken pipe")) {
+        }
+        return items;
+    }
 
     private static List<string> ChooseImpl(IEnumerable<string> source, IEnumerable<string> arguments) {
         List<string> items = [];
         try {
-            Process p = new() {
-                StartInfo = new("fzf", string.Join(' ', arguments)) {
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true
-                }
-            };
-
-            p.OutputDataReceived += (_, e) => {
-                if (e.Data == null) return;
-                items.Add(e.Data);
-            };
-
-            p.Start();
-            p.BeginOutputReadLine();
+            var p = StartFzfProcess(arguments, items);
 
             foreach (var s in source) {
                 p.StandardInput.WriteLine(s);
@@ -214,6 +228,24 @@ public static class Fzf {
         catch (IOException ex) when (ex.Message.Contains("Broken pipe")) {
         }
         return items;
+    }
+
+    private static Process StartFzfProcess(IEnumerable<string> arguments, List<string> items) {
+        Process p = new() {
+            StartInfo = new("fzf", string.Join(' ', arguments)) {
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true
+            }
+        };
+
+        p.OutputDataReceived += (_, e) => {
+            if (e.Data == null) return;
+            items.Add(e.Data);
+        };
+
+        p.Start();
+        p.BeginOutputReadLine();
+        return p;
     }
 
     public enum FzfColor { Dark, Light, _16, BW }
