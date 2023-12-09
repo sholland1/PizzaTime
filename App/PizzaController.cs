@@ -179,7 +179,7 @@ public partial class PizzaController(
             case '3': await ManagePizzasMenu(); break;
             case '4': _ = ManagePaymentsMenu(); break;
             case '5': _ = ManagePersonalInfo(); break;
-            // case '6': await TrackOrder(); break;
+            case '6': await TrackOrder(); break;
             case '7': ViewPastOrders(); break;
             default:
                 _terminalUI.PrintLine("Not a valid option. Try again.");
@@ -195,8 +195,52 @@ public partial class PizzaController(
         _chooser.IgnoreUserChoice(message, orders.Select(o => o.ToString()), "pastorder");
     }
 
-    public Task TrackOrder() {
-        throw new NotImplementedException();
+    public async Task TrackOrder() {
+        var phone = _repo.GetPersonalInfo()?.Phone;
+        if (phone is null) {
+            _terminalUI.PrintLine("No phone number found.");
+            return;
+        }
+
+        _terminalUI.PrintLine("Checking for orders...");
+        var orders = await _storeApi.InitiateTrackOrder(new(phone));
+        if (orders.Length == 0) {
+            _terminalUI.PrintLine("No orders found.");
+            return;
+        }
+
+        var order = SelectOrderToTrack(orders);
+
+        _terminalUI.PrintLine($"Tracking order {order.OrderID}...");
+        var request = order.ToTrackRequest();
+        var timeToSleep = TimeSpan.FromSeconds(30);
+
+        while (true) {
+            var trackResult = await _storeApi.TrackOrder(request);
+
+            _terminalUI.Print($"Status: {trackResult.OrderStatus} ");
+            var (message, isComplete) = trackResult.OrderStatus switch {
+                "MakeLine" => ($"Start Time: {trackResult.StartTime}", false),
+                "Oven" => ($"Oven Time: {trackResult.OvenTime}", false),
+                "Complete" => ($"Rack Time: {trackResult.RackTime}", true),
+                _ => ("Unknown order status: " + trackResult.OrderStatus, false)
+            };
+            _terminalUI.PrintLine(message);
+
+            if (isComplete) break;
+            Thread.Sleep(timeToSleep);
+        }
+
+        _terminalUI.PrintLine($"Order is ready! {_dateGetter.GetDateTime():T}");
+    }
+
+    private InitialTrackResponse SelectOrderToTrack(InitialTrackResponse[] orders) {
+        if (orders.Length == 1) return orders[0];
+
+        var orderID = _chooser.GetUserChoice(
+            "Multiple orders found. Choose an order to track: ",
+            orders.Select(o => o.OrderID));
+        return orders.First(o => o.OrderID == orderID);
     }
 
     private static bool IsAffirmative(string? answer) => answer is null or "Y" or "y";

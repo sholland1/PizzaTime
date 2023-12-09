@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
@@ -6,6 +7,7 @@ namespace Hollandsoft.PizzaTime;
 
 public class DominosStoreApi(ILogger<DominosStoreApi> _log, ISerializer _serializer) : IStoreApi {
     const string _baseUrl = "https://order.dominos.com";
+    const string _trackUrl = "https://tracker.dominos.com/tracker-presentation-service";
     private Dictionary<string, Store> _stores = [];
     private Dictionary<string, MenuCoupon> _coupons = [];
 
@@ -57,6 +59,44 @@ public class DominosStoreApi(ILogger<DominosStoreApi> _log, ISerializer _seriali
 
     public MenuCoupon? GetCoupon(string couponId) =>
         _coupons.TryGetValue(couponId, out var coupon) ? coupon : null;
+
+    public async Task<InitialTrackResponse[]> InitiateTrackOrder(InitialTrackRequest request) {
+        var requestUri = $"/v2/orders?phonenumber={request.PhoneNumber}";
+        _log.LogDebug(requestUri);
+
+        using HttpClient client = new();
+        AddTrackingHeaders(client);
+        var response = await client.GetAsync(_trackUrl + requestUri);
+        _log.LogDebug("Response: {StatusCode}", response.StatusCode);
+
+        if (response.StatusCode == HttpStatusCode.NotFound) return [];
+
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        _log.LogTrace(content);
+        return _serializer.Deserialize<InitialTrackResponse[]>(content)!;
+    }
+
+    public async Task<TrackResponse> TrackOrder(TrackRequest request) {
+        _log.LogDebug(request.Uri);
+
+        using HttpClient client = new();
+        AddTrackingHeaders(client);
+        var response = await client.GetAsync(_trackUrl + request.Uri);
+        _log.LogDebug("Response: {StatusCode}", response.StatusCode);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        _log.LogTrace(content);
+        return _serializer.Deserialize<TrackResponse>(content)!;
+    }
+
+    private static void AddTrackingHeaders(HttpClient client) {
+        client.DefaultRequestHeaders.Add("accept", "application/json");
+        client.DefaultRequestHeaders.Add("dpz-language", "en");
+        client.DefaultRequestHeaders.Add("dpz-market", "UNITED_STATES");
+    }
 }
 
 public interface IStoreApi {
@@ -65,7 +105,37 @@ public interface IStoreApi {
 
     Task<List<string>> ListCoupons(MenuRequest request);
     MenuCoupon? GetCoupon(string couponId);
+
+    Task<InitialTrackResponse[]> InitiateTrackOrder(InitialTrackRequest request);
+    Task<TrackResponse> TrackOrder(TrackRequest request);
 }
+
+public record TrackRequest(string Uri);
+
+public class TrackResponse {
+    public DateTime? StartTime { get; init; }
+    public DateTime? OvenTime { get; init; }
+    public DateTime? RackTime { get; init; }
+    public required string OrderStatus { get; init; }
+}
+
+// public enum OrderTrackStatus { MakeLine, Oven, Complete}
+
+public class InitialTrackResponse {
+    public string? StoreID { get; init; }
+    public required string OrderID { get; init; }
+    public string? OrderDescription { get; init; }
+    public DateTime? OrderTakeCompleteTime { get; init; }
+    public required Actions Actions { get; init; }
+
+    public TrackRequest ToTrackRequest() => new(Actions.Track);
+}
+
+public class Actions {
+    public required string Track { get; init; }
+}
+
+public record InitialTrackRequest(string PhoneNumber);
 
 public class MenuCoupon {
     public string Code { get; set; } = "";
