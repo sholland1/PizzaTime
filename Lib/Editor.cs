@@ -7,8 +7,14 @@ public interface IEditor {
     string? Edit(string pizzaName, Pizza pizza);
 }
 
-public class InstalledProgramEditor(string _editor, string _instructionsFilename) : IEditor {
-    private readonly string _instructions = File.ReadAllText(_instructionsFilename);
+public class InstalledProgramEditor(string _editor, FileSystem _fileSystem, string _instructionsFilename) : IEditor {
+    private readonly string _instructions = string.Format(
+        _fileSystem.ReadAllText(_instructionsFilename),
+        SizeHelpers.AllowedCrustsUserInstructions,
+        string.Join(", ", CutHelpers.AllCuts),
+        string.Join(", ", BakeHelpers.AllBakes),
+        string.Join(", ", SauceTypeHelpers.AllSauces),
+        string.Join('\n', ToppingTypeHelpers.AllToppings));
 
     public string? Create() => EditImpl("");
 
@@ -27,23 +33,28 @@ public class InstalledProgramEditor(string _editor, string _instructionsFilename
             {separator}{prependInstructions}
             {_instructions}
             """;
-        File.WriteAllText(filename, contents);
+        _fileSystem.WriteAllText(filename, contents);
         Process.Start(_editor, filename).WaitForExit();
-        var lines = File.ReadAllLines(filename)
+        var lines = _fileSystem.ReadLines(filename)
             .TakeWhile(s => s != separator)
             .ToArray();
-        File.Delete(filename);
+        _fileSystem.Delete(filename);
 
         return lines is [""] ? null
             : string.Join(Environment.NewLine, lines);
     }
 
-    //TODO: Use something like .pizza/COMMIT_EDITMSG
-    private static string GenerateFilename() => Path.GetTempFileName();
+    private static string GenerateFilename() => "PIZZA_EDITMSG";
 }
 
-public class FallbackEditor(string _instructionsFilename) : IEditor {
-    private readonly string[] _instructions = File.ReadAllLines(_instructionsFilename);
+public class FallbackEditor(FileSystem _fileSystem, string _instructionsFilename) : IEditor {
+    private readonly string[] _instructions = string.Format(
+        _fileSystem.ReadAllText(_instructionsFilename),
+        SizeHelpers.AllowedCrustsUserInstructions,
+        string.Join(", ", CutHelpers.AllCuts),
+        string.Join(", ", BakeHelpers.AllBakes),
+        string.Join(", ", SauceTypeHelpers.AllSauces),
+        string.Join('\n', ToppingTypeHelpers.AllToppings)).Split('\n');
 
     public string? Create() => EditImpl("Describe your new pizza:", Array.Empty<string>());
 

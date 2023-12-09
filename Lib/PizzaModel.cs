@@ -71,8 +71,10 @@ public class UnvalidatedPizza {
 public enum Size { Small, Medium, Large, XL }
 
 public static class SizeHelpers {
-    public static string AllowedCrustsString =>
-        string.Join("\n", Enum.GetValues<Size>().Select(s => $"{s}: {string.Join(" ", s.AllowedCrusts())}"));
+    public static string AllowedCrustsAIPrompt =>
+        string.Join("\n", Enum.GetValues<Size>().Select(s => $"{s}: {string.Join(' ', s.AllowedCrusts())}"));
+    public static string AllowedCrustsUserInstructions =>
+        string.Join("\n", Enum.GetValues<Size>().Select(s => $"{s} allowed crusts: {string.Join(", ", s.AllowedCrusts())}"));
 
     public static Crust[] AllowedCrusts(this Size size) => size switch {
         Size.Small => [Crust.HandTossed, Crust.Thin, Crust.GlutenFree],
@@ -123,8 +125,7 @@ public record struct Sauce(SauceType SauceType, Amount Amount) {
 public enum SauceType { Tomato, Marinara, HoneyBBQ, GarlicParmesan, Alfredo, Ranch }
 
 public static class SauceTypeHelpers {
-    public static string AllSaucesString =>
-        string.Join(' ', Enum.GetValues<SauceType>());
+    public static SauceType[] AllSauces => Enum.GetValues<SauceType>();
 }
 
 public record struct Topping(ToppingType ToppingType, Location Location, Amount Amount);
@@ -151,9 +152,16 @@ public enum ToppingType {
 }
 
 public static class ToppingTypeHelpers {
-    public static string AllToppingsString =>
-        string.Join(' ', Enum.GetValues<ToppingType>());
+    public static ToppingType[] AllToppings => Enum.GetValues<ToppingType>();
 }
 
 public enum Bake { Normal, WellDone }
+public static class BakeHelpers {
+    public static Bake[] AllBakes => Enum.GetValues<Bake>();
+}
+
 public enum Cut { Pie, Square, Uncut }
+
+public static class CutHelpers {
+    public static Cut[] AllCuts => Enum.GetValues<Cut>();
+}

@@ -73,9 +73,9 @@ static ServiceCollection BuildServiceProvider() {
         .AddSingleton<IDateGetter, CurrentDateGetter>();
 
     var editor = configuration.GetValue<string>("EDITOR");
-    services.AddSingleton<IEditor>(editor is not null
-        ? new InstalledProgramEditor(editor, "AIPizzaPromptSystemMessage.txt")
-        : new FallbackEditor("AIPizzaPromptSystemMessage.txt"));
+    services.AddSingleton<IEditor>(provider => editor is not null
+        ? new InstalledProgramEditor(editor, provider.GetRequiredService<FileSystem>(), "InstructionsToDescribePizza.txt")
+        : new FallbackEditor(provider.GetRequiredService<FileSystem>(), "InstructionsToDescribePizza.txt"));
 
     services
         .AddSingleton<PizzaController>()

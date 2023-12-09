@@ -1,0 +1,19 @@
+Describe your pizza in natural language.
+
+There are a few rules to keep in mind:
+You may choose up to 10 toppings per side from the list below. (Light=1, Normal=1, Extra=2)
+You may put each topping on the left half, right half, or whole pizza.
+
+{0}
+
+Pan and Brooklyn Style must have cheese.
+
+You may choose the cut and bake on Hand Tossed, Pan, Gluten Free, and Brooklyn Style crust.
+Available cuts: {1}
+Available bakes: {2}
+
+Garlic crust is an option on Hand Tossed pizza.
+You may choose the cut on Thin crust. Added oregano is also an option.
+
+Available Sauces: {3}
+Available Toppings: {4}
