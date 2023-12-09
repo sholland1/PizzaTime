@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
@@ -62,40 +61,27 @@ public class DominosStoreApi(ILogger<DominosStoreApi> _log, ISerializer _seriali
 
     public async Task<InitialTrackResponse[]> InitiateTrackOrder(InitialTrackRequest request) {
         var requestUri = $"/v2/orders?phonenumber={request.PhoneNumber}";
+        return await TrackImpl<InitialTrackResponse[]>(requestUri);
+    }
+
+    public async Task<TrackResponse> TrackOrder(TrackRequest request) =>
+        await TrackImpl<TrackResponse>(request.Uri);
+
+    private async Task<TResponse> TrackImpl<TResponse>(string requestUri) {
         _log.LogDebug(requestUri);
 
         using HttpClient client = new();
-        AddTrackingHeaders(client);
-        var response = await client.GetAsync(_trackUrl + requestUri);
-        _log.LogDebug("Response: {StatusCode}", response.StatusCode);
-
-        if (response.StatusCode == HttpStatusCode.NotFound) return [];
-
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-        _log.LogTrace(content);
-        return _serializer.Deserialize<InitialTrackResponse[]>(content)!;
-    }
-
-    public async Task<TrackResponse> TrackOrder(TrackRequest request) {
-        _log.LogDebug(request.Uri);
-
-        using HttpClient client = new();
-        AddTrackingHeaders(client);
-        var response = await client.GetAsync(_trackUrl + request.Uri);
-        _log.LogDebug("Response: {StatusCode}", response.StatusCode);
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-        _log.LogTrace(content);
-        return _serializer.Deserialize<TrackResponse>(content)!;
-    }
-
-    private static void AddTrackingHeaders(HttpClient client) {
         client.DefaultRequestHeaders.Add("accept", "application/json");
         client.DefaultRequestHeaders.Add("dpz-language", "en");
         client.DefaultRequestHeaders.Add("dpz-market", "UNITED_STATES");
+
+        var response = await client.GetAsync(_trackUrl + requestUri);
+        _log.LogDebug("Response: {StatusCode}", response.StatusCode);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        _log.LogTrace(content);
+        return _serializer.Deserialize<TResponse>(content)!;
     }
 }
 
