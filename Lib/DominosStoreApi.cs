@@ -124,11 +124,11 @@ public class Actions {
 public record InitialTrackRequest(string PhoneNumber);
 
 public class MenuCoupon {
-    public string Code { get; set; } = "";
-    public string Name { get; set; } = "";
-    public string? Description { get; set; }
-    public string Price { get; set; } = "";
-    // public DateOnly? EffectiveOn { get; set; }
+    public string Code { get; init; } = "";
+    public string Name { get; init; } = "";
+    public string? Description { get; init; }
+    public string Price { get; init; } = "";
+    // public DateOnly? EffectiveOn { get; init; }
 
     public string Summarize() => $"""
         Coupon Code: {Code}
@@ -141,10 +141,10 @@ public class MenuCoupon {
 public record MenuRequest(string StoreId);
 
 public class StoreRequest {
-    public required ServiceMethod ServiceMethod { get; set; }
-    public string? City { get; set; }
-    public string? State { get; set; }
-    public string? ZipCode { get; set; }
+    public required ServiceMethod ServiceMethod { get; init; }
+    public string? City { get; init; }
+    public string? State { get; init; }
+    public string? ZipCode { get; init; }
 
     public string UrlParameters {
         get {
@@ -165,21 +165,21 @@ public class StoreRequest {
 }
 
 public class StoreResponse {
-    public required int Status { get; set; }
-    public required string Granularity { get; set; }
-    public required List<Store> Stores { get; set; }
+    public required int Status { get; init; }
+    public required string Granularity { get; init; }
+    public required List<Store> Stores { get; init; }
 }
 
 public class Store {
-    public required string StoreID { get; set; }
-    public string Phone { get; set; } = "";
-    public string AddressDescription { get; set; } = "";
-    public string HoursDescription { get; set; } = "";
-    public bool AllowDeliveryOrders { get; set; }
-    public bool AllowCarryoutOrders { get; set; }
-    public required ServiceMethodEstimatedWaitMinutes ServiceMethodEstimatedWaitMinutes { get; set; }
-    public required StoreCoordinates StoreCoordinates { get; set; }
-    public bool IsOpen { get; set; }
+    public required string StoreID { get; init; }
+    public string Phone { get; init; } = "";
+    public string AddressDescription { get; init; } = "";
+    public string HoursDescription { get; init; } = "";
+    public bool AllowDeliveryOrders { get; init; }
+    public bool AllowCarryoutOrders { get; init; }
+    public required ServiceMethodEstimatedWaitMinutes ServiceMethodEstimatedWaitMinutes { get; init; }
+    public required StoreCoordinates StoreCoordinates { get; init; }
+    public bool IsOpen { get; init; }
 
     public string Summarize() => $"""
         StoreID: {StoreID} *{(IsOpen ? "Open" : "Closed")}*
@@ -197,13 +197,13 @@ public class Store {
 }
 
 public class StoreCoordinates {
-    public required string StoreLatitude { get; set; }
-    public required string StoreLongitude { get; set; }
+    public required string StoreLatitude { get; init; }
+    public required string StoreLongitude { get; init; }
 }
 
 public class ServiceMethodEstimatedWaitMinutes {
-    public EstimatedWaitMinutes? Delivery { get; set; }
-    public EstimatedWaitMinutes? Carryout { get; set; }
+    public EstimatedWaitMinutes? Delivery { get; init; }
+    public EstimatedWaitMinutes? Carryout { get; init; }
 
     public override string ToString() {
         return string.Join(Environment.NewLine, Helper());
@@ -217,6 +217,6 @@ public class ServiceMethodEstimatedWaitMinutes {
 }
 
 public class EstimatedWaitMinutes {
-    public required int Min { get; set; }
-    public required int Max { get; set; }
+    public required int Min { get; init; }
+    public required int Max { get; init; }
 }

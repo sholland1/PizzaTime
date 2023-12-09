@@ -11,8 +11,8 @@ public interface IAIPizzaBuilder {
 }
 
 public class AIPizzaBuilderConfig {
-    public string SystemMessageFile { get; set; } = "";
-    public string FewShotFile { get; set; } = "";
+    public string SystemMessageFile { get; init; } = "";
+    public string FewShotFile { get; init; } = "";
 }
 
 public class CompletionsPizzaBuilder : IAIPizzaBuilder {

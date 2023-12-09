@@ -34,8 +34,8 @@ public class ChatCompletionsPizzaBuilder : IAIPizzaBuilder {
     }
 
     private sealed class PromptPair {
-        public string User { get; set; } = "";
-        public UnvalidatedPizza? Assistant { get; set; }
+        public string User { get; init; } = "";
+        public UnvalidatedPizza? Assistant { get; init; }
     }
 
     public async Task<AIPizzaResult> CreatePizza(string userCreateMessage) => await EditPizza(null, userCreateMessage);

@@ -59,9 +59,9 @@ public class Order2 : Order {
 }
 
 public class StatusItem {
-    public string Code { get; set; } = "";
-    public int PulseCode { get; set; }
-    public string PulseText { get; set; } = "";
+    public string Code { get; init; } = "";
+    public int PulseCode { get; init; }
+    public string PulseText { get; init; } = "";
     public override string ToString() =>
         $"Code: \"{Code}\", PulseCode: {PulseCode}, PulseText: \"{PulseText}\"";
 }
@@ -86,48 +86,48 @@ public class ValidateRequest {
     public required Order Order { get; init; }
 }
 public class ValidateResponse {
-    public Order Order { get; set; } = new();
+    public Order Order { get; init; } = new();
 }
 
 public class PriceRequest {
     public required Order Order { get; init; }
 }
 public class PriceResponse {
-    public PricedOrder Order { get; set; } = new();
+    public PricedOrder Order { get; init; } = new();
 }
 
 public class PricedOrder {
-    public string OrderID { get; set; } = "";
-    public List<Product> Products { get; set; } = [];
-    public Amounts Amounts { get; set; } = new();
-    public string EstimatedWaitMinutes { get; set; } = "";
-    public List<Coupon> Coupons { get; set; } = [];
+    public string OrderID { get; init; } = "";
+    public List<Product> Products { get; init; } = [];
+    public Amounts Amounts { get; init; } = new();
+    public string EstimatedWaitMinutes { get; init; } = "";
+    public List<Coupon> Coupons { get; init; } = [];
 }
 
 public class Amounts {
-    public decimal Payment { get; set; } = 0;
+    public decimal Payment { get; init; } = 0;
 }
 
 public class Order {
-    public string OrderID { get; set; } = "";
-    public List<Product> Products { get; set; } = [];
-    public string ServiceMethod { get; set; } = "";
-    public string StoreID { get; set; } = "0";
-    public List<Coupon> Coupons { get; set; } = [];
-    public OrderAddress? Address { get; set; }
-    public string? FutureOrderTime { get; set; }
+    public string OrderID { get; init; } = "";
+    public List<Product> Products { get; init; } = [];
+    public string ServiceMethod { get; init; } = "";
+    public string StoreID { get; init; } = "0";
+    public List<Coupon> Coupons { get; init; } = [];
+    public OrderAddress? Address { get; init; }
+    public string? FutureOrderTime { get; init; }
 }
 
 public class OrderAddress {
-    public required string City { get; set; }
-    public required string PostalCode { get; set; }
-    public required string Region { get; set; }
-    public required string Street { get; set; }
-    public required string StreetName { get; set; }
-    public required string StreetNumber { get; set; }
-    public required string Type { get; set; }
-    public string? UnitNumber { get; set; }
-    public string? UnitType { get; set; }
+    public required string City { get; init; }
+    public required string PostalCode { get; init; }
+    public required string Region { get; init; }
+    public required string Street { get; init; }
+    public required string StreetName { get; init; }
+    public required string StreetNumber { get; init; }
+    public required string Type { get; init; }
+    public string? UnitNumber { get; init; }
+    public string? UnitType { get; init; }
 }
 
 [method: SetsRequiredMembers]

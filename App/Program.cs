@@ -142,15 +142,15 @@ internal sealed class DefaultCommand(PizzaQueryServer _server, PizzaController _
     public sealed class Settings : CommandSettings {
         [CommandOption("--default-order")]
         [Description("Place the default order with user confirmation only")]
-        public bool DefaultOrder { get; set; }
+        public bool DefaultOrder { get; init; }
 
         [CommandOption("---order <NAME>")]
         [Description("Place the order with the specified name with user confirmation only")]
-        public string? OrderName { get; set; }
+        public string? OrderName { get; init; }
 
         [CommandOption("--track")]
         [Description("Track your recent order")]
-        public bool Track { get; set; }
+        public bool Track { get; init; }
 
         public override ValidationResult Validate() =>
             DefaultOrder && OrderName is not null

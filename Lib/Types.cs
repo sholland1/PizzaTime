@@ -176,11 +176,11 @@ public record OrderInstance(string Name, DateTime TimeStamp) {
 }
 
 public class PastOrder {
-    public required string OrderName { get; set; }
-    public DateTime TimeStamp { get; set; }
-    public required UnvalidatedHistoricalOrder Order { get; set; }
-    public required string EstimatedWaitMinutes { get; set; }
-    public decimal TotalPrice { get; set; }
+    public required string OrderName { get; init; }
+    public DateTime TimeStamp { get; init; }
+    public required UnvalidatedHistoricalOrder Order { get; init; }
+    public required string EstimatedWaitMinutes { get; init; }
+    public decimal TotalPrice { get; init; }
 
     public OrderInstance ToOrderInstance() => new(OrderName, TimeStamp);
 
