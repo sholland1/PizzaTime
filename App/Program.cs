@@ -154,20 +154,20 @@ internal sealed class DefaultCommand(PizzaQueryServer _server, PizzaController _
 
         public override ValidationResult Validate() =>
             DefaultOrder && OrderName is not null
-            || DefaultOrder && Track
-            || OrderName is not null && Track
-                ? ValidationResult.Error("All arguments are mutually exclusive.")
+                ? ValidationResult.Error("The --default-order and --order arguments are mutually exclusive.")
                 : base.Validate();
     }
 
     private async Task<int> PizzaMain(bool defaultOrder, string? orderName, bool track) {
         if (defaultOrder) {
             await _controller.PlaceDefaultOrder();
+            if (track) await _controller.TrackOrder();
             return 0;
         }
 
         if (orderName is not null) {
             await _controller.PlaceOrder(orderName);
+            if (track) await _controller.TrackOrder();
             return 0;
         }
 
