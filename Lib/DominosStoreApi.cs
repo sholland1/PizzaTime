@@ -4,15 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Hollandsoft.PizzaTime;
 
-public class DominosStoreApi : IStoreApi {
+public class DominosStoreApi(ILogger<DominosStoreApi> _log, ISerializer _serializer) : IStoreApi {
     const string _baseUrl = "https://order.dominos.com";
-    private readonly ILogger<DominosStoreApi> _log;
-    private readonly ISerializer _serializer;
     private Dictionary<string, Store> _stores = [];
     private Dictionary<string, MenuCoupon> _coupons = [];
-
-    public DominosStoreApi(ILogger<DominosStoreApi> log, ISerializer serializer) =>
-        (_log, _serializer) = (log, serializer);
 
     public async Task<List<string>> ListStores(StoreRequest request) {
         var requestUri = "/power/store-locator" + request.UrlParameters;
@@ -79,14 +74,12 @@ public class MenuCoupon {
     public string Price { get; set; } = "";
     // public DateOnly? EffectiveOn { get; set; }
 
-    public string Summarize() {
-        return $"""
+    public string Summarize() => $"""
         Coupon Code: {Code}
         Name: {Name}
         Description: {Description ?? "None"}
         Price: ${Price}
         """;
-    }
 }
 
 public record MenuRequest(string StoreId);

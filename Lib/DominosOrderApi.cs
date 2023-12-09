@@ -29,8 +29,7 @@ public class DominosOrderApi(ILogger<DominosOrderApi> _log, ISerializer _seriali
         };
         var response = await client.PostAsync(requestUri,
             new StringContent(requestJson, Encoding.UTF8, "application/json"));
-        var statusCode = response.StatusCode;
-        _log.LogDebug("Response: {StatusCode}", statusCode);
+        _log.LogDebug("Response: {StatusCode}", response.StatusCode);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();

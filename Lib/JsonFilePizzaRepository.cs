@@ -159,23 +159,23 @@ public class JsonFilePizzaRepository(ISerializer _serializer, FileSystem _fileSy
     }
 
     const string OrderHistoryFilename = "orderHistory.jsonl";
-    private readonly Dictionary<OrderInstance, PastOrder> _orderHistory = [];
+    private readonly Dictionary<OrderInstance, PastOrder> _orderHistoryCache = [];
     public void AddOrderToHistory(PastOrder pastOrder) =>
         _fileSystem.AppendAllLines(OrderHistoryFilename, _serializer.Serialize(pastOrder, false));
 
     public IEnumerable<OrderInstance> ListPastOrders() {
-        _orderHistory.Clear();
+        _orderHistoryCache.Clear();
         if (!_fileSystem.Exists(OrderHistoryFilename)) yield break;
 
         foreach (var line in _fileSystem.ReadLines(OrderHistoryFilename)) {
             var pastOrder = _serializer.Deserialize<PastOrder>(line)!;
             var instance = pastOrder.ToOrderInstance();
-            _orderHistory.Add(instance, pastOrder);
+            _orderHistoryCache.Add(instance, pastOrder);
             yield return instance;
         }
     }
 
-    public PastOrder GetPastOrder(OrderInstance orderInstance) => _orderHistory[orderInstance];
+    public PastOrder GetPastOrder(OrderInstance orderInstance) => _orderHistoryCache[orderInstance];
 }
 
 public class FileSystem(string _root) {

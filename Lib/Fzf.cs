@@ -194,9 +194,9 @@ public static class Fzf {
         await ChooseImpl(source, MakeMultiArgs(options, maxSelect));
 
     private static IEnumerable<string> MakeNoMultiArgs(FzfOptions? options) =>
-        (options ?? new()).Arguments.Prepend("--no-multi");
+        ["--no-multi", .. options?.Arguments ?? []];
     private static IEnumerable<string> MakeMultiArgs(FzfOptions? options, int? maxSelect) =>
-        (options ?? new()).Arguments.Prepend("--multi" + (maxSelect == null ? "" : $"={maxSelect}"));
+        ["--multi" + (maxSelect == null ? "" : $"={maxSelect}"), .. options?.Arguments ?? []];
 
     private static async Task<List<string>> ChooseImpl(IAsyncEnumerable<string> source, IEnumerable<string> arguments) {
         List<string> items = [];

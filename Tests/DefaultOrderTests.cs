@@ -18,7 +18,12 @@ public class DefaultOrderTests {
 
         object results(int i) => cart.Calls[i].Result;
 
-        var pizzaResults = cart.Calls.Take(2).Select(x => x.Result).OfType<CartResult<AddPizzaSuccess>>().Select(x => x.SuccessValue).ToList();
+        var pizzaResults = cart.Calls
+            .Take(2)
+            .Select(x => x.Result)
+            .OfType<CartResult<AddPizzaSuccess>>()
+            .Select(x => x.SuccessValue)
+            .ToList();
         var summaryResult = ((CartResult<SummarySuccess>)results(2)).SuccessValue;
         var placeOrderResult = ((CartResult<string>)results(3)).SuccessValue;
 
@@ -61,7 +66,12 @@ public class DefaultOrderTests {
 
         await controller.PlaceDefaultOrder();
 
-        var pizzaResults = cart.Calls.Take(2).Select(x => x.Result).OfType<CartResult<AddPizzaSuccess>>().Select(x => x.SuccessValue).ToList();
+        var pizzaResults = cart.Calls
+            .Take(2)
+            .Select(x => x.Result)
+            .OfType<CartResult<AddPizzaSuccess>>()
+            .Select(x => x.SuccessValue)
+            .ToList();
         var summaryResult = ((CartResult<SummarySuccess>)cart.Calls[2].Result).SuccessValue;
 
         var expected = $"""
