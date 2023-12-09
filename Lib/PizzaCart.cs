@@ -74,7 +74,7 @@ public class DominosCart(IOrderApi _api, OrderInfo _orderInfo) : ICart {
             Order = new() {
                 Address = address,
                 OrderID = _orderID ?? "",
-                Products = _products.Append(userPizza.ToProduct(_products.Count + 1)).ToList(),
+                Products = [.. _products, userPizza.ToProduct(_products.Count + 1)],
                 ServiceMethod = _orderInfo.ServiceMethod.Name,
                 StoreID = _orderInfo.StoreId,
                 FutureOrderTime = timing
@@ -83,7 +83,7 @@ public class DominosCart(IOrderApi _api, OrderInfo _orderInfo) : ICart {
         var response = await _api.ValidateOrder(request);
 
         _orderID = response.Order.OrderID;
-        _products = response.Order.Products.Normalize().ToList();
+        _products = [.. response.Order.Products.Normalize()];
 
         return Success(
             new AddPizzaSuccess(_products.Count, response.Order.OrderID));
@@ -108,7 +108,7 @@ public class DominosCart(IOrderApi _api, OrderInfo _orderInfo) : ICart {
                 Products = _products,
                 ServiceMethod = _orderInfo.ServiceMethod.Name,
                 StoreID = _orderInfo.StoreId,
-                Coupons = _coupons.ToList()
+                Coupons = [.. _coupons]
             }
         };
         var response = await _api.PriceOrder(request);
@@ -141,7 +141,7 @@ public class DominosCart(IOrderApi _api, OrderInfo _orderInfo) : ICart {
         PlaceRequest request = new() {
             Order = new() {
                 Address = address,
-                Coupons = _coupons.ToList(),
+                Coupons = [.. _coupons],
                 Email = personalInfo.Email,
                 FirstName = personalInfo.FirstName,
                 LastName = personalInfo.LastName,

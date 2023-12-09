@@ -25,13 +25,12 @@ public class ChatCompletionsPizzaBuilder : IAIPizzaBuilder {
         var fewShot = _serializer.Deserialize<List<PromptPair>>(
             File.ReadAllText(config.FewShotFile))!;
 
-        _systemMessages = fewShot
+        _systemMessages = [.. fewShot
             .SelectMany(pp => new[] {
                 ChatMessage.FromSystem(pp.User, "example_user"),
                 ChatMessage.FromSystem(_serializer.Serialize(pp.Assistant?.Validate()), "example_assistant")
             })
-            .Prepend(ChatMessage.FromSystem(systemMessage))
-            .ToList();
+            .Prepend(ChatMessage.FromSystem(systemMessage))];
     }
 
     private sealed class PromptPair {
@@ -43,10 +42,9 @@ public class ChatCompletionsPizzaBuilder : IAIPizzaBuilder {
 
     public async Task<AIPizzaResult> EditPizza(Pizza? pizza, string userEditMessage) {
         var completionResult = await _service.CreateCompletion(new() {
-            Messages = _systemMessages
+            Messages = [.. _systemMessages
                 .Append(ChatMessage.FromAssistant(_serializer.Serialize(pizza)))
-                .Append(ChatMessage.FromUser(userEditMessage))
-                .ToList(),
+                .Append(ChatMessage.FromUser(userEditMessage))],
             Model = Models.Gpt_3_5_Turbo,
             MaxTokens = 300,
             Temperature = 0

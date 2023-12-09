@@ -64,16 +64,10 @@ public static class SummaryUtils {
         }
     }
 
-    private static IEnumerable<string> Display(this IEnumerable<Topping> ts) {
-        if (!ts.Any()) {
-            yield return "No Toppings";
-            yield break;
-        }
-        yield return "Toppings:";
-        foreach (var t in ts) {
-            yield return $" {string.Join(' ', t.Display())}";
-        }
-    }
+    private static IEnumerable<string> Display(this IEnumerable<Topping> ts) =>
+        ts.Any()
+        ? ["Toppings:", .. ts.Select(t => $" {string.Join(' ', t.Display())}")]
+        : ["No Toppings"];
 
     private static string Display(this Sauce? s) {
         var typeDisp = s == null ? "no" : $"{s.Value.SauceType}";

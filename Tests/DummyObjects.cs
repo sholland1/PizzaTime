@@ -38,7 +38,7 @@ public class DummyPizzaRepository : IPizzaRepo {
     public PersonalInfo? GetPersonalInfo() => _personalInfo;
 
     public NamedOrder? GetDefaultOrder() => new("default", new UnvalidatedActualOrder {
-            Pizzas = Pizzas.Values.Take(2).Select(p => p.Validate()).ToList(),
+            Pizzas = [.. Pizzas.Values.Take(2).Select(p => p.Validate())],
             Coupons = [new("1234")],
             OrderInfo = OrderInfos.First().Value.Validate(),
             Payment = Payments.First().Value.Validate()

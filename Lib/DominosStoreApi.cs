@@ -32,7 +32,7 @@ public class DominosStoreApi : IStoreApi {
 
         _stores = storeResponse.Stores.ToDictionary(s => s.StoreID);
 
-        return _stores.Keys.ToList();
+        return [.. _stores.Keys];
     }
 
     public Store? GetStore(string storeId) =>
@@ -57,7 +57,7 @@ public class DominosStoreApi : IStoreApi {
         _coupons = menuResponse["Coupons"]!.AsObject()
             .ToDictionary(c => c.Key, c => c.Value.Deserialize<MenuCoupon>()!);
 
-        return _coupons.Keys.ToList();
+        return [.. _coupons.Keys];
     }
 
     public MenuCoupon? GetCoupon(string couponId) =>

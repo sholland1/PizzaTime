@@ -265,7 +265,7 @@ public partial class PizzaController {
             _terminalUI.PrintLine("Invalid quantity.");
             return [];
         }
-        return pizzaNames.Zip(quantities, (p, q) => new SavedPizza(p, q)).ToList();
+        return [.. pizzaNames.Zip(quantities, (p, q) => new SavedPizza(p, q))];
 
         IEnumerable<int> GetQuantities(List<string> pizzaNames) {
             foreach (var pizzaName in pizzaNames) {
@@ -281,10 +281,9 @@ public partial class PizzaController {
     }
 
     private async Task<List<Coupon>> GetCoupons(string storeId) =>
-        _chooser.GetUserChoices(
+        [.. _chooser.GetUserChoices(
             "Choose coupons to add to order: ", await _storeApi.ListCoupons(new(storeId)), "coupon")
-            .Select(c => new Coupon(c))
-            .ToList();
+            .Select(c => new Coupon(c))];
 
     private async Task<string?> GetStoreId(ServiceMethod serviceMethod) {
         var zipCode = _terminalUI.Prompt("Zip code: ");

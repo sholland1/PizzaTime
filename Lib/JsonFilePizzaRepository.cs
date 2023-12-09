@@ -51,9 +51,8 @@ public class JsonFilePizzaRepository(ISerializer _serializer, FileSystem _fileSy
             PaymentType.PayWithCard => GetPayment(savedOrder.PaymentInfoName!)!,
             _ => throw new NotImplementedException("Unknown payment type")
         },
-        Pizzas = savedOrder.Pizzas
-            .Select(p => GetPizza(p.Name)!.WithQuantity(p.Quantity))
-            .ToList()
+        Pizzas = [.. savedOrder.Pizzas
+            .Select(p => GetPizza(p.Name)!.WithQuantity(p.Quantity))]
     };
 
     public PersonalInfo? GetPersonalInfo() =>

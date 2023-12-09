@@ -149,7 +149,7 @@ public class ActualOrder : UnvalidatedActualOrder {
     }
 
     public UnvalidatedHistoricalOrder ToHistOrder() => new() {
-        Pizzas = Pizzas.Select(p => new UnvalidatedPizza(p)).ToList(),
+        Pizzas = [.. Pizzas.Select(p => new UnvalidatedPizza(p))],
         Coupons = Coupons,
         OrderInfo = OrderInfo,
         Payment = Payment
