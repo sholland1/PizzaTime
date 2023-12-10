@@ -11,7 +11,7 @@ using Server;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-var services = BuildServiceProvider();
+var services = BuildServiceCollection();
 App.TypeRegistrar registrar = new(services);
 CommandApp<DefaultCommand> app = new(registrar);
 
@@ -19,9 +19,9 @@ app.Configure(config =>
     config.SetExceptionHandler(ex =>
         Console.WriteLine($"Unhandled exception: {ex}")));
 
-await app.RunAsync(args);
+return await app.RunAsync(args);
 
-static ServiceCollection BuildServiceProvider() {
+static ServiceCollection BuildServiceCollection() {
     ConfigurationBuilder builder = new();
     var configuration = builder
         .AddJsonFile("appsettings.json")
@@ -73,9 +73,13 @@ static ServiceCollection BuildServiceProvider() {
         .AddSingleton<IDateGetter, CurrentDateGetter>();
 
     var editor = configuration.GetValue<string>("EDITOR");
-    services.AddSingleton<IEditor>(provider => editor is not null
-        ? new InstalledProgramEditor(editor, provider.GetRequiredService<FileSystem>(), "InstructionsToDescribePizza.txt")
-        : new FallbackEditor(provider.GetRequiredService<FileSystem>(), "InstructionsToDescribePizza.txt"));
+    services.AddSingleton<IEditor>(services => {
+        var fs = services.GetRequiredService<FileSystem>();
+        var filename = "InstructionsToDescribePizza.txt";
+        return editor is not null
+            ? new InstalledProgramEditor(editor, fs, filename)
+            : new FallbackEditor(fs, filename);
+    });
 
     services
         .AddSingleton<PizzaController>()
