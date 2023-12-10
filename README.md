@@ -12,13 +12,13 @@ You will need to set up an account with [OpenAI](https://openai.com/). Once you'
 
 #### Windows
 Use the following command to set the environment variable. Set the key in the Environment Variables settings dialog to make it permanent.
-```cmd
+```bat
 > set OPENAI_API_KEY=<your-key>
 ```
 
 #### Linux
 Use the following command to set the environment variable. Put this in your .bashrc or another initialization script to make it permanent.
-```bash
+```sh
 $ export OPENAI_API_KEY='<your-key>'
 ```
 
@@ -26,7 +26,7 @@ Go to [OpenAI](https://help.openai.com/en/articles/5112595-best-practices-for-ap
 
 ### Run the application
 Run the program with no arguments to get started:
-```bash
+```sh
 $ pizza-time
 ```
 
@@ -44,7 +44,7 @@ q. Exit
 ```
 
 Once you have created an order, you can place it with one of the following commands:
-```bash
+```sh
 $ pizza-time --default-order
 $ pizza-time --order <order-name>
 ```
@@ -53,31 +53,31 @@ Don't worry. You will be asked to confirm the order before it is placed.
 
 You can track your order using the following command:
 
-```bash
+```sh
 $ pizza-time --track
 
 ```
 
 You can also place an order and track it immediately with the following commands:
-```bash
+```sh
 $ pizza-time --default-order --track
 $ pizza-time --order <order-name> --track
 ```
 
 Additional commands:
-```bash
+```sh
 $ pizza-time --version
 $ pizza-time --help
 ```
 
 ## Build
 Run the following in the solution directory:
-```bash
+```sh
 $ dotnet build
 ```
 
 ## Test
 Run the following in the solution directory:
-```bash
+```sh
 $ dotnet test
 ```
