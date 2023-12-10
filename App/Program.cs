@@ -115,29 +115,20 @@ static string GetMissingApiKeyMessage(string? dotnetEnv) => dotnetEnv == "Develo
         _ => "Please set the OPENAI_API_KEY environment variable.",
     };
 
-static string GetDataRootDir(string? dotnetEnv, string programName) {
-    if (dotnetEnv == "Development") return ".";
-
-    var dataDirectory =
-        Environment.OSVersion.Platform switch {
-            //Windows
-            PlatformID.Win32NT =>
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), programName),
-
+static string GetDataRootDir(string? dotnetEnv, string programName) =>
+    dotnetEnv == "Development"
+        ? "."
+        : Environment.OSVersion.Platform switch {
             //Unix
             PlatformID.Unix => Path.Combine(
                 Environment.GetEnvironmentVariable("XDG_DATA_HOME")
                 ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".local", "share"),
                 programName),
 
-            //Fallback
-            _ => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), programName),
+            //Windows or Fallback
+            PlatformID.Win32NT or _ =>
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), programName),
         };
-
-    Directory.CreateDirectory(dataDirectory);
-
-    return dataDirectory;
-}
 
 internal sealed class DefaultCommand(PizzaQueryServer _server, PizzaController _controller) : AsyncCommand<DefaultCommand.Settings> {
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings) =>
