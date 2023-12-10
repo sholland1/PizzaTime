@@ -6,9 +6,9 @@ public static class SummaryUtils {
     public static string Summarize(this UnvalidatedOrderInfo o) =>
         string.Join(Environment.NewLine, [
             $"Order for {o.Timing.Match(() => "now", dt => $"later at {dt}".Replace(" ", " "))}", //HACK: replace non-breaking space with normal space
-            $"{o.ServiceMethod.Match(
+            o.ServiceMethod.Match(
                     address => $"Delivery from Store #{o.StoreId} to\n{address.Summarize()}",
-                    loc => $"Carryout at {loc} at Store #{o.StoreId}")}",
+                    loc => $"Carryout at {loc} at Store #{o.StoreId}"),
         ]);
 
     public static string Summarize(this Address a) =>
@@ -20,26 +20,40 @@ public static class SummaryUtils {
         }.Where(s => s != "")
         .Select(s => $"  {s}"));
 
-    public static string Summarize(this ActualOrder o) => $"""
+    public static string Summarize(this ActualOrder o) => o.ToHistOrder().Summarize();
+
+    public static string Summarize(this UnvalidatedHistoricalOrder o) => $"""
         Pizzas:
         {string.Join("\n\n", o.Pizzas.Select(p => p.Summarize()))}
+
         Coupons: {string.Join(", ", o.Coupons.Select(c => c.Code))}
+
         Order Info:
         {o.OrderInfo.Summarize()}
+
         Payment Info:
         {o.Payment.Summarize()}
         """;
+
+    public static string Summarize(this PastOrder o) => $"""
+        Order Name: {o.OrderName}
+        Time Stamp: {o.TimeStamp}
+        Estimated Wait: {o.EstimatedWaitMinutes}
+        Total Price: {o.TotalPrice:C}
+
+        {o.Order.Summarize()}
+        """;
+
     public static string Summarize(this UnvalidatedPersonalInfo p) => $"""
         Name: {p.FirstName} {p.LastName}
         Email: {p.Email}
         Phone: {p.Phone}
         """;
 
-    public static string Summarize(this UnvalidatedPayment p) => $"""
-        {p.Match(
+    public static string Summarize(this UnvalidatedPayment p) =>
+        p.Match(
             () => "Pay at Store",
-            c => $"Pay with {c.Type} ending in {c.CardNumber[(^4)..]}")}
-        """;
+            c => $"Pay with {c.Type} ending in {c.CardNumber[(^4)..]}");
 
     public static string Summarize(this UnvalidatedPizza p) =>
         string.Join(Environment.NewLine, new[] {

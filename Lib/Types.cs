@@ -183,16 +183,6 @@ public class PastOrder {
     public decimal TotalPrice { get; init; }
 
     public OrderInstance ToOrderInstance() => new(OrderName, TimeStamp);
-
-    //TODO: Fix this
-    public string Summarize() => $"""
-        Order Name: {OrderName}
-        Time Stamp: {TimeStamp}
-        -- Fix this --
-        Order.Summarize()
-        Estimated Wait: {EstimatedWaitMinutes}
-        Total Price: {TotalPrice:C}
-        """;
 }
 
 public class UnvalidatedActualOrder {
