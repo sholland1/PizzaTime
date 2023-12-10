@@ -55,6 +55,13 @@ You can track your order using the following command:
 
 ```bash
 $ pizza-time --track
+
+```
+
+You can also place an order and track it immediately with the following commands:
+```bash
+$ pizza-time --default-order --track
+$ pizza-time --order <order-name> --track
 ```
 
 Additional commands:
