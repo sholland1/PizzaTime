@@ -12,44 +12,44 @@ public partial class PizzaController(
     IEditor _editor,
     IDateGetter _dateGetter) {
 
-    public async Task PlaceDefaultOrder() {
+    public async Task<bool> PlaceDefaultOrder() {
         var userOrder = _repo.GetDefaultOrder();
         if (userOrder is null) {
             _terminalUI.Clear();
             _terminalUI.PrintLine("No default order found.");
-            return;
+            return false;
         }
 
         var personalInfo = _repo.GetPersonalInfo();
         if (personalInfo is null) {
             _terminalUI.Clear();
             _terminalUI.PrintLine("No personal information found.");
-            return;
+            return false;
         }
 
         var (orderName, order) = userOrder;
-        await OrderPizza(orderName, order, personalInfo);
+        return await OrderPizza(orderName, order, personalInfo);
     }
 
-    public async Task PlaceOrder(string orderName) {
+    public async Task<bool> PlaceOrder(string orderName) {
         var order = _repo.GetOrder(orderName);
         if (order is null) {
             _terminalUI.Clear();
             _terminalUI.PrintLine("Order not found.");
-            return;
+            return false;
         }
 
         var personalInfo = _repo.GetPersonalInfo();
         if (personalInfo is null) {
             _terminalUI.Clear();
             _terminalUI.PrintLine("No personal information found.");
-            return;
+            return false;
         }
 
-        await OrderPizza(orderName, order, personalInfo);
+        return await OrderPizza(orderName, order, personalInfo);
     }
 
-    public async Task OrderPizza(string orderName, ActualOrder userOrder, PersonalInfo personalInfo) {
+    public async Task<bool> OrderPizza(string orderName, ActualOrder userOrder, PersonalInfo personalInfo) {
         var cart = _startOrder(userOrder.OrderInfo);
 
         bool firstTime = true;
@@ -65,7 +65,7 @@ public partial class PizzaController(
 
                     _terminalUI.PrintLine($"Pizza was added to cart. Product Count: {v.ProductCount}\n{pizza.Summarize()}\n");
                 });
-            if (cartResult.IsFailure) return;
+            if (cartResult.IsFailure) return false;
         }
 
         foreach (var coupon in userOrder.Coupons) {
@@ -94,22 +94,25 @@ public partial class PizzaController(
                 """);
                 return summary;
             });
-        if (summarySuccess is null) return;
+        if (summarySuccess is null) return false;
 
         var answer = _terminalUI.Prompt("Confirm order? [Y/n]: ");
         _terminalUI.PrintLine();
 
         if (!IsAffirmative(answer)) {
             _terminalUI.PrintLine("Order cancelled.");
-            return;
+            return false;
         }
 
         _terminalUI.PrintLine("Ordering pizza...");
 
         var orderResult = await cart.PlaceOrder(personalInfo, userOrder.Payment);
 
-        orderResult.Match(
-            message => _terminalUI.PrintLine($"Failed to place order: {message}"),
+        return orderResult.Match(
+            message => {
+                _terminalUI.PrintLine($"Failed to place order: {message}");
+                return false;
+            },
             message => {
                 PastOrder pastOrder = new() {
                     OrderName = orderName,
@@ -120,6 +123,7 @@ public partial class PizzaController(
                 };
                 _repo.AddOrderToHistory(pastOrder);
                 _terminalUI.PrintLine($"Order summary:\n{message}\nDone.");
+                return true;
             });
     }
 
@@ -142,7 +146,7 @@ public partial class PizzaController(
         }
 
         _terminalUI.PrintLine($"Placing '{orderName}' order:");
-        await OrderPizza(orderName, order, _repo.GetPersonalInfo()!);
+        _ = await OrderPizza(orderName, order, _repo.GetPersonalInfo()!);
     }
 
     public async Task OpenProgram() {
