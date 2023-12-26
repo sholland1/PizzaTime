@@ -280,10 +280,10 @@ public partial class PizzaController {
         }
     }
 
-    private async Task<List<Coupon>> GetCoupons(string storeId) =>
+    private async Task<List<SavedCoupon>> GetCoupons(string storeId) =>
         [.. _chooser.GetUserChoices(
             "Choose coupons to add to order: ", await _storeApi.ListCoupons(new(storeId)), "coupon")
-            .Select(c => new Coupon(c))];
+            .Select(c => new SavedCoupon(c))];
 
     private async Task<string?> GetStoreId(ServiceMethod serviceMethod) {
         var zipCode = _terminalUI.Prompt("Zip code: ");

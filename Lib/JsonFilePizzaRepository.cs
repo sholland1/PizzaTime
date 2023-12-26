@@ -44,7 +44,7 @@ public class JsonFilePizzaRepository(ISerializer _serializer, FileSystem _fileSy
         DeserializeFromFile<SavedOrder>(name + ".order");
 
     private UnvalidatedActualOrder ToUnvalidatedOrder(SavedOrder savedOrder) => new() {
-        Coupons = savedOrder.Coupons,
+        Coupons = savedOrder.Coupons.Select(c => new Coupon(c.Code)).ToList(),
         OrderInfo = savedOrder.OrderInfo.Validate(),
         Payment = savedOrder.PaymentType switch {
             PaymentType.PayAtStore => Payment.PayAtStoreInstance,

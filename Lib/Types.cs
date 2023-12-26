@@ -192,14 +192,16 @@ public class UnvalidatedActualOrder {
     public required Payment Payment { get; init; }
 }
 
+public record SavedCoupon(string Code);
+
 public class SavedOrder {
     public List<SavedPizza> Pizzas { get; init; } = [];
-    public required List<Coupon> Coupons { get; init; }
+    public required List<SavedCoupon> Coupons { get; init; }
     public required UnvalidatedOrderInfo OrderInfo { get; init; }
     public required PaymentType PaymentType { get; init; }
     public string? PaymentInfoName { get; init; }
 
-    public SavedOrder WithCoupons(List<Coupon> coupons) =>
+    public SavedOrder WithCoupons(List<SavedCoupon> coupons) =>
         new() {
             Pizzas = Pizzas,
             Coupons = coupons,
