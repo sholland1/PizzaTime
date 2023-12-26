@@ -105,7 +105,9 @@ public class DummyPizzaRepository : IPizzaRepo {
 }
 
 public class DummyTerminalUI(params string[] _readLines) : ITerminalUI {
+#pragma warning disable CA1051 // Do not declare visible instance fields
     public List<string> PrintedMessages = [];
+#pragma warning restore CA1051 // Do not declare visible instance fields
     private readonly Queue<string> _readLines = new(_readLines);
     public void Print(string message) => PrintedMessages.Add(message);
     public void PrintLine(string message) => PrintedMessages.Add(message + "\n");
@@ -124,9 +126,11 @@ public class DummyTerminalUI(params string[] _readLines) : ITerminalUI {
 }
 
 public class DummyPizzaCart(bool _cartFail = false, bool _priceFail = false, bool _orderFail = false) : ICart {
+#pragma warning disable CA1051 // Do not declare visible instance fields
     public readonly HashSet<Coupon> Coupons = [];
 
     public List<MethodCall> Calls = [];
+#pragma warning restore CA1051 // Do not declare visible instance fields
 
     private int _pizzaCount;
     public Task<CartResult<AddPizzaSuccess>> AddPizza(Pizza userPizza) {

@@ -12,3 +12,6 @@ trim_trailing_whitespace = false
 insert_final_newline = true
 indent_size = 4
 csharp_new_line_before_open_brace = none
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1848.severity = none
+dotnet_diagnostic.CA2254.severity = none

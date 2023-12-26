@@ -4,6 +4,7 @@
 namespace Hollandsoft.PizzaTime;
 public class PizzaBuilder<TBuilder>(Size Size, Crust Crust) : IPizzaBuilder
     where TBuilder : PizzaBuilder<TBuilder> {
+#pragma warning disable CA1051 // Do not declare visible instance fields
     protected Cheese _cheese = new Cheese.Full(Amount.Normal);
     protected Sauce? _sauce = new(SauceType.Tomato, Amount.Normal);
     protected List<Topping> _toppings = [];
@@ -11,6 +12,7 @@ public class PizzaBuilder<TBuilder>(Size Size, Crust Crust) : IPizzaBuilder
     protected Cut _cut;
     protected bool _oregano;
     protected bool _garlicCrust;
+#pragma warning restore CA1051 // Do not declare visible instance fields
 
     public UnvalidatedPizza Build(int quantity = 1) => new(
         Size, Crust, _cheese, _sauce, new(_toppings),

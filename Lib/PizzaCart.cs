@@ -56,7 +56,9 @@ public abstract record CartResult<T> where T : class {
 public class DominosCart(IOrderApi _api, OrderInfo _orderInfo) : ICart {
     private readonly HashSet<Coupon> _coupons = [];
 
+#pragma warning disable CA1051 // Do not declare visible instance fields
     protected List<Product> _products = [];
+#pragma warning restore CA1051 // Do not declare visible instance fields
     private string? _orderID;
     private decimal _currentTotal = 0;
 

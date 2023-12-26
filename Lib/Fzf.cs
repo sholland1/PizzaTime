@@ -54,7 +54,9 @@ public static class Fzf {
         // public ??? ScrollBar { get; init; }
         public bool NoScrollBar { get; init; }
         public string? Prompt { get; init; }
+#pragma warning disable CA1720 // Identifier contains type name
         public string? Pointer { get; init; }
+#pragma warning restore CA1720 // Identifier contains type name
         public string? Marker { get; init; }
         public string? Header { get; init; }
         public int? HeaderLines { get; init; }
@@ -249,7 +251,9 @@ public static class Fzf {
     }
 
     public enum FzfColor { Dark, Light, _16, BW }
+#pragma warning disable CA1720 // Identifier contains type name
     public enum FzfBorder { Rounded, Sharp, Bold, Block, Thinblock, Double, Horizontal, Vertical, Top, Bottom, Left, Right, None }
+#pragma warning restore CA1720 // Identifier contains type name
     public enum FzfLayout { Default, Reverse, Reverse_List }
     public enum FzfTieBreak { Length, Chunk, Begin, End, Index }
     public enum FzfScheme { Default, Path, History }
