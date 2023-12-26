@@ -156,13 +156,13 @@ internal sealed class DefaultCommand(PizzaQueryServer _server, PizzaController _
     private async Task<int> PizzaMain(bool defaultOrder, string? orderName, bool track) {
         if (defaultOrder) {
             var wasPlaced = await _controller.PlaceDefaultOrder();
-            if (wasPlaced && track) await _controller.TrackOrder();
+            if (wasPlaced && track) await _controller.TrackOrder(TimeSpan.FromMinutes(2));
             return 0;
         }
 
         if (orderName is not null) {
             var wasPlaced = await _controller.PlaceOrder(orderName);
-            if (wasPlaced && track) await _controller.TrackOrder();
+            if (wasPlaced && track) await _controller.TrackOrder(TimeSpan.FromMinutes(2));
             return 0;
         }
 

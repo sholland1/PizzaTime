@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Hollandsoft.PizzaTime;
 
 namespace Controllers;
@@ -199,15 +200,21 @@ public partial class PizzaController(
         _chooser.IgnoreUserChoice(message, orders.Select(o => o.ToString()), "pastorder");
     }
 
-    public async Task TrackOrder() {
+    public async Task TrackOrder(TimeSpan? totalWaitTime = null) {
+        totalWaitTime ??= TimeSpan.Zero;
+
         var phone = _repo.GetPersonalInfo()?.Phone;
         if (phone is null) {
             _terminalUI.PrintLine("No phone number found.");
             return;
         }
 
-        _terminalUI.PrintLine("Checking for orders...");
-        var orders = await _storeApi.InitiateTrackOrder(new(phone));
+        var orders = await _spinner.Show(
+            "Searching for orders...",
+            async () => await SearchForOrders(phone, totalWaitTime.Value));
+
+        _terminalUI.Clear();
+
         if (orders.Length == 0) {
             _terminalUI.PrintLine("No orders found.");
             return;
@@ -232,10 +239,20 @@ public partial class PizzaController(
             _terminalUI.PrintLine(message);
 
             if (isComplete) break;
-            Thread.Sleep(timeToSleep);
+            await Task.Delay(timeToSleep);
         }
 
         _terminalUI.PrintLine($"Order is ready! {_dateGetter.GetDateTime():T}");
+    }
+
+    private async Task<InitialTrackResponse[]> SearchForOrders(string phone, TimeSpan totalWaitTime) {
+        var waitInterval = TimeSpan.FromSeconds(2);
+        var timer = Stopwatch.StartNew();
+        while (true) {
+            var orders = await _storeApi.InitiateTrackOrder(new(phone));
+            if (orders.Length != 0 || timer.Elapsed > totalWaitTime) return orders;
+            await Task.Delay(waitInterval);
+        }
     }
 
     private InitialTrackResponse SelectOrderToTrack(InitialTrackResponse[] orders) {
