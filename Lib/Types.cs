@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using static Hollandsoft.PizzaTime.PaymentInfo;
 
@@ -169,7 +170,7 @@ public record OrderInstance(string Name, DateTime TimeStamp) {
     public OrderInstance(string displayString) : this("", new(0)) {
         var (timestamp, name) = Utils.SplitAtFirst(displayString, '-');
         Name = name.Trim();
-        TimeStamp = DateTime.Parse(timestamp.Trim());
+        TimeStamp = DateTime.Parse(timestamp.Trim(), CultureInfo.InvariantCulture);
     }
 
     public override string ToString() => $"{TimeStamp:MM/dd/yyyy hh:mm:ss tt} - {Name}";

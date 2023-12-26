@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 
 namespace Hollandsoft.PizzaTime;
 
@@ -8,7 +9,7 @@ public interface IEditor {
 }
 
 public class InstalledProgramEditor(string _editor, FileSystem _fileSystem, string _instructionsFilename) : IEditor {
-    private readonly string _instructions = string.Format(
+    private readonly string _instructions = string.Format(CultureInfo.InvariantCulture,
         _fileSystem.ReadAllText(_instructionsFilename),
         SizeHelpers.AllowedCrustsUserInstructions,
         string.Join(", ", CutHelpers.AllCuts),
@@ -48,7 +49,7 @@ public class InstalledProgramEditor(string _editor, FileSystem _fileSystem, stri
 }
 
 public class FallbackEditor(FileSystem _fileSystem, string _instructionsFilename) : IEditor {
-    private readonly string[] _instructions = string.Format(
+    private readonly string[] _instructions = string.Format(CultureInfo.InvariantCulture,
         _fileSystem.ReadAllText(_instructionsFilename),
         SizeHelpers.AllowedCrustsUserInstructions,
         string.Join(", ", CutHelpers.AllCuts),

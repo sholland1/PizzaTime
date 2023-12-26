@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using OpenAI.Interfaces;
 using OpenAI.ObjectModels;
@@ -18,7 +19,7 @@ public class ChatCompletionsPizzaBuilder : IAIPizzaBuilder {
         _serializer = serializer;
         _fileSystem = fileSystem;
 
-        var systemMessage = string.Format(
+        var systemMessage = string.Format(CultureInfo.InvariantCulture,
             _fileSystem.ReadAllText(config.SystemMessageFile),
             string.Join(' ', ToppingTypeHelpers.AllToppings),
             string.Join(' ', SauceTypeHelpers.AllSauces),

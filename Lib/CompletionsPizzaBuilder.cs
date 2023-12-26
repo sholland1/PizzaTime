@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using OpenAI.Interfaces;
 
@@ -28,7 +29,7 @@ public class CompletionsPizzaBuilder : IAIPizzaBuilder {
 
         var systemMessage = _fileSystem.ReadAllText(config.SystemMessageFile);
         var fewShot = _fileSystem.ReadAllText(config.FewShotFile);
-        _promptPreamble = string.Format(
+        _promptPreamble = string.Format(CultureInfo.InvariantCulture,
             systemMessage,
             string.Join(' ', ToppingTypeHelpers.AllToppings),
             string.Join(' ', SauceTypeHelpers.AllSauces),
