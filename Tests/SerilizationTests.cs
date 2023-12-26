@@ -120,4 +120,18 @@ public class SerializationTests {
         var serialized = _serializer.Serialize(p.OrderInfo);
         Assert.Equal(json, serialized);
     }
+
+    [Fact]
+    public void CheckCouponSerialization() {
+        List<Coupon> coupons = [ new("1234") ];
+        var json = _serializer.Serialize(coupons, writeIndented: false);
+        Assert.Equal("[{\"Code\":\"1234\",\"Status\":0,\"StatusItems\":[]}]", json);
+    }
+
+    [Fact]
+    public void CheckSavedCouponSerialization() {
+        List<SavedCoupon> coupons = [ new("1234") ];
+        var json = _serializer.Serialize(coupons, writeIndented: false);
+        Assert.Equal("[\"1234\"]", json);
+    }
 }
