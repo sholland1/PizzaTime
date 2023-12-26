@@ -60,7 +60,7 @@ public class DominosStoreApi(ILogger<DominosStoreApi> _log, ISerializer _seriali
         _coupons.TryGetValue(couponId, out var coupon) ? coupon : null;
 
     public async Task<InitialTrackResponse[]> InitiateTrackOrder(InitialTrackRequest request) {
-        var requestUri = $"/v2/orders?phonenumber={request.PhoneNumber}";
+        var requestUri = $"/v2/orders?phonenumber={request.PhoneNumber.Replace("-", "")}";
         return await TrackImpl<InitialTrackResponse[]>(requestUri);
     }
 
