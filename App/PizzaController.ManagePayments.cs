@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Hollandsoft.PizzaTime;
 
 namespace Controllers;
@@ -140,8 +141,8 @@ public partial class PizzaController {
             return default;
         }
 
-        var payWithCard = (PaymentInfo.PayWithCard?)_repo.GetPayment(paymentName)?.PaymentInfo
-            ?? throw new Exception("Payment not found.");
+        var payWithCard = (PaymentInfo.PayWithCard?)_repo.GetPayment(paymentName)?.PaymentInfo;
+        Debug.Assert(payWithCard is not null, "Payment not found.");
 
         _terminalUI.PrintLine($"Editing '{paymentName}' payment information:");
         var cardNumber = _terminalUI.PromptForEdit("Card number: ", payWithCard.CardNumber) ?? "";
@@ -184,7 +185,9 @@ public partial class PizzaController {
             return;
         }
 
-        var payment = _repo.GetPayment(paymentName) ?? throw new Exception("Payment not found.");
+        var payment = _repo.GetPayment(paymentName);
+        Debug.Assert(payment is not null, "Payment not found.");
+
         _terminalUI.PrintLine($"Deleting '{paymentName}' payment information:");
         _terminalUI.PrintLine(payment.Summarize());
         var shouldDelete = IsAffirmative(_terminalUI.Prompt($"Delete payment ({paymentName})? [Y/n]: "));

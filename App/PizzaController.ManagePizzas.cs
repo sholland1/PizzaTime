@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Hollandsoft.PizzaTime;
 
 namespace Controllers;
@@ -142,7 +143,8 @@ public partial class PizzaController {
             return default;
         }
 
-        var pizza = _repo.GetPizza(pizzaName) ?? throw new Exception("Pizza not found.");
+        var pizza = _repo.GetPizza(pizzaName);
+        Debug.Assert(pizza is not null, "Pizza not found.");
 
         var input = _editor.Edit(pizzaName, pizza);
         if (input is null) {
@@ -187,7 +189,9 @@ public partial class PizzaController {
             return;
         }
 
-        var pizza = _repo.GetPizza(pizzaName) ?? throw new Exception("Pizza not found.");
+        var pizza = _repo.GetPizza(pizzaName);
+        Debug.Assert(pizza is not null, "Pizza not found.");
+
         _terminalUI.PrintLine($"Deleting '{pizzaName}' pizza:");
         _terminalUI.PrintLine(pizza.Summarize());
         var shouldDelete = IsAffirmative(_terminalUI.Prompt($"Delete pizza ({pizzaName})? [Y/n]: "));

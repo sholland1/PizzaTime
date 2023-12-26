@@ -137,7 +137,8 @@ public partial class PizzaController(
             return;
         }
 
-        var order = _repo.GetOrder(orderName) ?? throw new Exception("Order not found.");
+        var order = _repo.GetOrder(orderName);
+        Debug.Assert(order is not null, "Order not found.");
 
         var personalInfo = _repo.GetPersonalInfo();
         if (personalInfo is null) {

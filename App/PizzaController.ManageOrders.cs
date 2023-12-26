@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Hollandsoft.PizzaTime;
 
 namespace Controllers;
@@ -101,7 +102,8 @@ public partial class PizzaController {
             return;
         }
 
-        var order = _repo.GetSavedOrder(orderName) ?? throw new Exception("Order not found.");
+        var order = _repo.GetSavedOrder(orderName);
+        Debug.Assert(order is not null, "Order not found.");
         await EditOrder(orderName, order);
     }
 
@@ -362,7 +364,9 @@ public partial class PizzaController {
             return;
         }
 
-        var order = _repo.GetOrder(orderName) ?? throw new Exception("Order not found.");
+        var order = _repo.GetOrder(orderName);
+        Debug.Assert(order is not null, "Order not found.");
+
         _terminalUI.PrintLine($"Deleting '{orderName}' order:");
         _terminalUI.PrintLine(order.Summarize());
         var shouldDelete = IsAffirmative(_terminalUI.Prompt($"Delete order ({orderName}) [Y/n]: "));
