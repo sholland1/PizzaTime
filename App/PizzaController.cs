@@ -218,7 +218,7 @@ public partial class PizzaController(
         while (true) {
             var trackResult = await _storeApi.TrackOrder(request);
 
-            _terminalUI.Print($"Status: {trackResult.OrderStatus} ");
+            _terminalUI.Print($"Status: {trackResult.OrderStatus}, ");
             var (message, isComplete) = trackResult.OrderStatus switch {
                 "MakeLine" => ($"Start Time: {trackResult.StartTime}", false),
                 "Oven" => ($"Oven Time: {trackResult.OvenTime}", false),
