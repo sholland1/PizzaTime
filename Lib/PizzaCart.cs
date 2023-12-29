@@ -147,12 +147,24 @@ public class DominosCart(IOrderApi _api, OrderInfo _orderInfo) : ICart {
                 Email = personalInfo.Email,
                 FirstName = personalInfo.FirstName,
                 LastName = personalInfo.LastName,
-                Phone = personalInfo.Phone,
+                Phone = personalInfo.Phone.Replace("-", ""),
                 OrderID = _orderID,
                 Payments = [GetPayment(userPayment, _currentTotal)],
                 Products = _products,
                 ServiceMethod = GetDetailedServiceMethod(),
                 StoreID = _orderInfo.StoreId,
+
+                CustomerID = "",
+                Extension = "",
+                PhonePrefix = "",
+                Version = "1.0",
+                LanguageCode = "en",
+                OrderChannel = "OLO",
+                OrderMethod = "Web",
+                SourceOrganizationURI = "order.dominos.com",
+                NoCombine = true,
+                HotspotsLite = false,
+                NewUser = true,
             }
         };
 

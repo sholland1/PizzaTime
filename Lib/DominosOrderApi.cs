@@ -56,6 +56,18 @@ public class Order2 : Order {
     public List<OrderPayment> Payments { get; init; } = [];
     public int? Status { get; init; }
     public List<StatusItem> StatusItems { get; init; } = [];
+
+    public required string LanguageCode { get; init; }
+    public required string OrderChannel { get; init; }
+    public required string OrderMethod { get; init; }
+    public required string SourceOrganizationURI { get; init; }
+    public required bool NoCombine { get; init; }
+    public required bool HotspotsLite { get; init; }
+    public required bool NewUser { get; init; }
+    public required string CustomerID { get; init; }
+    public required string Extension { get; init; }
+    public required string PhonePrefix { get; init; }
+    public required string Version { get; init; }
 }
 
 public class StatusItem {
@@ -67,7 +79,7 @@ public class StatusItem {
 }
 
 public class PlaceResponse {
-    public Order2 Order { get; init; } = new();
+    public required Order2 Order { get; init; }
     public int? Status { get; init; }
     public List<StatusItem> StatusItems { get; init; } = [];
 }
