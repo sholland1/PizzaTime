@@ -231,15 +231,15 @@ public partial class PizzaController(
             var trackResult = await _storeApi.TrackOrder(request);
 
             _terminalUI.Print($"Status: {trackResult.OrderStatus}, ");
-            var (message, isComplete) = trackResult.OrderStatus switch {
-                "MakeLine" => ($"Start Time: {trackResult.StartTime}", false),
-                "Oven" => ($"Oven Time: {trackResult.OvenTime}", false),
-                "Complete" => ($"Rack Time: {trackResult.RackTime}", true),
-                _ => ("Unknown order status: " + trackResult.OrderStatus, false)
-            };
-            _terminalUI.PrintLine(message);
+            if (trackResult.RackTime is not null) {
+                _terminalUI.PrintLine($"Rack Time: {trackResult.RackTime}");
+                break;
+            }
+            else if (trackResult.OvenTime is not null)
+                _terminalUI.PrintLine($"Oven Time: {trackResult.OvenTime}");
+            else if (trackResult.StartTime is not null)
+                _terminalUI.PrintLine($"Start Time: {trackResult.StartTime}");
 
-            if (isComplete) break;
             await Task.Delay(timeToSleep);
         }
 
