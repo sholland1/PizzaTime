@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <AssemblyName>pizza-time</AssemblyName>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -25,5 +26,8 @@
   <ItemGroup>
     <None Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="nlog.config" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="FewShotPrompt.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="AIPizzaPromptSystemMessage.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="InstructionsToDescribePizza.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

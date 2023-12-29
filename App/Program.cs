@@ -46,7 +46,7 @@ static ServiceCollection BuildServiceCollection() {
 
     services.AddOpenAIService();
 
-    var dataRootDir = GetDataRootDir(dotnetEnv, "PizzaTime");
+    var dataRootDir = GetDataRootDir(dotnetEnv, "pizza-time");
     services.AddSingleton(new FileSystem(dataRootDir));
 
     services.AddLogging(loggingBuilder =>
@@ -122,7 +122,7 @@ static string GetDataRootDir(string? dotnetEnv, string programName) =>
             //Unix
             PlatformID.Unix => Path.Combine(
                 Environment.GetEnvironmentVariable("XDG_DATA_HOME")
-                ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".local", "share"),
+                ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share"),
                 programName),
 
             //Windows or Fallback

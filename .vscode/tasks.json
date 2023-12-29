@@ -21,7 +21,12 @@
         "publish",
         "${workspaceFolder}/App/App.csproj",
         "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary"
+        "/consoleloggerparameters:NoSummary",
+        "--self-contained",
+        "--runtime", "linux-x64",
+        "-p:PublishSingleFile=true",
+        "-p:DebugType=None",
+        "--output", "${workspaceFolder}/App/publish"
       ],
       "problemMatcher": "$msCompile"
     },
