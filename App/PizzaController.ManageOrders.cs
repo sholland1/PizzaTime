@@ -16,7 +16,7 @@ public partial class PizzaController {
         _terminalUI.Clear();
 
         switch (choice) {
-            case '1': _ = CreateOrder(); await ManageOrdersMenu(); break;
+            case '1': await CreateOrder(); await ManageOrdersMenu(); break;
             case 'Q' or 'q': return;
             default:
                 _terminalUI.PrintLine("Not a valid option. Try again.");
