@@ -40,9 +40,11 @@ static ServiceCollection BuildServiceCollection() {
 
     ServiceCollection services = new();
     services.AddSingleton<IConfiguration>(configuration);
-    services.AddSingleton(new HttpOptions(
+
+    HttpOptions httpOptions = new(
         IPAddress.Parse(configuration.GetValue<string>("PizzaQueryServer:Host")!),
-        configuration.GetValue<int>("PizzaQueryServer:Port")));
+        configuration.GetValue<int>("PizzaQueryServer:Port"));
+    services.AddSingleton(httpOptions);
 
     services.AddOpenAIService();
 
@@ -82,6 +84,14 @@ static ServiceCollection BuildServiceCollection() {
     });
 
     services
+        .AddSingleton(new DebugInfo {
+            OpenAiApiKey = openAiApiKey,
+            DataRootDir = dataRootDir,
+            DotnetEnv = dotnetEnv,
+            Editor = editor,
+            IPAddress = httpOptions.IPAddress,
+            Port = httpOptions.Port
+        })
         .AddSingleton<PizzaController>()
         .AddSingleton<PizzaQueryServer>();
 
@@ -130,9 +140,9 @@ static string GetDataRootDir(string? dotnetEnv, string programName) =>
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), programName),
         };
 
-internal sealed class DefaultCommand(PizzaQueryServer _server, PizzaController _controller) : AsyncCommand<DefaultCommand.Settings> {
+internal sealed class DefaultCommand(PizzaQueryServer _server, PizzaController _controller, DebugInfo _debugInfo) : AsyncCommand<DefaultCommand.Settings> {
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings) =>
-        await PizzaMain(settings.DefaultOrder, settings.OrderName, settings.Track);
+        await PizzaMain(settings.DefaultOrder, settings.OrderName, settings.Track, settings.Debug);
 
     public sealed class Settings : CommandSettings {
         [CommandOption("--default-order")]
@@ -147,13 +157,22 @@ internal sealed class DefaultCommand(PizzaQueryServer _server, PizzaController _
         [Description("Track your recent order")]
         public bool Track { get; init; }
 
+        [CommandOption("--debug")]
+        [Description("Display debug information")]
+        public bool Debug { get; init; }
+
         public override ValidationResult Validate() =>
             DefaultOrder && OrderName is not null
                 ? ValidationResult.Error("The --default-order and --order arguments are mutually exclusive.")
                 : base.Validate();
     }
 
-    private async Task<int> PizzaMain(bool defaultOrder, string? orderName, bool track) {
+    private async Task<int> PizzaMain(bool defaultOrder, string? orderName, bool track, bool debug) {
+        if (debug) {
+            _debugInfo.Print();
+            return 0;
+        }
+
         if (defaultOrder) {
             var wasPlaced = await _controller.PlaceDefaultOrder();
             if (wasPlaced && track) await _controller.TrackOrder(TimeSpan.FromMinutes(2));
@@ -174,5 +193,26 @@ internal sealed class DefaultCommand(PizzaQueryServer _server, PizzaController _
         _ = _server.StartServer();
         await _controller.OpenProgram();
         return 0;
+    }
+}
+
+sealed class DebugInfo {
+    public required string OpenAiApiKey { get; init; }
+    public required string DataRootDir  { get; init; }
+    public required string? DotnetEnv  { get; init; }
+    public required string? Editor  { get; init; }
+    public required IPAddress IPAddress  { get; init; }
+    public required int Port  { get; init; }
+
+    public void Print() {
+        Console.WriteLine($"""
+            OpenAI API Key: {OpenAiApiKey}
+            Data Root Dir: {DataRootDir}
+            DOTNET_ENVIRONMENT: {DotnetEnv}
+            EDITOR: {Editor}
+            Server:
+              IP Address: {IPAddress}
+              Port: {Port}
+            """);
     }
 }
