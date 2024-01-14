@@ -16,4 +16,5 @@ Garlic crust is an option on Hand Tossed pizza.
 You may choose the cut on Thin crust. Added oregano is also an option.
 
 Available Sauces: {3}
-Available Toppings: {4}
+Available Toppings:
+{4}

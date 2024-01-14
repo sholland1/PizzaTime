@@ -15,14 +15,15 @@
     }
   },
   {
-    "User": "make it large with extra cheese and light pepperoni on the left",
+    "User": "make it large with extra cheese and light pepperoni on the left and ham on the right",
     "Assistant": {
       "Size": "Large",
       "Crust": "HandTossed",
       "Cheese": "^",
       "Sauce": "=Tomato",
       "Toppings": [
-        "L-Pepperoni"
+        "L-Pepperoni",
+        "R=Ham"
       ],
       "Bake": "WellDone",
       "Cut": "Pie",
@@ -40,6 +41,7 @@
       "Sauce": "=Alfredo",
       "Toppings": [
         "L-Pepperoni",
+        "R=Ham",
         "A=Bacon",
         "A=JalapenoPeppers"
       ],

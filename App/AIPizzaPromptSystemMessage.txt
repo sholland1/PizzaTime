@@ -6,6 +6,7 @@ Rules:
 = means normal amount
 - means light amount
 ^ means extra amount
+Always include =, -, or ^ on the sauce, cheese, and each topping
 
 simplify == to =
 simplify ^^ to ^
@@ -14,6 +15,7 @@ simplify -- to -
 A means both sides of the pizza or the whole pizza
 L means left side
 R means right side
+Always include A, L, or R on each topping
 
 Allowed Toppings: {0}
 Allowed Sauces: {1}
