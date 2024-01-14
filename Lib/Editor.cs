@@ -35,7 +35,7 @@ public class InstalledProgramEditor(string _editor, FileSystem _fileSystem, stri
             {_instructions}
             """;
         _fileSystem.WriteAllText(filename, contents);
-        Process.Start(_editor, filename).WaitForExit();
+        Process.Start(_editor, _fileSystem.CombineWithRoot(filename)).WaitForExit();
         var lines = _fileSystem.ReadLines(filename)
             .TakeWhile(s => s != separator)
             .ToArray();

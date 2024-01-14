@@ -193,4 +193,6 @@ public class FileSystem(string _root) {
         Directory.EnumerateFiles(Path.Combine(_root, path), searchPattern);
     public FileStream OpenRead(string path) => File.OpenRead(Path.Combine(_root, path));
     public FileStream Create(string path) => File.Create(Path.Combine(_root, path));
+
+    public string CombineWithRoot(string path) => Path.Combine(_root, path);
 }
