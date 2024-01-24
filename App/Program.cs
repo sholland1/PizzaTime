@@ -149,7 +149,7 @@ internal sealed class DefaultCommand(PizzaQueryServer _server, PizzaController _
         [Description("Place the default order with user confirmation only")]
         public bool DefaultOrder { get; init; }
 
-        [CommandOption("---order <NAME>")]
+        [CommandOption("--order <NAME>")]
         [Description("Place the order with the specified name with user confirmation only")]
         public string? OrderName { get; init; }
 
