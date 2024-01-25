@@ -63,15 +63,18 @@ public static class ApiHelpers {
     }
 
     private static string GetCode(Size size, Crust crust) {
+        if (crust == Crust.Brooklyn) {
+            if (size == Size.XL) return "P16IBKZA";
+            if (size == Size.Large) return "PBKIREZA";
+        }
+
         var s = size switch {
             Size.Small => "10",
             Size.Medium => "P12",
             Size.Large => "14",
-            Size.XL => "P16",
             _ => throw new UnreachableException($"Unknown size: {size}")
         };
         var c = crust switch {
-            Crust.Brooklyn => "IBKZA",
             Crust.HandTossed => "SCREEN",
             Crust.Thin => "THIN",
             Crust.HandmadePan => "IPAZA",
