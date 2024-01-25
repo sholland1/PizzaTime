@@ -51,5 +51,26 @@
       "GarlicCrust": true,
       "Quantity": 1
     }
+  },
+  {
+    "User": "Add provolone cheese",
+    "Assistant": {
+      "Size": "Large",
+      "Crust": "HandTossed",
+      "Cheese": "^",
+      "Sauce": "=Alfredo",
+      "Toppings": [
+        "L-Pepperoni",
+        "R=Ham",
+        "A=Bacon",
+        "A=JalapenoPeppers",
+        "A=ShreddedProvolone"
+      ],
+      "Bake": "WellDone",
+      "Cut": "Square",
+      "Oregano": false,
+      "GarlicCrust": true,
+      "Quantity": 1
+    }
   }
 ]

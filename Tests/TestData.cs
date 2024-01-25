@@ -138,7 +138,7 @@ public static class TestPizza {
             .AddTopping(BananaPeppers, Right, Extra)
             .AddTopping(DicedTomatoes, Right, Extra)
             .AddTopping(BlackOlives, Right, Extra)
-            .AddTopping(ShreddedProvoloneCheese, Right)
+            .AddTopping(ShreddedProvolone, Right)
             .SetNoCheese()
             .WithOregano();
 

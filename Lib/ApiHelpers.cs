@@ -130,7 +130,7 @@ public static class ApiHelpers {
             ToppingType.BlackOlives => "R",
             ToppingType.Mushrooms => "M",
             ToppingType.Pineapple => "N",
-            ToppingType.ShreddedProvoloneCheese => "Cp",
+            ToppingType.ShreddedProvolone => "Cp",
             ToppingType.CheddarCheese => "E",
             ToppingType.GreenPeppers => "G",
             ToppingType.Spinach => "Si",

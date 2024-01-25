@@ -131,7 +131,7 @@ public static class BuilderHelpers {
     public static readonly ToppingType BlackOlives = ToppingType.BlackOlives;
     public static readonly ToppingType Mushrooms = ToppingType.Mushrooms;
     public static readonly ToppingType Pineapple = ToppingType.Pineapple;
-    public static readonly ToppingType ShreddedProvoloneCheese = ToppingType.ShreddedProvoloneCheese;
+    public static readonly ToppingType ShreddedProvolone = ToppingType.ShreddedProvolone;
     public static readonly ToppingType CheddarCheese = ToppingType.CheddarCheese;
     public static readonly ToppingType GreenPeppers = ToppingType.GreenPeppers;
     public static readonly ToppingType Spinach = ToppingType.Spinach;
