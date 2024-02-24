@@ -67,6 +67,7 @@ Additional commands:
 ```sh
 $ pizza-time --version
 $ pizza-time --help
+$ pizza-time --debug
 ```
 
 ## Build
