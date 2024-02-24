@@ -51,6 +51,7 @@ public partial class PizzaController(
     }
 
     public async Task<bool> OrderPizza(string orderName, ActualOrder userOrder, PersonalInfo personalInfo) {
+        _terminalUI.PrintLine($"Starting order: '{orderName}'");
         var cart = _startOrder(userOrder.OrderInfo);
 
         bool firstTime = true;
