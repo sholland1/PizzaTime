@@ -12,8 +12,8 @@ public interface IAIPizzaBuilder {
 }
 
 public class AIPizzaBuilderConfig {
-    public string SystemMessageFile { get; init; } = "";
-    public string FewShotFile { get; init; } = "";
+    public required string SystemMessage { get; init; }
+    public required string FewShotText { get; init; }
 }
 
 public class CompletionsPizzaBuilder : IAIPizzaBuilder {
@@ -27,14 +27,12 @@ public class CompletionsPizzaBuilder : IAIPizzaBuilder {
         _serializer = serializer;
         _fileSystem = fileSystem;
 
-        var systemMessage = _fileSystem.ReadAllText(config.SystemMessageFile);
-        var fewShot = _fileSystem.ReadAllText(config.FewShotFile);
         _promptPreamble = string.Format(CultureInfo.InvariantCulture,
-            systemMessage,
+            config.SystemMessage,
             string.Join(' ', ToppingTypeHelpers.AllToppings),
             string.Join(' ', SauceTypeHelpers.AllSauces),
             SizeHelpers.AllowedCrustsAIPrompt)
-            + "\n+++\n" + fewShot;
+            + "\n+++\n" + config.FewShotText;
     }
 
     public async Task<AIPizzaResult> CreatePizza(string userCreateMessage) => await EditPizza(null, userCreateMessage);

@@ -48,8 +48,11 @@ static ServiceCollection BuildServiceCollection() {
 
     services.AddOpenAIService();
 
-    var dataRootDir = GetDataRootDir(dotnetEnv, "pizza-time");
+    var dataRootDir = GetDataRootDir(dotnetEnv, "PizzaTime");
     services.AddSingleton(new FileSystem(dataRootDir));
+
+    var configRootDir = AppDomain.CurrentDomain.BaseDirectory;
+    FileSystem configFs = new(configRootDir);
 
     services.AddLogging(loggingBuilder =>
         loggingBuilder
@@ -60,12 +63,12 @@ static ServiceCollection BuildServiceCollection() {
         .AddSingleton<IStoreApi, DominosStoreApi>()
         .AddSingleton<IPizzaRepo, JsonFilePizzaRepository>()
         .AddSingleton<Func<OrderInfo, ICart>>(services =>
-        o => new DominosCart(
-            services.GetRequiredService<IOrderApi>()!, o))
+            o => new DominosCart(
+                services.GetRequiredService<IOrderApi>()!, o))
 
         .AddSingleton(new AIPizzaBuilderConfig {
-            SystemMessageFile = "AIPizzaPromptSystemMessage.txt",
-            FewShotFile = "FewShotPrompt.json"
+            SystemMessage = configFs.ReadAllText("AIPizzaPromptSystemMessage.txt"),
+            FewShotText = configFs.ReadAllText("FewShotPrompt.json")
         })
         .AddSingleton<IAIPizzaBuilder, ChatCompletionsPizzaBuilder>()
 
@@ -77,16 +80,17 @@ static ServiceCollection BuildServiceCollection() {
     var editor = configuration.GetValue<string>("EDITOR");
     services.AddSingleton<IEditor>(services => {
         var fs = services.GetRequiredService<FileSystem>();
-        var filename = "InstructionsToDescribePizza.txt";
+        var instructions = configFs.ReadAllText("InstructionsToDescribePizza.txt");
         return editor is not null
-            ? new InstalledProgramEditor(editor, fs, filename)
-            : new FallbackEditor(fs, filename);
+            ? new InstalledProgramEditor(editor, fs, instructions)
+            : new FallbackEditor(instructions);
     });
 
     services
         .AddSingleton(new DebugInfo {
             OpenAiApiKey = openAiApiKey,
             DataRootDir = dataRootDir,
+            ConfigRootDir = configRootDir,
             DotnetEnv = dotnetEnv,
             Editor = editor,
             IPAddress = httpOptions.IPAddress,
@@ -199,6 +203,7 @@ internal sealed class DefaultCommand(PizzaQueryServer _server, PizzaController _
 sealed class DebugInfo {
     public required string OpenAiApiKey { get; init; }
     public required string DataRootDir  { get; init; }
+    public required string ConfigRootDir  { get; init; }
     public required string? DotnetEnv  { get; init; }
     public required string? Editor  { get; init; }
     public required IPAddress IPAddress  { get; init; }
@@ -208,6 +213,7 @@ sealed class DebugInfo {
         Console.WriteLine($"""
             OpenAI API Key: {OpenAiApiKey}
             Data Root Dir: {DataRootDir}
+            Config Root Dir: {ConfigRootDir}
             DOTNET_ENVIRONMENT: {DotnetEnv}
             EDITOR: {Editor}
             Server:

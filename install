@@ -1,0 +1,21 @@
+#!/bin/bash
+
+build_dir=App/publish
+bin_dir=/usr/local/bin
+target_dir=$bin_dir/PizzaTime
+log_dir=$target_dir/logs
+
+# clean the target directory
+sudo rm -f $target_dir/*
+
+# copy the binary and the configuration files
+sudo mkdir -p $target_dir
+sudo cp -r $build_dir/* $target_dir/
+
+# create a symlink
+sudo ln -s $target_dir/pizza-time $bin_dir/pizza-time
+
+# create the log file
+sudo mkdir -p $log_dir
+sudo touch $log_dir/PizzaTime.log
+sudo chmod 777 $log_dir/PizzaTime.log

@@ -20,13 +20,12 @@ public class ChatCompletionsPizzaBuilder : IAIPizzaBuilder {
         _fileSystem = fileSystem;
 
         var systemMessage = string.Format(CultureInfo.InvariantCulture,
-            _fileSystem.ReadAllText(config.SystemMessageFile),
+            config.SystemMessage,
             string.Join(' ', ToppingTypeHelpers.AllToppings),
             string.Join(' ', SauceTypeHelpers.AllSauces),
             SizeHelpers.AllowedCrustsAIPrompt);
 
-        var fewShot = _serializer.Deserialize<List<PromptPair>>(
-            _fileSystem.ReadAllText(config.FewShotFile))!;
+        var fewShot = _serializer.Deserialize<List<PromptPair>>(config.FewShotText)!;
 
         _systemMessages = [.. fewShot
             .SelectMany(pp => new[] {

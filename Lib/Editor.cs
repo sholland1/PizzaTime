@@ -8,9 +8,9 @@ public interface IEditor {
     string? Edit(string pizzaName, Pizza pizza);
 }
 
-public class InstalledProgramEditor(string _editor, FileSystem _fileSystem, string _instructionsFilename) : IEditor {
+public class InstalledProgramEditor(string _editor, FileSystem _fileSystem, string instructions) : IEditor {
     private readonly string _instructions = string.Format(CultureInfo.InvariantCulture,
-        _fileSystem.ReadAllText(_instructionsFilename),
+        instructions,
         SizeHelpers.AllowedCrustsUserInstructions,
         string.Join(", ", CutHelpers.AllCuts),
         string.Join(", ", BakeHelpers.AllBakes),
@@ -48,9 +48,9 @@ public class InstalledProgramEditor(string _editor, FileSystem _fileSystem, stri
     private static string GenerateFilename() => "PIZZA_EDITMSG";
 }
 
-public class FallbackEditor(FileSystem _fileSystem, string _instructionsFilename) : IEditor {
+public class FallbackEditor(string instructions) : IEditor {
     private readonly string[] _instructions = string.Format(CultureInfo.InvariantCulture,
-        _fileSystem.ReadAllText(_instructionsFilename),
+        instructions,
         SizeHelpers.AllowedCrustsUserInstructions,
         string.Join(", ", CutHelpers.AllCuts),
         string.Join(", ", BakeHelpers.AllBakes),

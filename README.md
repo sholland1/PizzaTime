@@ -81,3 +81,9 @@ Run the following in the solution directory:
 ```sh
 $ dotnet test
 ```
+
+## Install
+Run the following in the solution directory on Linux:
+```sh
+$ ./install
+```
