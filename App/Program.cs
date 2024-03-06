@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Net;
+using Anthropic.SDK;
 using Controllers;
 using Hollandsoft.PizzaTime;
 using Microsoft.Extensions.Configuration;
@@ -26,14 +27,19 @@ static ServiceCollection BuildServiceCollection() {
     var configuration = builder
         .AddJsonFile("appsettings.json")
         .AddUserSecrets<Program>()
-        .AddEnvironmentVariables(static _ => Environment.SetEnvironmentVariable(
-            "OpenAIServiceOptions:ApiKey", Environment.GetEnvironmentVariable("OPENAI_API_KEY")))
+        .AddEnvironmentVariables(static _ => {
+            Environment.SetEnvironmentVariable(
+                "OpenAIServiceOptions:ApiKey", Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
+            Environment.SetEnvironmentVariable(
+                "AnthropicOptions:ApiKey", Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY"));
+        })
         .Build();
 
     var dotnetEnv = configuration.GetValue<string>("DOTNET_ENVIRONMENT");
 
     var openAiApiKey = configuration.GetValue<string>("OpenAIServiceOptions:ApiKey");
-    if (openAiApiKey is null){
+    var anthropicApiKey = configuration.GetValue<string>("AnthropicOptions:ApiKey");
+    if (openAiApiKey is null || anthropicApiKey is null) {
         Console.WriteLine(GetMissingApiKeyMessage(dotnetEnv));
         Environment.Exit(1);
     }
@@ -70,7 +76,8 @@ static ServiceCollection BuildServiceCollection() {
             SystemMessage = configFs.ReadAllText("AIPizzaPromptSystemMessage.txt"),
             FewShotText = configFs.ReadAllText("FewShotPrompt.json")
         })
-        .AddSingleton<IAIPizzaBuilder, ChatCompletionsPizzaBuilder>()
+        .AddSingleton(new AnthropicClient(anthropicApiKey))
+        .AddSingleton<IAIPizzaBuilder, AnthropicPizzaBuilder>()
 
         .AddSingleton<ITerminalUI, RealTerminalUI>()
         .AddSingleton<IUserChooser, FzfChooser>()
@@ -89,6 +96,7 @@ static ServiceCollection BuildServiceCollection() {
     services
         .AddSingleton(new DebugInfo {
             OpenAiApiKey = openAiApiKey,
+            AnthropicApiKey = anthropicApiKey,
             DataRootDir = dataRootDir,
             ConfigRootDir = configRootDir,
             DotnetEnv = dotnetEnv,
@@ -202,6 +210,7 @@ internal sealed class DefaultCommand(PizzaQueryServer _server, PizzaController _
 
 sealed class DebugInfo {
     public required string OpenAiApiKey { get; init; }
+    public required string AnthropicApiKey { get; init; }
     public required string DataRootDir  { get; init; }
     public required string ConfigRootDir  { get; init; }
     public required string? DotnetEnv  { get; init; }
@@ -212,6 +221,7 @@ sealed class DebugInfo {
     public void Print() {
         Console.WriteLine($"""
             OpenAI API Key: {OpenAiApiKey}
+            Anthropic API Key: {AnthropicApiKey}
             Data Root Dir: {DataRootDir}
             Config Root Dir: {ConfigRootDir}
             DOTNET_ENVIRONMENT: {DotnetEnv}
