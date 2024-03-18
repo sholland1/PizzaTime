@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 
 namespace Server;
-public record PizzaQueryServer(HttpOptions HttpOptions, IPizzaRepo PizzaRepository, IStoreApi StoreApi) {
+public class PizzaQueryServer(HttpOptions HttpOptions, IPizzaRepo PizzaRepository, IStoreApi StoreApi) {
     public Task StartServer() => Task.Run(() => {
         TcpListener listener = new(HttpOptions.IPAddress, HttpOptions.Port);
         listener.Start();
