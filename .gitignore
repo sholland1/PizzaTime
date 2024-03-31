@@ -5,3 +5,5 @@ publish
 App/*.json
 App/*.jsonl
 App/default_order
+.git
+Session.vim
