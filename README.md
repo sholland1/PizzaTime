@@ -3,26 +3,30 @@
 This application allows ordering Domino's pizzas from the command line. You can manage orders, payments, pizzas, and personal info. You can track your
 order. The application uses OpenAI to design a pizza using natural language.
 
+This application should work on any platform but has only been tested on Linux.
+
+Warning: Domino's now requires solving a CAPTCHA to place an order. I haven't had time to implement a solution for this.
+
 ## Example usage
 
-### Get an API key from OpenAI
-You will need to set up an account with [OpenAI](https://openai.com/). Once you've created the key, it will be located here: https://platform.openai.com/api-keys. Copy it into your clipboard for the next step.
+### Get an API key from OpenAI or Anthropic
+You will need to set up an account an obtain an api key from [OpenAI](https://openai.com/) or [Anthropic](https://www.anthropic.com/).
 
 ### Set the environment variable
-
-#### Windows
-Use the following command to set the environment variable. Set the key in the Environment Variables settings dialog to make it permanent.
-```bat
-> set OPENAI_API_KEY=<your-key>
-```
 
 #### Linux
 Use the following command to set the environment variable. Put this in your .bashrc or another initialization script to make it permanent.
 ```sh
 $ export OPENAI_API_KEY='<your-key>'
+$ export ANTHROPIC_API_KEY='<your-key>'
 ```
 
-Go to [OpenAI](https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety) for more information.
+#### Windows
+Use the following command to set the environment variable. Set the key in the Environment Variables settings dialog to make it permanent.
+```bat
+> set OPENAI_API_KEY=<your-key>
+> set ANTHROPIC_API_KEY=<your-key>
+```
 
 ### Run the application
 Run the program with no arguments to get started:
