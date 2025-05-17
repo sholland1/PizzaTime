@@ -124,7 +124,7 @@ public partial class PizzaController(
                     TotalPrice = summarySuccess.TotalPrice
                 };
                 _repo.AddOrderToHistory(pastOrder);
-                _terminalUI.PrintLine($"Order summary:\n{message}\nDone.");
+                _terminalUI.PrintLine($"Order summary:\nMessage: {message}\nDone.");
                 return true;
             });
     }
@@ -214,8 +214,6 @@ public partial class PizzaController(
         var orders = await _spinner.Show(
             "Searching for orders...",
             async () => await SearchForOrders(phone, totalWaitTime.Value));
-
-        _terminalUI.Clear();
 
         if (orders.Length == 0) {
             _terminalUI.PrintLine("No orders found.");

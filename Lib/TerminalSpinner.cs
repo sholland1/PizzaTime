@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Hollandsoft.PizzaTime;
 public class TerminalSpinner {
     private readonly string _sequence;
@@ -47,6 +49,6 @@ public class TerminalSpinner {
 
             await Task.Delay(_delay, CancellationToken.None);
         }
-        throw new InvalidOperationException("This should never happen");
+        throw new UnreachableException();
     }
 }
